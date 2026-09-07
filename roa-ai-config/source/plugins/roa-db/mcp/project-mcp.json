@@ -1,0 +1,22 @@
+{
+  "servers": {
+    "postgresql": {
+      "enabledByDefault": false,
+      "instancePath": "databases",
+      "serverNameTemplate": "postgresql-${name}",
+      "required": [
+        "name",
+        "dsnEnv"
+      ],
+      "config": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-postgres",
+          "${env:dsnEnv}"
+        ]
+      }
+    }
+  }
+}

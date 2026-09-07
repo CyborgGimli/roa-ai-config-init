@@ -1,0 +1,19 @@
+{
+  "name": "${plugin_name}",
+  "displayName": "${plugin_display_name}",
+  "version": "${plugin_version}",
+  "description": "${plugin_description}",
+  "author": {
+    "name": "${marketplace_owner}",
+    "email": "${marketplace_owner_email}"
+  },
+  "homepage": "https://github.com/${marketplace_repo}",
+  "repository": "https://github.com/${marketplace_repo}",
+  "license": "Proprietary",
+  "keywords": ${plugin_tags_json},
+  "dependencies": ${plugin_dependencies_json},
+  "defaultEnabled": ${plugin_default_enabled_json},
+  "agents": "./agents",
+  "skills": "./skills",
+  "hooks": "./hooks/hooks.json"
+}

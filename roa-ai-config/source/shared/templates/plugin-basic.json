@@ -1,0 +1,11 @@
+{
+  "name": "${plugin_name}",
+  "displayName": "${plugin_display_name}",
+  "version": "${plugin_version}",
+  "description": "${plugin_description}",
+  "author": {
+    "name": "${marketplace_owner}",
+    "email": "${marketplace_owner_email}"
+  },
+  "license": "Proprietary"
+}

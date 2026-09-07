@@ -1,0 +1,231 @@
+{
+  "plugins": {
+    "roa-api": {
+      "marketplaceName": "roa-ai",
+      "marketplaceRepo": "CyborgGimli/roa-ai-config-init",
+      "marketplaceRef": "roa-api--v0.1.0",
+      "enabledPlugin": "roa-api@roa-ai",
+      "pluginVersion": "0.1.0",
+      "install": {
+        "enabled": true,
+        "scope": "project"
+      },
+      "ruleFile": ".claude/rules/roa-api.md",
+      "ruleTemplate": "generated/templates/roa-api/rules.md",
+      "claudeTemplate": "generated/templates/roa-api/CLAUDE.md",
+      "extraDirectories": [
+        ".claude",
+        ".claude/rules",
+        "src/test/java",
+        "src/test/resources"
+      ],
+      "settingsFragments": [
+        "generated/settings/shared/project-settings.json",
+        "generated/settings/roa-api/settings.json"
+      ],
+      "aiConfigTemplate": "generated/mcp/ai-config.example.yaml",
+      "mcpTemplates": [
+        "generated/mcp/shared/project-shared.json",
+        "generated/mcp/roa-api/project-mcp.json"
+      ],
+      "rules": [
+        {
+          "to": "generated/rules/shared/ethics.md",
+          "target": ".claude/rules/ethics.md",
+          "marker": "shared/ethics"
+        },
+        {
+          "to": "generated/rules/shared/engineering.md",
+          "target": ".claude/rules/engineering.md",
+          "marker": "shared/engineering"
+        },
+        {
+          "to": "generated/rules/shared/git-pr.md",
+          "target": ".claude/rules/git-pr.md",
+          "marker": "shared/git-pr"
+        },
+        {
+          "to": "generated/rules/shared/validation.md",
+          "target": ".claude/rules/validation.md",
+          "marker": "shared/validation"
+        },
+        {
+          "to": "generated/rules/roa-api/contracts.md",
+          "target": ".claude/rules/contracts.md",
+          "marker": "roa-api/contracts"
+        },
+        {
+          "to": "generated/rules/roa-api/assertions.md",
+          "target": ".claude/rules/assertions.md",
+          "marker": "roa-api/assertions"
+        },
+        {
+          "to": "generated/rules/roa-api/testing.md",
+          "target": ".claude/rules/testing.md",
+          "marker": "roa-api/testing"
+        }
+      ],
+      "templateValues": {
+        "plugin_name": "roa-api",
+        "plugin_display_name": "ROA API Testing",
+        "marketplace_name": "roa-ai",
+        "marketplace_repo": "CyborgGimli/roa-ai-config-init",
+        "marketplace_ref": "roa-api--v0.1.0",
+        "enabled_plugin": "roa-api@roa-ai"
+      }
+    },
+    "roa-db": {
+      "marketplaceName": "roa-ai",
+      "marketplaceRepo": "CyborgGimli/roa-ai-config-init",
+      "marketplaceRef": "roa-db--v0.1.0",
+      "enabledPlugin": "roa-db@roa-ai",
+      "pluginVersion": "0.1.0",
+      "install": {
+        "enabled": true,
+        "scope": "project"
+      },
+      "ruleFile": ".claude/rules/roa-db.md",
+      "ruleTemplate": "generated/templates/roa-db/rules.md",
+      "claudeTemplate": "generated/templates/roa-db/CLAUDE.md",
+      "extraDirectories": [
+        ".claude",
+        ".claude/rules",
+        "src/test/java",
+        "src/test/resources"
+      ],
+      "settingsFragments": [
+        "generated/settings/shared/project-settings.json",
+        "generated/settings/roa-db/settings.json"
+      ],
+      "aiConfigTemplate": "generated/mcp/ai-config.example.yaml",
+      "mcpTemplates": [
+        "generated/mcp/shared/project-shared.json",
+        "generated/mcp/roa-db/project-mcp.json"
+      ],
+      "rules": [
+        {
+          "to": "generated/rules/shared/ethics.md",
+          "target": ".claude/rules/ethics.md",
+          "marker": "shared/ethics"
+        },
+        {
+          "to": "generated/rules/shared/engineering.md",
+          "target": ".claude/rules/engineering.md",
+          "marker": "shared/engineering"
+        },
+        {
+          "to": "generated/rules/shared/git-pr.md",
+          "target": ".claude/rules/git-pr.md",
+          "marker": "shared/git-pr"
+        },
+        {
+          "to": "generated/rules/shared/validation.md",
+          "target": ".claude/rules/validation.md",
+          "marker": "shared/validation"
+        },
+        {
+          "to": "generated/rules/roa-db/queries.md",
+          "target": ".claude/rules/queries.md",
+          "marker": "roa-db/queries"
+        },
+        {
+          "to": "generated/rules/roa-db/test-data.md",
+          "target": ".claude/rules/test-data.md",
+          "marker": "roa-db/test-data"
+        },
+        {
+          "to": "generated/rules/roa-db/testing.md",
+          "target": ".claude/rules/testing.md",
+          "marker": "roa-db/testing"
+        }
+      ],
+      "templateValues": {
+        "plugin_name": "roa-db",
+        "plugin_display_name": "ROA Database Testing",
+        "marketplace_name": "roa-ai",
+        "marketplace_repo": "CyborgGimli/roa-ai-config-init",
+        "marketplace_ref": "roa-db--v0.1.0",
+        "enabled_plugin": "roa-db@roa-ai"
+      }
+    },
+    "roa-ui": {
+      "marketplaceName": "roa-ai",
+      "marketplaceRepo": "CyborgGimli/roa-ai-config-init",
+      "marketplaceRef": "roa-ui--v0.1.0",
+      "enabledPlugin": "roa-ui@roa-ai",
+      "pluginVersion": "0.1.0",
+      "install": {
+        "enabled": true,
+        "scope": "project"
+      },
+      "ruleFile": ".claude/rules/roa-ui.md",
+      "ruleTemplate": "generated/templates/roa-ui/rules.md",
+      "claudeTemplate": "generated/templates/roa-ui/CLAUDE.md",
+      "extraDirectories": [
+        ".claude",
+        ".claude/rules",
+        "src/test/java",
+        "src/test/resources"
+      ],
+      "settingsFragments": [
+        "generated/settings/shared/project-settings.json",
+        "generated/settings/roa-ui/settings.json"
+      ],
+      "aiConfigTemplate": "generated/mcp/ai-config.example.yaml",
+      "mcpTemplates": [
+        "generated/mcp/shared/project-shared.json",
+        "generated/mcp/roa-ui/project-mcp.json"
+      ],
+      "rules": [
+        {
+          "to": "generated/rules/shared/ethics.md",
+          "target": ".claude/rules/ethics.md",
+          "marker": "shared/ethics"
+        },
+        {
+          "to": "generated/rules/shared/engineering.md",
+          "target": ".claude/rules/engineering.md",
+          "marker": "shared/engineering"
+        },
+        {
+          "to": "generated/rules/shared/git-pr.md",
+          "target": ".claude/rules/git-pr.md",
+          "marker": "shared/git-pr"
+        },
+        {
+          "to": "generated/rules/shared/validation.md",
+          "target": ".claude/rules/validation.md",
+          "marker": "shared/validation"
+        },
+        {
+          "to": "generated/rules/roa-ui/three-layer.md",
+          "target": ".claude/rules/three-layer.md",
+          "marker": "roa-ui/three-layer"
+        },
+        {
+          "to": "generated/rules/roa-ui/locators.md",
+          "target": ".claude/rules/locators.md",
+          "marker": "roa-ui/locators"
+        },
+        {
+          "to": "generated/rules/roa-ui/waits.md",
+          "target": ".claude/rules/waits.md",
+          "marker": "roa-ui/waits"
+        },
+        {
+          "to": "generated/rules/roa-ui/testing.md",
+          "target": ".claude/rules/testing.md",
+          "marker": "roa-ui/testing"
+        }
+      ],
+      "templateValues": {
+        "plugin_name": "roa-ui",
+        "plugin_display_name": "ROA UI Testing",
+        "marketplace_name": "roa-ai",
+        "marketplace_repo": "CyborgGimli/roa-ai-config-init",
+        "marketplace_ref": "roa-ui--v0.1.0",
+        "enabled_plugin": "roa-ui@roa-ai"
+      }
+    }
+  }
+}

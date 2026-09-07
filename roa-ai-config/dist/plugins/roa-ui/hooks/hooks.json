@@ -1,0 +1,61 @@
+{
+  "description": "ROA UI Testing hooks.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/dangerous-command-guard.mjs"
+            ],
+            "timeout": 10,
+            "statusMessage": "Checking shell command safety"
+          },
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/maven-command-guard.mjs"
+            ],
+            "timeout": 10,
+            "statusMessage": "Checking Maven command policy"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/validate-java-edit.mjs"
+            ],
+            "timeout": 130,
+            "statusMessage": "Compiling changed Java modules"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/stop-test-gate.mjs"
+            ],
+            "timeout": 620,
+            "statusMessage": "Running ROA tests"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "servers": {
+    "openapi": {
+      "enabledByDefault": false,
+      "required": [
+        "specUrl"
+      ],
+      "config": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "openapi-mcp-server",
+          "${specUrl}"
+        ]
+      }
+    }
+  }
+}

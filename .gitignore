@@ -1,0 +1,15 @@
+# Reference material only — kept locally, never committed.
+# Multi-GB photo sets of the fx-ai-config project used to port the scripts,
+# plus a sample ROA target repository used to verify the framework contract.
+/setup-script/
+/build-script/
+/base-shared -source-files/
+/scr/
+/demo-video-i1/
+
+# IDE
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

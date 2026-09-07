@@ -1,0 +1,16 @@
+{
+  "name": "roa-db",
+  "displayName": "ROA Database Testing",
+  "version": "0.1.0",
+  "description": "Database testing with query abstractions and managed test data lifecycle",
+  "author": {
+    "name": "ROA Platform Team",
+    "email": "roa-platform@example.com"
+  },
+  "homepage": "https://github.com/CyborgGimli/roa-ai-config-init",
+  "repository": "https://github.com/CyborgGimli/roa-ai-config-init",
+  "license": "Proprietary",
+  "keywords": ["roa","database","sql","testing"],
+  "dependencies": ["roa-base"],
+  "defaultEnabled": true
+}

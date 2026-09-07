@@ -1,0 +1,40 @@
+{
+  "name": "roa-base",
+  "displayName": "ROA Base",
+  "version": "0.1.0",
+  "description": "Bootstrap plugin providing setup and update machinery for ROA Claude Code plugins",
+  "category": "framework",
+  "tags": [
+    "roa",
+    "base",
+    "framework",
+    "install",
+    "setup"
+  ],
+  "defaultEnabled": true,
+  "dependencies": [],
+  "copy": [
+    {
+      "from": "${plugin_dir}/README.md",
+      "to": "README.md"
+    },
+    {
+      "from": "${plugin_dir}/skills",
+      "to": "skills"
+    },
+    {
+      "from": "${plugin_dir}/agents",
+      "to": "agents"
+    }
+  ],
+  "render": [
+    {
+      "from": "${shared_dir}/templates/plugin-basic.json",
+      "to": ".claude-plugin/plugin.json"
+    }
+  ],
+  "executable": [
+    "skills/setup/scripts/setup.mjs",
+    "skills/setup/scripts/install-prereqs.mjs"
+  ]
+}

@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+*.swp
+*.swo
+*~
+.env
+.env.local
+# dist/plugins/ IS committed - marketplace.json resolves plugins from it and CI
+# regenerates it on main. Do not hand-edit; run `npm run build`.
+target/
+.idea/

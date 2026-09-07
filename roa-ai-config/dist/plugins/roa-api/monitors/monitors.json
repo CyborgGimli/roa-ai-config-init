@@ -1,0 +1,8 @@
+[
+  {
+    "name": "app-log",
+    "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/tail-logs.mjs\"",
+    "description": "Tails the configured application log (ROA_LOG_FILE from ai-config.yaml) and streams new lines while debugging.",
+    "when": "on-skill-invoke:debug"
+  }
+]

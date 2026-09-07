@@ -1,0 +1,15 @@
+{
+  "servers": {
+    "playwright": {
+      "enabledByDefault": false,
+      "config": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@playwright/mcp@latest"
+        ]
+      }
+    }
+  }
+}

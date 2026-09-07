@@ -1,0 +1,15 @@
+{
+  "name": "roa-ai-config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Internal Claude Code plugin marketplace build tooling for the ROA test automation framework.",
+  "type": "module",
+  "scripts": {
+    "bump-version": "node scripts/bump-version.mjs",
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

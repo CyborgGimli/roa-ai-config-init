@@ -1,0 +1,18 @@
+{
+  "marketplace": {
+    "name": "roa-ai",
+    "description": "Private Claude Code plugin marketplace for the ROA test automation framework",
+    "version": "0.1.0",
+    "repository": "CyborgGimli/roa-ai-config-init",
+    "owner": {
+      "name": "ROA Platform Team",
+      "email": "roa-platform@example.com"
+    }
+  },
+  "paths": {
+    "pluginConfigGlob": "source/plugins/*/plugin-config.json",
+    "distPlugins": "dist/plugins",
+    "marketplaceFile": ".claude-plugin/marketplace.json",
+    "setupRegistryFile": "dist/plugins/roa-base/skills/setup/generated/setup-registry.json"
+  }
+}

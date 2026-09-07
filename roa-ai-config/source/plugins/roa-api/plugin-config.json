@@ -1,0 +1,177 @@
+{
+  "name": "roa-api",
+  "displayName": "ROA API Testing",
+  "version": "0.1.0",
+  "description": "REST API testing with fluent request patterns and response assertions",
+  "category": "testing",
+  "tags": [
+    "roa",
+    "api",
+    "rest",
+    "testing"
+  ],
+  "defaultEnabled": true,
+  "dependencies": [
+    "roa-base"
+  ],
+  "copy": [
+    {
+      "from": "${shared_dir}/agents",
+      "to": "agents"
+    },
+    {
+      "from": "${plugin_dir}/agents",
+      "to": "agents"
+    },
+    {
+      "from": "${shared_dir}/skills",
+      "to": "skills"
+    },
+    {
+      "from": "${plugin_dir}/skills",
+      "to": "skills"
+    },
+    {
+      "from": "${shared_dir}/scripts",
+      "to": "scripts"
+    },
+    {
+      "from": "${shared_dir}/monitors",
+      "to": "monitors"
+    },
+    {
+      "from": "${shared_dir}/output-styles",
+      "to": "output-styles"
+    },
+    {
+      "from": "${shared_dir}/mcp/ai-config.example.yaml",
+      "to": "mcp/ai-config.example.yaml"
+    },
+    {
+      "from": "${shared_dir}/docs",
+      "to": "docs"
+    },
+    {
+      "from": "${plugin_dir}/docs",
+      "to": "docs"
+    },
+    {
+      "from": "${plugin_dir}/README.md",
+      "to": "README.md"
+    },
+    {
+      "from": "${shared_dir}/hooks/scripts",
+      "to": "hooks/scripts"
+    }
+  ],
+  "render": [
+    {
+      "from": "${shared_dir}/templates/plugin-standard.json",
+      "to": ".claude-plugin/plugin.json"
+    }
+  ],
+  "mergeHooks": [
+    {
+      "from": [
+        "${shared_dir}/hooks/hooks.json",
+        "${plugin_dir}/hooks/hooks.json"
+      ],
+      "to": "hooks/hooks.json",
+      "description": "ROA API Testing hooks."
+    }
+  ],
+  "executable": [
+    "scripts/tail-logs.mjs",
+    "hooks/scripts/dangerous-command-guard.mjs",
+    "hooks/scripts/maven-command-guard.mjs",
+    "hooks/scripts/validate-java-edit.mjs",
+    "hooks/scripts/stop-test-gate.mjs"
+  ],
+  "setup": {
+    "enabled": true,
+    "enabledPlugin": "${plugin_name}@${marketplace_name}",
+    "install": {
+      "enabled": true,
+      "scope": "project"
+    },
+    "ruleFile": ".claude/rules/${plugin_name}.md",
+    "ruleTemplate": "generated/templates/${plugin_name}/rules.md",
+    "claudeTemplate": "generated/templates/${plugin_name}/CLAUDE.md",
+    "ruleTemplateSource": "${plugin_dir}/setup/rules.md",
+    "claudeTemplateSource": "${plugin_dir}/setup/CLAUDE.md",
+    "settingsFragments": [
+      {
+        "from": "${shared_dir}/settings/project-settings.json",
+        "to": "generated/settings/shared/project-settings.json"
+      },
+      {
+        "from": "${plugin_dir}/setup/settings.json",
+        "to": "generated/settings/${plugin_name}/settings.json"
+      }
+    ],
+    "aiConfigTemplate": {
+      "from": "${shared_dir}/mcp/ai-config.example.yaml",
+      "to": "generated/mcp/ai-config.example.yaml"
+    },
+    "mcpTemplates": [
+      {
+        "from": "${shared_dir}/mcp/project-shared.json",
+        "to": "generated/mcp/shared/project-shared.json"
+      },
+      {
+        "from": "${plugin_dir}/mcp/project-mcp.json",
+        "to": "generated/mcp/${plugin_name}/project-mcp.json"
+      }
+    ],
+    "rules": [
+      {
+        "from": "${shared_dir}/rules/ethics.md",
+        "to": "generated/rules/shared/ethics.md",
+        "target": ".claude/rules/ethics.md",
+        "marker": "shared/ethics"
+      },
+      {
+        "from": "${shared_dir}/rules/engineering.md",
+        "to": "generated/rules/shared/engineering.md",
+        "target": ".claude/rules/engineering.md",
+        "marker": "shared/engineering"
+      },
+      {
+        "from": "${shared_dir}/rules/git-pr.md",
+        "to": "generated/rules/shared/git-pr.md",
+        "target": ".claude/rules/git-pr.md",
+        "marker": "shared/git-pr"
+      },
+      {
+        "from": "${shared_dir}/rules/validation.md",
+        "to": "generated/rules/shared/validation.md",
+        "target": ".claude/rules/validation.md",
+        "marker": "shared/validation"
+      },
+      {
+        "from": "${plugin_dir}/setup/rules/contracts.md",
+        "to": "generated/rules/${plugin_name}/contracts.md",
+        "target": ".claude/rules/contracts.md",
+        "marker": "${plugin_name}/contracts"
+      },
+      {
+        "from": "${plugin_dir}/setup/rules/assertions.md",
+        "to": "generated/rules/${plugin_name}/assertions.md",
+        "target": ".claude/rules/assertions.md",
+        "marker": "${plugin_name}/assertions"
+      },
+      {
+        "from": "${plugin_dir}/setup/rules/testing.md",
+        "to": "generated/rules/${plugin_name}/testing.md",
+        "target": ".claude/rules/testing.md",
+        "marker": "${plugin_name}/testing"
+      }
+    ],
+    "extraDirectories": [
+      ".claude",
+      ".claude/rules",
+      "src/test/java",
+      "src/test/resources"
+    ]
+  }
+}

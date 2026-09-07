@@ -1,0 +1,10 @@
+* text=auto eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Generated build output: collapse in diffs and exclude from language stats.
+dist/plugins/** linguist-generated=true
+.claude-plugin/marketplace.json linguist-generated=true
