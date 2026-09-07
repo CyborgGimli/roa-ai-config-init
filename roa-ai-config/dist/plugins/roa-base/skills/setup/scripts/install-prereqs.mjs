@@ -6,7 +6,7 @@
 //   - Node.js >= 20   runs ROA setup, hooks, and monitor scripts (hard prerequisite)
 //   - git             version control (hard prerequisite)
 //   - JDK >= 17       compiles and runs ROA tests
-//   - Maven >= 3.8    builds the project and runs `mvn pandora:open -U`
+//   - Maven >= 3.8    builds the project and runs `mvn pandora:navigation -U`
 //
 // Auto-install (unless --check-only): on Windows the JDK and Maven are installed
 // through winget, on macOS through Homebrew. Node.js and git are never

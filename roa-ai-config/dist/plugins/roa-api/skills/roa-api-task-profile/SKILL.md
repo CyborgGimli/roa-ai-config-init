@@ -23,5 +23,7 @@ workflow skills so those workflows are not duplicated per stack.
 6. Compile, then run the single test before running the suite.
 
 - **Framework contract**: when a ROA signature is unclear or code does not compile,
-  load `roa-pandora-metadata` and read `target/pandora/metadata/` before guessing.
+  load `ai-compass` and read `target/pandora/metadata/` before guessing.
+- **Project patterns**: before generating a new class, load `ai-teacher` and take the
+  closest `EXCELLENT` lesson from `target/pandora/ai-teacher/` as the reference shape.
 - **Done** means `roa-api-definition-of-done` is met, not merely that it compiles.

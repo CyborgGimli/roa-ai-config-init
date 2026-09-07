@@ -10,5 +10,5 @@
 - JSONPaths live in the project's registry enum; param keys, header keys, ids, and
   expected values live in the constants classes. Use them directly - no local aliases.
 - When the contract changes, update the endpoint and the registries first, then the
-  tests, then regenerate metadata with `mvn pandora:open -U`.
+  tests, then regenerate metadata with `mvn pandora:navigation -U`.
 <!-- END ROA AI CONFIG: ${plugin_name}/contracts -->

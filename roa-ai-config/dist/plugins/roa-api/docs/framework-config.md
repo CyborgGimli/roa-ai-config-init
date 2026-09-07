@@ -60,7 +60,7 @@ src/test/java/
 mvn clean compile
 mvn test -Pe2e -Dtest=YourTestClass
 mvn clean install
-mvn pandora:open -U      # after changing ROA implementations
+mvn pandora:navigation -U      # after changing ROA implementations
 ```
 
 See `quality-gates.md` for the evidence format.

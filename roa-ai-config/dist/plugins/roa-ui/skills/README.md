@@ -30,7 +30,20 @@ roa-db). Anything that applies to only one module belongs in that plugin's own
 | `definition-of-done` | the completion checklist |
 | `validation-policy` | what counts as adequate evidence |
 | `git-pr-lifecycle-policy` | branch, commit and PR rules |
-| `roa-pandora-metadata` | how to read the generated framework contract |
+
+## Generated project knowledge (hidden, loaded before writing ROA code)
+
+| Skill | Purpose |
+| --- | --- |
+| `ai-compass` | the generated framework contract — signatures, options, worked usages |
+| `ai-teacher` | the curated lesson catalog — this team's approved patterns |
+
+`ai-compass` answers *what the framework can do*; `ai-teacher` answers *what good
+looks like here*. On a signature disagreement `ai-compass` wins, because it is
+generated from the framework on the classpath. Both are produced by Pandora Maven
+goals (`pandora:navigation` and `pandora:teach`) into `target/pandora/`.
+
+`ai-compass` replaces the former `roa-pandora-metadata` skill.
 
 ## Pull requests
 

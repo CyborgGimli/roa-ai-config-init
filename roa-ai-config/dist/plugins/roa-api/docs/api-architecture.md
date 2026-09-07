@@ -22,4 +22,4 @@ Split into single-topic chunks:
 | `api-rules.md` | non-negotiable rules and common mistakes |
 
 Framework fundamentals are in the `framework-*` chunks. Signatures are authoritative
-in `target/pandora/metadata/` — load the `roa-pandora-metadata` skill.
+in `target/pandora/metadata/` — load the `ai-compass` skill.

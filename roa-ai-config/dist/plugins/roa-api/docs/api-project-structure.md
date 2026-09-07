@@ -66,8 +66,8 @@ or the environment) and **JSONPaths** (they belong in `ApiResponsesJsonPaths`).
 3. Add any new param or header key to `api/constants`.
 4. Add any newly asserted response field to `ApiResponsesJsonPaths`.
 5. Add request/response DTOs only if a meaningful body is involved.
-6. Run `mvn pandora:open -U` — `Endpoint` implementations are on the regeneration
-   list, and the metadata's `availableOptions` will not offer the new constant until
+6. Run `mvn pandora:navigation -U` — `Endpoint` implementations are on the regeneration
+   list, and the metadata's options field will not offer the new constant until
    you do.
 
 ## Generate only what is used

@@ -72,4 +72,4 @@ storage key is unaffected: a parameterised `GET_USER` still stores under `GET_US
 - Params, ids, headers and expected values come from constants classes, not inline.
 - Base URL comes from `getApiConfig().baseUrl()`.
 - `Endpoint` implementations are on the Pandora regeneration list — run
-  `mvn pandora:open -U` after changing the enum.
+  `mvn pandora:navigation -U` after changing the enum.

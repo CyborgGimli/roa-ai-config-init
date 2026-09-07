@@ -19,4 +19,6 @@ Anything specific to one module — the three UI layers, `Endpoint`, `DbQuery` �
 documented there, not here.
 
 `target/pandora/metadata/` is the authority for signatures — load the
-`roa-pandora-metadata` skill before writing `io.cyborgcode.roa` code.
+`ai-compass` skill before writing `io.cyborgcode.roa` code. For the shape a new
+class should take, load `ai-teacher` and read the curated lessons in
+`target/pandora/ai-teacher/`.

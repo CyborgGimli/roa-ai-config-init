@@ -65,4 +65,4 @@ Quote the placeholder in the SQL for string values; leave it unquoted for numeri
   breaks on any value containing a quote — exactly the input a test should exercise.
 - Explicit column lists rather than `SELECT *`; `*` couples the test to column order.
 - `DbQuery` implementations are on the Pandora regeneration list — run
-  `mvn pandora:open -U` after changing the enum.
+  `mvn pandora:navigation -U` after changing the enum.

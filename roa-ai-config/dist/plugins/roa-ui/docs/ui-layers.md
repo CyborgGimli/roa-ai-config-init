@@ -41,7 +41,7 @@ naming up front:
 2. `ui/elements/` — the locator, bound to that type.
 3. `ui/components/` — the implementation, annotated `@ImplementationOfType`.
 
-Then `mvn pandora:open -U`, because Layer 1 and Layer 2 are both on the regeneration
+Then `mvn pandora:navigation -U`, because Layer 1 and Layer 2 are both on the regeneration
 list.
 
 Adding a *locator* for an interaction that already exists is Layer 2 only. Check

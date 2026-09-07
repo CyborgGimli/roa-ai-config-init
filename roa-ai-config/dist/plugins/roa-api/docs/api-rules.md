@@ -10,7 +10,7 @@
 | **Use constants** | params, ids, headers and expected values come from `api/constants/`; use them directly, never via a local alias |
 | **No wildcard imports** | import only what is used |
 | **Always `complete()`** | soft assertions flush there; the lifecycle finalises there |
-| **Regenerate after an `Endpoint` change** | `mvn pandora:open -U`, or the metadata's options go stale |
+| **Regenerate after an `Endpoint` change** | `mvn pandora:navigation -U`, or the metadata's options go stale |
 
 ## Common mistakes
 

@@ -44,6 +44,6 @@ reviewing code. Each file covers one topic; open only what you need.
 Prefer the chunk that matches the change in front of you. These docs are reference,
 not law — never apply a pattern that contradicts working code already in the repo.
 
-For the authoritative class contract, load `roa-pandora-metadata` and read
+For the authoritative class contract, load `ai-compass` and read
 `target/pandora/metadata/` directly. That is the source of truth when a signature is
 unclear or something does not compile; module rules still outrank it.

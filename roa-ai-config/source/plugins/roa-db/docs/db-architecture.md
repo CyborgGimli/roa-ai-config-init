@@ -18,4 +18,4 @@ Split into single-topic chunks:
 | `db-rules.md` | non-negotiable rules, mistakes, performance traps |
 
 Framework fundamentals are in the `framework-*` chunks. Signatures are authoritative
-in `target/pandora/metadata/` — load the `roa-pandora-metadata` skill.
+in `target/pandora/metadata/` — load the `ai-compass` skill.

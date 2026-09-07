@@ -9,5 +9,5 @@ This repository is configured for the ROA framework via `${enabled_plugin}`
 - Repository configuration: `ai-config.yaml` (non-secret values only)
 
 Build with `mvn clean compile`; regenerate framework metadata with
-`mvn pandora:open -U` before generating page objects or components.
+`mvn pandora:navigation -U` before generating page objects or components.
 <!-- END ROA AI CONFIG: ${plugin_name} -->

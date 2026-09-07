@@ -72,7 +72,7 @@ public enum Tables implements TableElement<Tables> {
 The service takes the enum constant directly, so no nested `Data` class of string
 constants is needed here — unlike the element enums, no annotation references it.
 
-`TableElement` is on the Pandora regeneration list — run `mvn pandora:open -U` after
+`TableElement` is on the Pandora regeneration list — run `mvn pandora:navigation -U` after
 adding one.
 
 ## TableField — projecting columns

@@ -21,7 +21,7 @@ can execute without re-deriving your reasoning. You never edit code.
 - **Validation steps**: the exact commands that prove it works
   (`mvn clean compile`, `mvn test -Dtest=...`).
 - **Risks**: flaky-wait risk, shared test data, environment coupling, and
-  whether metadata must be regenerated (`mvn pandora:open -U`).
+  whether metadata must be regenerated (`mvn pandora:navigation -U`).
 
 ## Rules
 

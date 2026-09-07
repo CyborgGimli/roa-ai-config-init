@@ -30,4 +30,4 @@ Foundation plugin for ROA test automation.
 - Framework core concepts: `.codex/instructions/core-framework-instructions.md`
 - UI testing: `.codex/instructions/ui-framework-instructions.md`
 - Code standards: `.codex/rules/rules.md`
-- Metadata: `target/pandora/metadata/` (after `mvn pandora:open -U`)
+- Metadata: `target/pandora/metadata/` (after `mvn pandora:navigation -U`)

@@ -17,7 +17,7 @@ gate runs the same Maven the project does.
 Regenerate framework metadata when dependencies or the ROA version changed:
 
 ```bash
-mvn pandora:open -U
+mvn pandora:navigation -U
 ```
 
 ## Evidence format

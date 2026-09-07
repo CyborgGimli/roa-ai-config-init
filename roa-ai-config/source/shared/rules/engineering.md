@@ -19,7 +19,7 @@ sit alongside this file in `.claude/rules/`.
   should be hard to pick out from the code beside it.
 - Reuse an existing element, endpoint, query or component before adding a
   near-duplicate.
-- Run `mvn pandora:open -U` after changing dependencies, the framework version, or
+- Run `mvn pandora:navigation -U` after changing dependencies, the framework version, or
   any class the metadata is generated from, so `target/pandora/metadata/` reflects
   reality before generating code against it.
 <!-- END ROA AI CONFIG: shared/engineering -->

@@ -22,7 +22,7 @@ Describe the operations to cover:
 
 ## Before generating
 
-1. Load `roa-pandora-metadata` and read `target/pandora/metadata/` for any ROA
+1. Load `ai-compass` and read `target/pandora/metadata/` for any ROA
    signature you are about to use. Never guess a method name.
 2. Read the closest existing test and follow its shape.
 3. Read `${CLAUDE_PLUGIN_ROOT}/docs/api-ring.md` and `api-validation.md`.
@@ -129,7 +129,7 @@ annotations reference by name: `DataCreator`, `DataCleaner`, `Preconditions`,
 `ApiHookFlows`.
 
 Changing an `Endpoint` implementation means regenerating metadata:
-`mvn pandora:open -U`.
+`mvn pandora:navigation -U`.
 
 ## Validation
 

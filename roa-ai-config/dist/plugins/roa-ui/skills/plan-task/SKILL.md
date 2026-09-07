@@ -14,7 +14,7 @@ Produce a short, executable plan for the requested change.
 3. Order the steps bottom-up: definitions first, then the test that uses them.
 4. State the validation commands that will prove it works.
 5. List the real risks: flaky waits, shared test data, environment coupling,
-   whether `mvn pandora:open -U` must be re-run.
+   whether `mvn pandora:navigation -U` must be re-run.
 
 Keep it short. A plan longer than the change it describes is a failure.
 Hand off to `implement-task` once the plan is agreed.

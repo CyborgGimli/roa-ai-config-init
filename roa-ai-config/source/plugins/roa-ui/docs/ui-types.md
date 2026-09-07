@@ -45,4 +45,4 @@ to resolve an implementation at runtime.
 `RadioComponentType`, `SelectComponentType`, `TabComponentType`,
 `TableComponentType`, `ToggleComponentType`.
 
-All are on the Pandora regeneration list — run `mvn pandora:open -U` after adding one.
+All are on the Pandora regeneration list — run `mvn pandora:navigation -U` after adding one.

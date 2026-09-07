@@ -16,7 +16,7 @@ It follows `validation-policy` for severity and evidence format.
   - **Maven build + tests** - `mvn clean compile`, then `mvn test -Dtest=<TheTest>`.
     Prefer `./mvnw` when the repository provides a wrapper.
   - **Full suite** - `mvn test` before declaring the whole change good.
-  - **Metadata** - `mvn pandora:open -U` when dependencies or framework version changed.
+  - **Metadata** - `mvn pandora:navigation -U` when dependencies or framework version changed.
   Never skip or disable tests to make the gate pass.
 - **Evidence output** (required): for each check, the exact command, its exit code,
   PASS/FAIL, the failures, and any check intentionally skipped and why.
