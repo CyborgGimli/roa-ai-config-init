@@ -6,11 +6,12 @@ allowed-tools: Read, Glob, Grep, Task, Skill
 
 Produce a short, executable plan for the requested change.
 
-1. Identify the affected layers: `types`, `elements`, `components`,
-   `service`, `tests`, `data`. Say why each is needed.
-2. Check what already exists before planning anything new - name the component
-   or helper you found, or state that none exists.
-3. Order the steps bottom-up: locators, then components, then tests.
+1. Identify the affected pieces and say why each is needed - the module's own
+   definitions (UI `types`/`elements`/`components`, API endpoints and DTOs, DB
+   queries and types), plus `service`, `data`, and `tests`.
+2. Check what already exists before planning anything new - name the element,
+   endpoint, query or helper you found, or state that none exists.
+3. Order the steps bottom-up: definitions first, then the test that uses them.
 4. State the validation commands that will prove it works.
 5. List the real risks: flaky waits, shared test data, environment coupling,
    whether `mvn pandora:open -U` must be re-run.

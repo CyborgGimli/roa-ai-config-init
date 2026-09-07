@@ -14,7 +14,7 @@ where real credentials and production-shaped data leak in through fixtures.
 ## What to check
 
 - **Secrets in code**: passwords, tokens, API keys, or connection strings as
-  literals in tests, page objects, or configuration.
+  literals in tests, in the module's definitions, or in configuration.
 - **Secrets in `ai-config.yaml`**: the file holds references only. A key like
   `tokenEnv: SONAR_TOKEN` is correct; `token: abc123` is a leak. Setup rejects
   the latter, but review should catch it before it is ever written.

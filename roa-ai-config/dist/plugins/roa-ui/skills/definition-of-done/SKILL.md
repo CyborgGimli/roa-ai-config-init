@@ -9,8 +9,8 @@ Done means all of the following, not some:
 
 1. **Builds** - `mvn clean compile` succeeds.
 2. **Proven** - the relevant tests pass; commands and results reported.
-3. **Layered** - locators in elements, tests talk to components, no `types`
-   access from tests.
+3. **Layered** - the module's architecture respected: no raw driver, HTTP client
+   or JDBC in a test, and nothing reaching past the abstraction that owns it.
 4. **Clean data** - everything created is removed by a `DataCleaner`, including
    on failure paths.
 5. **No secrets** - no credentials, URLs, or environment specifics as literals.

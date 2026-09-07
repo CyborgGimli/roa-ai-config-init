@@ -53,6 +53,13 @@ Assertion.builder()
 
 UI tables use `TableAssertionTypes` instead.
 
+## Results
+
+Executing an `Assertion` produces an `AssertionResult` carrying the pass/fail verdict
+and the diagnostic message. The validation engine emits these for reporting; tests do
+not consume them directly — express the check through the ring and let `complete()`
+surface it.
+
 ## Assertions that mean something
 
 An assertion that would still pass with the feature removed is not an assertion.

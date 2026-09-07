@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob
 ---
 
 Actionable API guidance, layered on top of:
-- `${CLAUDE_PLUGIN_ROOT}/docs/architecture.md`
+- `${CLAUDE_PLUGIN_ROOT}/docs/api-architecture.md`
 - the always-on repo rules in `.claude/rules/contracts.md`, `.claude/rules/assertions.md`, `.claude/rules/testing.md`
 
 Pairs with the `implementation-engineer` and `adversarial-reviewer` agents.

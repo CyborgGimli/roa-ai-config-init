@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob
 ---
 
 Actionable Database guidance, layered on top of:
-- `${CLAUDE_PLUGIN_ROOT}/docs/architecture.md`
+- `${CLAUDE_PLUGIN_ROOT}/docs/db-architecture.md`
 - the always-on repo rules in `.claude/rules/queries.md`, `.claude/rules/test-data.md`, `.claude/rules/testing.md`
 
 Pairs with the `implementation-engineer` and `adversarial-reviewer` agents.

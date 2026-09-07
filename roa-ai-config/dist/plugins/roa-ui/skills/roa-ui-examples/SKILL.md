@@ -11,16 +11,21 @@ reviewing code. Each file covers one topic; open only what you need.
 | If you need | Read |
 | --- | --- |
 | Orientation / getting started | `ui-usage.md` |
-| The three layers, non-negotiables | `ui-layers.md` |
+| The three layers, what a component costs | `ui-layers.md` |
 | Layer 1 — component types | `ui-types.md` |
 | Layer 2 — locators and hooks | `ui-elements.md` |
-| Layer 3 — implementations | `ui-components.md` |
+| Layer 3 — implementations, overload pairs, inheritance | `ui-components.md` |
 | `AppUiService` facade | `ui-facade.md` |
-| Every service, element and component | `ui-services.md` |
-| Tables and `Assertion.builder()` | `ui-tables.md` |
+| Which service method to call; `Strategy` | `ui-services.md` |
+| Table row model, `TableField`, reading, validating | `ui-tables.md` |
+| Filtering, sorting, editing, clicking in cells | `ui-tables-operations.md` |
+| Reading stored rows and intercepted responses | `ui-storage.md` |
 | Login as a precondition | `ui-authentication.md` |
 | Model-driven form filling | `ui-insertion.md` |
 | Capturing network requests | `ui-interception.md` |
+| Which wait to use; `retryUntil` | `ui-retry.md` |
+| Required imports | `ui-imports.md` |
+| Non-negotiable rules and mistakes | `ui-rules.md` |
 | Test shape and structure | `ui-test-basics.md` |
 | Preconditions, auth, test data | `ui-test-preconditions.md` |
 | Soft vs hard, meaningful assertions | `ui-test-assertions.md` |
@@ -32,9 +37,10 @@ reviewing code. Each file covers one topic; open only what you need.
 | Quest, base classes, `complete()` | `framework-quest.md` |
 | Rings, `drop()`, custom rings | `framework-rings.md` |
 | Storage, `retrieve`, extractors, indexes | `framework-storage.md` |
-| `@Journey` / `@Ripper` / `@Craft` / `Late` | `framework-lifecycle.md` |
+| `@Journey` / `@Ripper` / `@Craft` / `Late`, hooks, tags | `framework-lifecycle.md` |
 | `DataCreator` / `Preconditions` / `DataCleaner` | `framework-registries.md` |
 | Hard vs soft, `Assertion.builder()`, types | `framework-validation.md` |
+| `retryUntil` and `RetryCondition` | `framework-retry.md` |
 | Config, static data, project layout | `framework-config.md` |
 | Code standards and the forbidden list | `code-standards.md` |
 | Test shape and validation patterns | `testing-standards.md` |
