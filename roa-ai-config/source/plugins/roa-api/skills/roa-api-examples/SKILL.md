@@ -12,10 +12,12 @@ reviewing code. Each file covers one topic; open only what you need.
 | --- | --- |
 | Orientation / getting started | `api-usage.md` |
 | The ring and its operations | `api-ring.md` |
+| `RestService` — hooks, auth clients, `LogApi` | `api-rest-service.md` |
 | Typed endpoints and parameterisation | `api-endpoints.md` |
+| Where a class goes; constants discipline | `api-project-structure.md` |
 | Request/response DTOs | `api-dtos.md` |
 | Centralised JSONPaths | `api-extractors.md` |
-| Response storage and chaining | `api-storage.md` |
+| Response storage, `retrieve`, extractors | `api-storage.md` |
 | `@AuthenticateViaApi` | `api-authentication.md` |
 | Class-level `@ApiHook` flows | `api-hooks.md` |
 | Retry and eventual consistency | `api-retry.md` |

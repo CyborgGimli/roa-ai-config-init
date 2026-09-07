@@ -8,13 +8,15 @@ Split into single-topic chunks:
 | Chunk | Covers |
 | --- | --- |
 | `api-ring.md` | `RING_OF_API`, every operation, when to use which |
+| `api-rest-service.md` | `RestService` vs the ring — hooks, auth clients, `LogApi` |
 | `api-endpoints.md` | `Endpoint<T>`, `defaultConfiguration()`, parameterisation |
+| `api-project-structure.md` | package map, the registry/functions split, constants discipline |
 | `api-dtos.md` | request/response models, Jackson tolerance |
 | `api-extractors.md` | the `ApiResponsesJsonPaths` registry |
-| `api-storage.md` | automatic response storage and request chaining |
+| `api-storage.md` | response storage, `retrieve` overloads, `DataExtractorsApi`, chaining |
 | `api-authentication.md` | `@AuthenticateViaApi`, `Credentials`, auth client |
-| `api-hooks.md` | class-level `@ApiHook` flows |
-| `api-retry.md` | `retryUntil` and eventual consistency (mechanism: `framework-retry.md`) |
+| `api-hooks.md` | class-level `@ApiHook` flows, `hookData` |
+| `api-retry.md` | `retryUntil`, the `RetryConditionApi` factories (mechanism: `framework-retry.md`) |
 | `api-validation.md` | targets, types, and assertion patterns |
 | `api-imports.md` | the import table |
 | `api-rules.md` | non-negotiable rules and common mistakes |

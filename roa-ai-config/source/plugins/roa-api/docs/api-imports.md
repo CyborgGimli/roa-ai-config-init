@@ -26,8 +26,28 @@ No wildcard imports. Import only what you use, especially for statics.
 | Base auth client | `io.cyborgcode.roa.api.authentication.BaseAuthenticationClient` |
 | Hooks annotation | `io.cyborgcode.roa.api.annotations.ApiHook` |
 | Hook execution enum | `io.cyborgcode.roa.framework.hooks.HookExecution` |
-| Retry conditions | `io.cyborgcode.roa.api.retry.RetryConditionApi` |
+| Retry conditions | `static io.cyborgcode.roa.api.retry.RetryConditionApi.statusEquals` |
+| Retry contract | `io.cyborgcode.roa.framework.retry.RetryCondition` |
 | API config access | `static io.cyborgcode.roa.api.config.ApiConfigHolder.getApiConfig` |
 | Project constants | `static {project}.constants.QueryParams.PAGE_PARAM` |
+| JSONPath registry | `static {project}.api.extractors.ApiResponsesJsonPaths.TOKEN` |
 
 `{project}` is your own base package.
+
+## Project-side support code
+
+Needed in hook functions, authentication clients, preconditions, and cleaners — not
+in tests.
+
+| Feature | Import |
+| --- | --- |
+| Non-Quest executor | `io.cyborgcode.roa.api.service.RestService` |
+| Response extractors | `static io.cyborgcode.roa.api.storage.DataExtractorsApi.responseBodyExtraction` |
+| Extractor contract | `io.cyborgcode.roa.framework.storage.DataExtractor` |
+| Assertion results | `io.cyborgcode.roa.validator.core.AssertionResult` |
+| Hook flow contract | `io.cyborgcode.roa.api.hooks.ApiHookFlow` |
+| Hook flow function type | `org.apache.logging.log4j.util.TriConsumer` |
+| Auth header type | `io.restassured.http.Header` |
+| Precondition/cleaner quest | `io.cyborgcode.roa.framework.quest.SuperQuest` |
+| Data registries | `io.cyborgcode.roa.framework.parameters.DataForge` / `.DataRipper` / `.PreQuestJourney` |
+| Framework logging | `io.cyborgcode.roa.api.log.LogApi` |

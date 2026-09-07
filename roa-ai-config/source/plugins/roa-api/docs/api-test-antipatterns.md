@@ -7,8 +7,11 @@ HttpClient.newHttpClient().send(request, ofString());
 // Hardcoded environment and credentials
 .baseUri("https://staging.internal").header("Authorization", "Bearer eyJ...");
 
-// Status-only assertion on a payload-bearing endpoint
-.expectStatus(200);
+// Invented fluent surface — none of these exist on RestServiceFluent
+quest.use(RING_OF_API).post(POST_CREATE_USER).body(dto).expectStatus(201);
+
+// Path id concatenated into the constant
+GET_USER_BY_ID_3   // instead of GET_USER.withPathParam(ID_PARAM, USER_ID_THREE)
 ```
 
 | Anti-pattern | Why it hurts | Instead |
@@ -32,10 +35,11 @@ HttpClient.newHttpClient().send(request, ofString());
     Assertion.builder().target(STATUS).type(IS).expected(SC_OK).build())
 
 // Whole-body equality: an unrelated additive field breaks this
-.expectBody(equalTo(fullExpectedJson))
+Assertion.builder().target(BODY).type(IS).expected(fullExpectedJson).build()
 
 // Asserting a field the API does not guarantee
-.expectBodyField("createdAt", "2026-09-07T10:00:00Z")
+Assertion.builder().target(BODY).key(RESPONSE_CREATED_AT.getJsonPath())
+         .type(IS).expected("2026-09-07T10:00:00Z").build()
 ```
 
 Assert status **and** the fields the behaviour depends on. Normalise ids, timestamps

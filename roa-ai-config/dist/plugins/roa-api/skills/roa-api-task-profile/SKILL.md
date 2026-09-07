@@ -16,9 +16,11 @@ workflow skills so those workflows are not duplicated per stack.
 - **Standard task sequence**:
 
 1. Confirm the contract: path, method, request and response shape, error cases.
-2. Extend the service wrapper first, then write the test against it.
-3. Assert status and payload, including the error paths.
-4. Compile, then run the single test before running the suite.
+2. Add the endpoint constant, then any missing constants and JSONPaths, then DTOs.
+3. Write the test against `quest.use(RING_OF_API)` - never a raw HTTP client.
+4. Assert status and payload, including the error paths.
+5. Clean up what the test creates, via `@Ripper`.
+6. Compile, then run the single test before running the suite.
 
 - **Framework contract**: when a ROA signature is unclear or code does not compile,
   load `roa-pandora-metadata` and read `target/pandora/metadata/` before guessing.

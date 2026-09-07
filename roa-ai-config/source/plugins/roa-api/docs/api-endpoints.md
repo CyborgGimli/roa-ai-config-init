@@ -11,7 +11,10 @@ public enum AppEndpoints implements Endpoint<AppEndpoints> {
     GET_ALL_USERS(Method.GET, "/users"),
     GET_USER(Method.GET, "/users/{id}"),
     POST_CREATE_USER(Method.POST, "/users"),
-    DELETE_USER(Method.DELETE, "/users/{id}");
+    PUT_UPDATE_USER(Method.PUT, "/users/{id}"),
+    PATCH_USER(Method.PATCH, "/users/{id}"),
+    DELETE_USER(Method.DELETE, "/users/{id}"),
+    POST_LOGIN(Method.POST, "/login");
 
     private final Method method;
     private final String url;
@@ -36,19 +39,31 @@ public enum AppEndpoints implements Endpoint<AppEndpoints> {
 ```
 
 `defaultConfiguration()` is where a mandatory header belongs. Adding `x-api-key` per
-call means one forgotten call is a confusing 401 later.
+call means one forgotten call is a confusing 401 later. Take its value from
+`Data.testData()` — never a literal.
 
 ## Parameterisation
 
 Never build a URL by hand.
 
+| Call | Adds |
+| --- | --- |
+| `withQueryParam(String key, Object value)` | a query parameter |
+| `withPathParam(String key, Object value)` | a value for a `{placeholder}` in the URL |
+| `withHeader(String key, String value)` | a header for this call |
+| `withHeader(String key, List<String> values)` | a multi-value header — rare |
+
 ```java
 GET_ALL_USERS.withQueryParam(PAGE_PARAM, PAGE_TWO)
-GET_USER.withPathParam(ID_PARAM, ID_THREE)
-GET_USER.withHeader(EXAMPLE_HEADER, token)
+GET_USER.withPathParam(ID_PARAM, USER_ID_FOUR)
+GET_USER.withPathParam(ID_PARAM, id).withHeader(AUTHORIZATION_HEADER_KEY, AUTHORIZATION_HEADER_VALUE + token)
 ```
 
-Chain them; each returns the endpoint so the call site stays one expression.
+Each returns a **new** endpoint instance and leaves the enum constant untouched, so
+they chain freely and one test's parameterisation cannot leak into another's. The
+storage key is unaffected: a parameterised `GET_USER` still stores under `GET_USER`.
+
+`withPathParam` requires the URL to contain the matching placeholder.
 
 ## Rules
 
