@@ -16,6 +16,10 @@ quest.use(RING_OF_API)
 `retryUntil(condition, maxWait, interval)` — build conditions with
 `RetryConditionApi` (`io.cyborgcode.roa.api.retry`).
 
+The mechanism itself is `FluentService`-level and is the same in every ring:
+`framework-retry.md` covers `RetryCondition`, `RetryConditionImpl`, and the
+protected four-argument form for custom rings.
+
 ## When retry is right
 
 - The system is documented as eventually consistent.

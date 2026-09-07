@@ -13,10 +13,11 @@ can execute without re-deriving your reasoning. You never edit code.
 
 ## What to produce
 
-- **Affected layers**: which of `types` / `elements` / `components` / `service` /
-  `tests` / `data` the change touches, and why each is needed.
+- **Affected pieces**: what the change touches and why each is needed - the
+  module's own definitions (UI `types` / `elements` / `components`, API endpoints
+  and DTOs, DB queries and types), plus `service`, `data` and `tests`.
 - **Ordered steps**: the smallest sequence that gets to green. Bottom-up -
-  element locators before components, components before tests.
+  definitions before the tests that use them.
 - **Validation steps**: the exact commands that prove it works
   (`mvn clean compile`, `mvn test -Dtest=...`).
 - **Risks**: flaky-wait risk, shared test data, environment coupling, and
@@ -25,8 +26,8 @@ can execute without re-deriving your reasoning. You never edit code.
 ## Rules
 
 - Keep the plan short and executable. No design document unless asked.
-- Prefer reusing an existing component over adding a near-duplicate; say which
-  one you checked.
+- Prefer reusing an existing element, endpoint, query or component over adding a
+  near-duplicate; say which one you checked.
 - If the request is ambiguous in a way that changes the plan, state the
   assumption you planned against rather than stopping.
 

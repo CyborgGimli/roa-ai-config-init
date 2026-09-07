@@ -14,7 +14,7 @@ Split into single-topic chunks:
 | `api-storage.md` | automatic response storage and request chaining |
 | `api-authentication.md` | `@AuthenticateViaApi`, `Credentials`, auth client |
 | `api-hooks.md` | class-level `@ApiHook` flows |
-| `api-retry.md` | `retryUntil` and eventual consistency |
+| `api-retry.md` | `retryUntil` and eventual consistency (mechanism: `framework-retry.md`) |
 | `api-validation.md` | targets, types, and assertion patterns |
 | `api-imports.md` | the import table |
 | `api-rules.md` | non-negotiable rules and common mistakes |

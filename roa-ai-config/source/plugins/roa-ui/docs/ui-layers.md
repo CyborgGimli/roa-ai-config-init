@@ -32,12 +32,21 @@ Layer 1 exists to absorb the difference between stacks:
 Prefer a stable test hook over a structural selector in every case. A selector tied
 to layout breaks when someone adds a wrapper `div`.
 
+## What a new component costs
+
+All three layers, every time — that is the price of the abstraction, and it is worth
+naming up front:
+
+1. `ui/types/` — an enum constant naming the technology variant.
+2. `ui/elements/` — the locator, bound to that type.
+3. `ui/components/` — the implementation, annotated `@ImplementationOfType`.
+
+Then `mvn pandora:open -U`, because Layer 1 and Layer 2 are both on the regeneration
+list.
+
+Adding a *locator* for an interaction that already exists is Layer 2 only. Check
+whether the implementation is already there before writing a fourth one.
+
 ## Non-negotiable
 
-| Rule | Description |
-| --- | --- |
-| **Smart API only** | `findSmartElement()`, never `findElement()`; `getDomAttribute()`, never `getAttribute()` |
-| **Three layers required** | types + elements + implementations |
-| **@ImplementationOfType** | links an implementation to its type via `Types.Data.CONSTANT` |
-| **Hooks for sync only** | never business logic in `before()` / `after()` |
-| **Direct validation** | components use `validate*` methods, not `Assertion.builder()` — tables excepted |
+The full list, with the mistakes each rule prevents, is in `ui-rules.md`.

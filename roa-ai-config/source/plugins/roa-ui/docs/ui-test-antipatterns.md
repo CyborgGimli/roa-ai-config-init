@@ -15,7 +15,11 @@ final By save = By.id("save");                 // locators live in Layer 2
 | `Thread.sleep` | passes or fails on machine speed, not behaviour | wait on the real condition via `SmartWebDriver` |
 | `quest.getDriver()` | bypasses the framework's lifecycle | `quest.use(RING_OF_UI).getDriver()` where genuinely needed |
 | `findElement` | no staleness recovery | `findSmartElement` |
-| `getAttribute` | not normalised | `getDomAttribute` |
+| `getAttribute` | ambiguous legacy call | `getDomAttribute` for markup, `getDomProperty` for live state |
+| `getDomAttribute("value")` on an input | returns the markup default, ignoring what was typed | `getDomProperty("value")` |
+| Implementing only `m(container)` | the labelled overload is abstract too | implement both; delegate where the label is unused |
+| `Assertion.builder()` on a component | tables only | the component's own `validate*` method |
+| `Strategy.RANDOM` on an assertion path | a failure nobody can reproduce | an explicit target |
 | Inline locator | one markup change, many edits | Layer 2 element enum |
 | Test reaching into `types` | layering bug | go through the component |
 | Missing `.complete()` | soft assertions never report | always finish the chain |
@@ -28,10 +32,10 @@ final By save = By.id("save");                 // locators live in Layer 2
 
 ```java
 // Passes with the feature deleted
-.label().validateIsVisible(LabelFields.TOTAL)
+.button().validateIsVisible(ButtonFields.TRANSFER)
 
 // Actually checks the behaviour
-.label().validateValue(LabelFields.TOTAL, "42.00")
+.alert().validateValue(AlertFields.TRANSFER_SUCCESS, "Transfer complete")
 ```
 
 ## Structure

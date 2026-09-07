@@ -66,12 +66,14 @@ These fail review every time:
 - Raw types (`List` instead of `List<String>`).
 - Narrative comments that restate the code.
 - Unused code left "for later".
-- `Thread.sleep()` in tests — see the waits guidance for what to do instead.
+- `Thread.sleep()` in tests — wait on the condition, not on time passing.
 - Empty catch blocks.
-- `quest.getDriver()` — never reach into Quest internals.
-- `findElement()` instead of `findSmartElement()`.
-- `getAttribute()` instead of `getDomAttribute()`.
+- Reaching into Quest internals; `quest.getDriver()` is the usual offender.
+- Missing `.complete()` on a chain — soft assertions never report.
 - `System.out.println` — use SLF4J.
+
+Each module adds its own forbidden list. See `ui-rules.md`, `api-rules.md`,
+`db-rules.md` for the module you are working in.
 
 ## Comments
 
@@ -83,13 +85,3 @@ future readers must maintain. Match the comment density of the surrounding file.
 Test automation code is read far more often than it is written, usually by someone
 debugging a failure at an inconvenient moment. Consistency is what makes an
 unfamiliar test readable at a glance; every deviation costs someone time later.
-
-## Non-negotiable UI rules
-
-| Rule | Description |
-| --- | --- |
-| **Smart API only** | `findSmartElement()`, never `findElement()`; `getDomAttribute()`, never `getAttribute()` |
-| **Three layers required** | Types + Elements + Implementations — no layer skipped |
-| **@ImplementationOfType** | Links an implementation to its type via `Types.Data.CONSTANT` |
-| **Hooks for sync only** | Never encode business logic in a `before()` / `after()` hook |
-| **Direct validation** | UI components use the direct `validate*` methods, not `Assertion.builder()` — tables are the exception |

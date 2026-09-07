@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob
 ---
 
 Actionable UI guidance, layered on top of:
-- `${CLAUDE_PLUGIN_ROOT}/docs/architecture.md`
+- `${CLAUDE_PLUGIN_ROOT}/docs/ui-architecture.md`
 - the always-on repo rules in `.claude/rules/three-layer.md`, `.claude/rules/locators.md`, `.claude/rules/waits.md`, `.claude/rules/testing.md`
 
 Pairs with the `implementation-engineer` and `adversarial-reviewer` agents.

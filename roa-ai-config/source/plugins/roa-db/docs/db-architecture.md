@@ -13,7 +13,7 @@ Split into single-topic chunks:
 | `db-config.md` | connection configuration and MCP-facing `ai-config.yaml` |
 | `db-storage.md` | `QueryResponse` storage, JSONPath extraction, chaining |
 | `db-hooks.md` | class-level `@DbHook` flows |
-| `db-retry.md` | `retryUntil` and eventual consistency |
+| `db-retry.md` | `retryUntil` and eventual consistency (mechanism: `framework-retry.md`) |
 | `db-validation.md` | `DbAssertionTarget`, types, assertion patterns |
 | `db-rules.md` | non-negotiable rules, mistakes, performance traps |
 

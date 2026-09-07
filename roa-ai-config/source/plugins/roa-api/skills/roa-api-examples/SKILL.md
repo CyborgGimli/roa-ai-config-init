@@ -32,9 +32,10 @@ reviewing code. Each file covers one topic; open only what you need.
 | Quest, base classes, `complete()` | `framework-quest.md` |
 | Rings, `drop()`, custom rings | `framework-rings.md` |
 | Storage, `retrieve`, extractors, indexes | `framework-storage.md` |
-| `@Journey` / `@Ripper` / `@Craft` / `Late` | `framework-lifecycle.md` |
+| `@Journey` / `@Ripper` / `@Craft` / `Late`, hooks, tags | `framework-lifecycle.md` |
 | `DataCreator` / `Preconditions` / `DataCleaner` | `framework-registries.md` |
 | Hard vs soft, `Assertion.builder()`, types | `framework-validation.md` |
+| `retryUntil` and `RetryCondition` | `framework-retry.md` |
 | Config, static data, project layout | `framework-config.md` |
 | Code standards and the forbidden list | `code-standards.md` |
 | Test shape and validation patterns | `testing-standards.md` |
