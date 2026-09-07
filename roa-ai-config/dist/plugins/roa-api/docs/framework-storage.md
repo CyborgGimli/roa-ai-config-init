@@ -7,6 +7,20 @@ more values per enum key (append-only) and is namespaced by sub-storages:
 
 Most writes happen automatically inside ROA services. Tests mostly read.
 
+## Scope
+
+Every test gets its **own** storage instance, tied to the thread running it, and it
+is discarded when the test finishes.
+
+```text
+Test thread 1 → Storage #1
+Test thread 2 → Storage #2
+```
+
+That is what makes parallel execution safe: nothing test A writes can be read by
+test B. It is also why storage is not a way to pass state *between* tests — a test
+that depends on what another one stored will pass alone and fail in a parallel run.
+
 ## Reading in a test
 
 ```java
@@ -58,10 +72,28 @@ reads from `storage.sub(UI)` without an explicit `.sub(...)`.
 Boolean selected = DefaultStorage.retrieve(MyUiKeys.CHECKBOX_SELECTED, Boolean.class);
 ```
 
-## Module storage keys
+## Namespaces — what goes where
 
-| Module | Key | Keyed by |
+| Namespace | Keyed by | Holds |
 | --- | --- | --- |
-| API | `StorageKeysApi.API` | the endpoint enum constant |
-| DB | `StorageKeysDb.DB` | the query enum constant |
-| UI | `StorageKeysUi.UI` | project-defined keys |
+| `StorageKeysApi.API` | the endpoint enum constant | the `Response` of every ring call |
+| `StorageKeysDb.DB` | the query enum constant | `QueryResponse` objects |
+| `StorageKeysUi.UI` | project-defined keys, and table/element constants | intercepted responses, table rows, values read from components |
+| `StorageKeysTest.PRE_ARGUMENTS` | the `DataCreator` constant | the input and output of journeys and preconditions |
+| `StorageKeysTest.STATIC_DATA` | the static-data key | data preloaded before the run |
+| `StorageKeysTest.HOOKS` | an arbitrary object key | values a hook flow wrote, read back with `hookData(...)` |
+
+Writing into the wrong namespace is not an error — it just means the matching
+`retrieve` never finds it. Match the namespace to what produced the value.
+
+## Practices
+
+- **Enums as keys.** They are discoverable, they survive a rename, and they keep the
+  typed `retrieve` overloads usable. A string key defeats all three.
+- **Keep direct storage access in rings, journeys, hooks and cleaners** — not spread
+  through tests. A test reading `quest.getStorage().sub(...)` directly is usually a
+  missing extractor or a missing precondition.
+- **Prefer `retrieve(...)` and `staticTestData(...)`** over raw map access; they do
+  the cast, so a wrong type fails with a useful message rather than a `ClassCastException`.
+- **Do not store large payloads** you will not assert on. Storage lives for the whole
+  test, and a parallel run multiplies whatever you put there.

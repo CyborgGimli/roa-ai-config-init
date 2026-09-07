@@ -53,6 +53,29 @@ AllTransactionEntry row = retrieve(
 AllTransactionEntry first = retrieve(
     DataExtractorsUi.tableRowExtractor(Tables.ALL_TRANSACTIONS, 1),
     AllTransactionEntry.class);
+
+// The row a preceding readRow(...) selected — no search argument needed
+OutFlow selected = retrieve(
+    DataExtractorsUi.tableRowExtractor(Tables.OUTFLOW),
+    OutFlow.class);
+```
+
+The bare form pairs with `readRow(table, …)`: the read chooses the row, the extractor
+just hands it back typed. Use the search form after a `readTable(...)`, where storage
+holds every row and the extractor has to pick one.
+
+Every row at once comes straight from the namespace, keyed by the table constant:
+
+```java
+List<FilteredTransactionEntry> allRows = retrieve(
+    StorageKeysUi.UI, Tables.FILTERED_TRANSACTIONS, List.class);
+```
+
+A cell is a `TableCell`, not a `String` — read its text:
+
+```java
+String amount = retrieve(DataExtractorsUi.tableRowExtractor(Tables.OUTFLOW, RETAIL), OutFlow.class)
+        .getAmount().getText();
 ```
 
 The row must have been read first — the extractor reads storage, not the page. A

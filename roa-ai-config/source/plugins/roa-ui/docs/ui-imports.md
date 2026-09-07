@@ -62,10 +62,11 @@ class that uses both, import one and qualify the other.
 | Feature | Import |
 | --- | --- |
 | Table element contract | `io.cyborgcode.roa.ui.service.tables.TableElement` |
+| Cell type on the row model | `io.cyborgcode.roa.ui.components.table.model.TableCell` |
 | Column binding | `io.cyborgcode.roa.ui.components.table.base.TableField` |
 | Structural annotations | `io.cyborgcode.roa.ui.components.table.annotations.TableInfo` / `.TableCellLocator` |
 | Cell overrides | `…table.annotations.CellFilter` / `.CellInsertion` / `.CustomCellFilter` / `.CustomCellInsertion` |
-| Custom handlers | `…table.insertion.CellInsertionFunction` |
+| Custom handlers | `…table.insertion.CellInsertionFunction` / `…table.filters.CellFilterFunction` |
 | Filter strategy | `io.cyborgcode.roa.ui.components.table.filters.FilterStrategy` |
 | Sorting strategy | `io.cyborgcode.roa.ui.components.table.sort.SortingStrategy` |
 | Assertion builder | `io.cyborgcode.roa.validator.core.Assertion` |
