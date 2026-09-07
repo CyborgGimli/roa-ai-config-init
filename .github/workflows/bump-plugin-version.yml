@@ -1,5 +1,10 @@
 name: Bump plugin version
 
+# The marketplace lives in roa-ai-config/, not at the repository root.
+# Every `run:` step below resolves through defaults.run.working-directory;
+# git-auto-commit is not a `run:` step and takes repository-root-relative
+# paths, so its file_pattern carries the prefix explicitly.
+
 on:
   workflow_dispatch:
     inputs:
@@ -23,6 +28,10 @@ concurrency:
 jobs:
   bump:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: roa-ai-config
 
     steps:
       - name: Check out repository
@@ -54,4 +63,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: bump plugins to v${{ steps.version.outputs.version }}"
-          file_pattern: "source dist .claude-plugin README.md build-config.json package.json"
+          file_pattern: "roa-ai-config/source roa-ai-config/dist roa-ai-config/.claude-plugin roa-ai-config/README.md roa-ai-config/build-config.json roa-ai-config/package.json"

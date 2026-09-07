@@ -1,10 +1,21 @@
 name: Build Claude Code plugins
 
+# The marketplace lives in roa-ai-config/, not at the repository root.
+# Every `run:` step below resolves through defaults.run.working-directory;
+# the two steps that are not `run:` steps (paths-filter, git-auto-commit)
+# take repository-root-relative paths and carry the prefix explicitly.
+
 on:
   pull_request:
+    paths:
+      - "roa-ai-config/**"
+      - ".github/workflows/build-plugins.yml"
   push:
     branches:
       - main
+    paths:
+      - "roa-ai-config/**"
+      - ".github/workflows/build-plugins.yml"
 
 permissions:
   contents: write
@@ -17,6 +28,10 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: roa-ai-config
 
     steps:
       - name: Check out repository
@@ -36,8 +51,8 @@ jobs:
         with:
           filters: |
             generated:
-              - '.claude-plugin/marketplace.json'
-              - 'dist/**'
+              - 'roa-ai-config/.claude-plugin/marketplace.json'
+              - 'roa-ai-config/dist/**'
 
       - name: Keep PRs source-only for generated artifacts
         if: github.event_name == 'pull_request' && steps.pr-generated.outputs.generated == 'true'
@@ -65,4 +80,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: rebuild Claude Code plugins"
-          file_pattern: ".claude-plugin/marketplace.json dist"
+          file_pattern: "roa-ai-config/.claude-plugin/marketplace.json roa-ai-config/dist"
