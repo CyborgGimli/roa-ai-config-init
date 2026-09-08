@@ -295,7 +295,7 @@ function runStructuralChecks() {
 run(process.execPath, ["scripts/build.mjs"]);
 
 validateJson("build-config.json");
-validateJson(".claude-plugin/marketplace.json");
+validateJson("../.claude-plugin/marketplace.json");
 for (const file of collectJsonFiles(path.join(ROOT, "dist", "plugins"))) {
   JSON.parse(readText(file));
 }
@@ -306,17 +306,18 @@ const claudeBinary = findClaudeBinary();
 if (!claudeBinary) {
   console.log("Claude CLI not found; skipped 'claude plugin validate .'");
 } else {
+  const marketplaceRoot = path.resolve(ROOT, "..");
   const args = ["plugin", "validate", "."];
   const useShell = needsShell(claudeBinary);
   const claude = useShell
     ? spawnSync([JSON.stringify(claudeBinary), ...args].join(" "), {
-        cwd: ROOT,
+        cwd: marketplaceRoot,
         stdio: "inherit",
         encoding: "utf8",
         shell: true,
       })
     : spawnSync(claudeBinary, args, {
-        cwd: ROOT,
+        cwd: marketplaceRoot,
         stdio: "inherit",
         encoding: "utf8",
       });

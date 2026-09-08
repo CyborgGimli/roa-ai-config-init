@@ -67,6 +67,37 @@ function repoRelative(candidate) {
   return path.relative(ROOT, candidate).split(path.sep).join("/");
 }
 
+// Claude Code resolves a marketplace at <checkout>/.claude-plugin/marketplace.json,
+// and this package is a subdirectory of the repository, so the manifest has to be
+// written to the repository root. That is the one configured path allowed to sit
+// outside ROOT - and only exactly one level up, never further.
+const REPO_ROOT = path.resolve(ROOT, "..");
+
+function marketplaceManifestPath(value) {
+  if (typeof value !== "string" || value.length === 0) {
+    fail(`invalid path value: ${JSON.stringify(value)}`);
+  }
+  const resolved = path.resolve(ROOT, value);
+  const relative = path.relative(REPO_ROOT, resolved);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    fail(`marketplace manifest escapes the repository: ${resolved}`);
+  }
+  if (
+    path.basename(resolved) !== "marketplace.json" ||
+    path.basename(path.dirname(resolved)) !== ".claude-plugin"
+  ) {
+    fail(`marketplace manifest must be named .claude-plugin/marketplace.json: ${resolved}`);
+  }
+  return resolved;
+}
+
+// Plugin sources in the manifest are relative to the directory that holds
+// .claude-plugin, which is not necessarily this package.
+function pluginSourcePrefix(marketplacePath, distRoot) {
+  const marketplaceRoot = path.dirname(path.dirname(marketplacePath));
+  return path.relative(marketplaceRoot, distRoot).split(path.sep).join("/");
+}
+
 function requireObject(value, label) {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     fail(`${label} must be an object`);
@@ -630,12 +661,11 @@ function buildPlugin(marketplace, plugin, distRoot, extraPlaceholders = {}) {
   }
 }
 
-function marketplaceCatalog(config) {
+function marketplaceCatalog(config, sourcePrefix) {
   const marketplace = requireObject(config.marketplace, "marketplace");
   const owner = requireObject(marketplace.owner, "marketplace.owner");
   const metadata = requireObject(marketplace.metadata ?? {}, "marketplace.metadata");
-  const pathsConfig = requireObject(config.paths ?? {}, "paths");
-  const distPlugins = String(pathsConfig.distPlugins ?? "dist/plugins")
+  const distPlugins = String(sourcePrefix)
     .replace(/^[.\\\/]+/, "")
     .replace(/\\/g, "/")
     .replace(/\/+$/, "");
@@ -672,6 +702,14 @@ function marketplaceCatalog(config) {
 
 function writeJson(filePath, data) {
   ensureInsideRepo(filePath);
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + "\n", "utf8");
+}
+
+// The marketplace manifest is the one generated file written outside ROOT, so it
+// carries its own guard (marketplaceManifestPath) instead of ensureInsideRepo.
+function writeMarketplaceJson(filePath, data) {
+  marketplaceManifestPath(filePath);
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + "\n", "utf8");
 }
@@ -867,7 +905,7 @@ function main() {
   config.plugins = loadPluginConfigs(paths);
 
   const distRoot = repoPath(paths.distPlugins ?? "dist/plugins");
-  const marketplacePath = repoPath(paths.marketplaceFile ?? ".claude-plugin/marketplace.json");
+  const marketplacePath = marketplaceManifestPath(paths.marketplaceFile ?? "../.claude-plugin/marketplace.json");
   const setupRegistryPath = repoPath(
     paths.setupRegistryFile ?? "dist/plugins/roa-base/skills/setup/generated/setup-registry.json"
   );
@@ -881,7 +919,7 @@ function main() {
   copySetupAssets(config, setupRegistryPath, registry);
   validateSetupAssets(setupRegistryPath, registry);
   writeJson(setupRegistryPath, { plugins: registry });
-  writeJson(marketplacePath, marketplaceCatalog(config));
+  writeMarketplaceJson(marketplacePath, marketplaceCatalog(config, pluginSourcePrefix(marketplacePath, distRoot)));
 
   console.log(`Built ${repoRelative(distRoot)}`);
   console.log(`Updated ${repoRelative(marketplacePath)}`);

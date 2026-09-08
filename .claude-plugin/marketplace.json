@@ -10,7 +10,7 @@
     {
       "name": "roa-base",
       "displayName": "ROA Base",
-      "source": "./dist/plugins/roa-base",
+      "source": "./roa-ai-config/dist/plugins/roa-base",
       "description": "Bootstrap plugin providing setup and update machinery for ROA Claude Code plugins",
       "category": "framework",
       "tags": [
@@ -25,7 +25,7 @@
     {
       "name": "roa-api",
       "displayName": "ROA API Testing",
-      "source": "./dist/plugins/roa-api",
+      "source": "./roa-ai-config/dist/plugins/roa-api",
       "description": "REST API testing with fluent request patterns and response assertions",
       "category": "testing",
       "tags": [
@@ -39,7 +39,7 @@
     {
       "name": "roa-db",
       "displayName": "ROA Database Testing",
-      "source": "./dist/plugins/roa-db",
+      "source": "./roa-ai-config/dist/plugins/roa-db",
       "description": "Database testing with query abstractions and managed test data lifecycle",
       "category": "testing",
       "tags": [
@@ -53,7 +53,7 @@
     {
       "name": "roa-ui",
       "displayName": "ROA UI Testing",
-      "source": "./dist/plugins/roa-ui",
+      "source": "./roa-ai-config/dist/plugins/roa-ui",
       "description": "UI automation with three-layer component architecture, Selenium SmartWebDriver, and fluent testing patterns",
       "category": "testing",
       "tags": [
