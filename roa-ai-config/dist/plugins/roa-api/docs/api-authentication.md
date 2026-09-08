@@ -48,6 +48,8 @@ void authenticatedCall(Quest quest) { }
 - Prefer the annotation over a login flow repeated per test.
 - `cacheCredentials = true` only when reuse within a run is actually correct — a test
   that depends on a *fresh* session must not cache.
+- `AuthenticationKey` is the cache key `BaseAuthenticationClient` builds from the
+  username, password and client type. It is internal — never construct or pass one.
 
 ## Imports
 

@@ -46,6 +46,27 @@ Integer status = retrieve(statusExtraction(GET_ALL_USERS), Integer.class);
 
 The first argument is the same endpoint constant the response was stored under.
 
+### When the factories are not enough
+
+For an extraction the two factories cannot express — filtering a list, walking two
+levels, combining fields — build the extractor yourself:
+
+```java
+DataExtractor<String> firstUserEmail = new DataExtractorImpl<>(
+    StorageKeysApi.API,
+    GET_ALL_USERS,
+    raw -> ((Response) raw).getBody().jsonPath().getString("data[0].email"));
+
+String email = retrieve(firstUserEmail, String.class);
+```
+
+The lambda gets the stored object untyped — for this namespace that is always a
+RestAssured `Response`, so cast it.
+
+Treat this as a staging post, not a destination. The path inside the lambda is
+exactly the scattered JSONPath `ApiResponsesJsonPaths` exists to prevent; once it
+settles, move it into the registry and go back to `responseBodyExtraction`.
+
 ## Index semantics
 
 Storage keeps every write, newest first. Calling the same endpoint twice stores both

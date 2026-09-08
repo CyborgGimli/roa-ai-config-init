@@ -21,6 +21,7 @@ Split into single-topic chunks:
 | `ui-insertion.md` | `@InsertionElement` model-driven forms |
 | `ui-interception.md` | `@InterceptRequests` and `DataIntercept` |
 | `ui-retry.md` | which wait to reach for, and `retryUntil` |
+| `ui-config.md` | browser, waits, shadow DOM, default component types |
 | `ui-imports.md` | the import table |
 | `ui-rules.md` | non-negotiable rules and common mistakes |
 

@@ -48,6 +48,24 @@ Reach for it only when the methods genuinely must share state — a wizard flow 
 alive across steps, or setup too expensive to repeat. Ordering that is merely
 convenient is a reason to split the test, not to serialise the class.
 
+`Services` is the Spring container, handed to those two hooks and nowhere else.
+There is no Quest yet at that point, so `quest.use(...)` is not available; `Services`
+is how you reach the plain service behind a ring instead:
+
+```java
+@Override
+protected void beforeAll(Services services) {
+    RestService restService = services.service(RestServiceFluent.class, RestService.class);
+}
+```
+
+`service(fluentServiceClass, serviceClass)` finds the ring's Spring bean and returns
+the field of the requested type inside it. The ring class has to implement
+`ClassLevelHook`; the built-in ones do. If the ring holds more than one field of that
+type you get the first, with a warning in the log.
+
+This is class-level setup only. Inside a test, use the ring.
+
 ## Methods available in a test
 
 | Method | Purpose |

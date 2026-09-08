@@ -24,6 +24,12 @@ later step is meaningless if this one failed.
 Used where a ring method actually accepts an `Assertion`: UI **tables**, and
 structured API/DB checks. Never for ordinary UI components.
 
+That is the whole rule for choosing between the two forms — look at the method. If
+its signature takes `Assertion` parameters, build assertions; if it does not, the
+generic `validate(...)` overloads above are the only option, and they are where you
+pull a value out of storage and assert on it with JUnit or AssertJ. A ring's own
+`validate*` methods beat both when one exists for what you are checking.
+
 ```java
 Assertion.builder()
     .target(TARGET)       // module-specific target enum

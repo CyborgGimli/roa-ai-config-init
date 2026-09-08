@@ -38,6 +38,28 @@ String token = retrieve(
 String value = retrieve(DataExtractorsTest.staticTestData(StaticData.KEY), String.class);
 ```
 
+## Custom extractors
+
+The module factories — `DataExtractorsApi.responseBodyExtraction`,
+`DataExtractorsUi`, `DataExtractorsTest.staticTestData` — cover the common shapes.
+When the extraction is genuinely one of a kind, build a `DataExtractor` directly:
+
+```java
+DataExtractor<String> firstUserEmail = new DataExtractorImpl<>(
+    StorageKeysApi.API,                 // namespace
+    GET_ALL_USERS,                      // key the raw object is stored under
+    raw -> ((Response) raw).getBody().jsonPath().getString("data[0].email"));
+
+String email = retrieve(firstUserEmail, String.class);
+```
+
+The lambda receives whatever was stored — cast it yourself. There is a two-argument
+constructor without the namespace, for keys in the root storage.
+
+Prefer a factory. A custom extractor that hardcodes a path is the same scattered
+JSONPath the registries exist to prevent: once the path is stable, move it into
+`ApiResponsesJsonPaths` and go back to `responseBodyExtraction`.
+
 ## Writing (rare)
 
 ```java
@@ -59,18 +81,40 @@ Storage keeps **every** write for a key.
 
 | Call | Returns |
 | --- | --- |
-| `get(key, ...)` | the latest value |
-| `getByIndex(key, 1, ...)` | the latest |
-| `getByIndex(key, 2, ...)` | the previous |
+| `get(key, Class)` | the latest value, cast to the type |
+| `getByIndex(key, 1, Class)` | the latest |
+| `getByIndex(key, 2, Class)` | the previous |
+| `getByClass(key, Class)` | the latest value **that is** of that type |
+| `getAllByClass(key, Class)` | every value of that type, oldest first |
 
-## DefaultStorage shortcut
+`get` and `getByClass` differ when a key holds values of more than one type. `get`
+takes the newest entry and casts it — the wrong type there is a failure. `getByClass`
+skips past entries that do not match and returns the newest one that does. Reach for
+it when a key accumulates mixed writes; `get` is right everywhere else.
 
-When `config.properties` sets `default.storage=UI`, `DefaultStorage.retrieve(...)`
-reads from `storage.sub(UI)` without an explicit `.sub(...)`.
+Each also takes a `ParameterizedTypeReference` instead of a `Class` for generic types
+such as `List<Order>`.
+
+## The default sub-storage
+
+`default.storage=UI` in the framework config names one namespace as the default, so
+`storage.sub()` — no argument — returns it:
 
 ```java
-Boolean selected = DefaultStorage.retrieve(MyUiKeys.CHECKBOX_SELECTED, Boolean.class);
+Boolean selected = quest.getStorage().sub().get(MyUiKeys.CHECKBOX_SELECTED, Boolean.class);
 ```
+
+The default is latched **lazily**: `Storage` records the enum the first time
+`sub(subKey)` is called with a constant whose `name()` equals the configured value.
+Until something has entered that namespace in the current test, `sub()` throws:
+
+```text
+IllegalStateException: There is no default storage initialized
+```
+
+So `sub()` is dependable inside a ring that has already written to its own namespace,
+and a coin flip in a test that has not. Naming the namespace — `sub(StorageKeysUi.UI)`
+— costs one argument and never throws.
 
 ## Namespaces — what goes where
 

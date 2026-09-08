@@ -35,7 +35,7 @@ reviewing code. Each file covers one topic; open only what you need.
 | `DataCreator` / `Preconditions` / `DataCleaner` | `framework-registries.md` |
 | Hard vs soft, `Assertion.builder()`, types | `framework-validation.md` |
 | `retryUntil` and `RetryCondition` | `framework-retry.md` |
-| Config, static data, project layout | `framework-config.md` |
+| POM setup, property files, environments, layout | `framework-config.md` |
 | Code standards and the forbidden list | `code-standards.md` |
 | Test shape and validation patterns | `testing-standards.md` |
 | Gate commands and evidence format | `quality-gates.md` |

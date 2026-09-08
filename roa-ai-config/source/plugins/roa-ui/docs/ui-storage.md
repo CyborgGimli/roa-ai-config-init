@@ -82,13 +82,20 @@ The row must have been read first — the extractor reads storage, not the page.
 `null` here almost always means the `readTable` call is missing, or ran before the
 table rendered.
 
-## DefaultStorage
+## The default sub-storage
 
-When `config.properties` sets `default.storage=UI`:
+`default.storage=UI` (see `ui-config.md`) makes `UI` the default namespace, so the
+no-argument `sub()` resolves to it:
 
 ```java
-Boolean selected = DefaultStorage.retrieve(MyUiKeys.CHECKBOX_SELECTED, Boolean.class);
+Boolean selected = quest.getStorage().sub().get(MyUiKeys.CHECKBOX_SELECTED, Boolean.class);
 ```
+
+It is latched lazily — the framework only records the namespace once something calls
+`sub(StorageKeysUi.UI)` in the current test. Before that, `sub()` throws
+`IllegalStateException: There is no default storage initialized`. Inside a UI ring
+that has already stored something it is safe; in a test it is a gamble. Name the
+namespace and the question does not arise. `framework-storage.md` has the mechanism.
 
 ## Passing values between steps
 

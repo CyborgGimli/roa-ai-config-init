@@ -24,6 +24,7 @@ reviewing code. Each file covers one topic; open only what you need.
 | Model-driven form filling | `ui-insertion.md` |
 | Capturing network requests | `ui-interception.md` |
 | Which wait to use; `retryUntil` | `ui-retry.md` |
+| Browser, waits, shadow DOM, default types | `ui-config.md` |
 | Required imports | `ui-imports.md` |
 | Non-negotiable rules and mistakes | `ui-rules.md` |
 | Test shape and structure | `ui-test-basics.md` |
@@ -41,7 +42,7 @@ reviewing code. Each file covers one topic; open only what you need.
 | `DataCreator` / `Preconditions` / `DataCleaner` | `framework-registries.md` |
 | Hard vs soft, `Assertion.builder()`, types | `framework-validation.md` |
 | `retryUntil` and `RetryCondition` | `framework-retry.md` |
-| Config, static data, project layout | `framework-config.md` |
+| POM setup, property files, environments, layout | `framework-config.md` |
 | Code standards and the forbidden list | `code-standards.md` |
 | Test shape and validation patterns | `testing-standards.md` |
 | Gate commands and evidence format | `quality-gates.md` |

@@ -18,6 +18,7 @@ Split into single-topic chunks:
 | `api-hooks.md` | class-level `@ApiHook` flows, `hookData` |
 | `api-retry.md` | `retryUntil`, the `RetryConditionApi` factories (mechanism: `framework-retry.md`) |
 | `api-validation.md` | targets, types, and assertion patterns |
+| `api-config.md` | base URL, logging and body truncation keys |
 | `api-imports.md` | the import table |
 | `api-rules.md` | non-negotiable rules and common mistakes |
 

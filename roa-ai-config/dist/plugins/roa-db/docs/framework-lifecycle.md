@@ -18,6 +18,14 @@ Runs before the test body. Multiple journeys run in `order`.
 void testWithPreconditions(Quest quest) { }
 ```
 
+`@JourneyData` names the `DataCreator` constants the journey takes as arguments; omit
+it for a journey that needs no input. The values arrive as the `Object[]` the
+`Preconditions` enum unpacks.
+
+`@PreQuest({ @Journey(...), @Journey(...) })` is an older container form for the same
+thing. `@Journey` repeats on its own, so stacking it is the shorter spelling — use
+the container only in code that already does.
+
 ## @Ripper — cleanup
 
 Runs after the test **even when it fails** — which is the case that matters, since a

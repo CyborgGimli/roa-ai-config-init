@@ -12,7 +12,7 @@ This reference is split into single-topic chunks. Read them in this order:
 | `framework-registries.md` | `DataCreator`, `Preconditions`, `DataCleaner` |
 | `framework-validation.md` | hard/soft assertions, `Assertion.builder()`, targets and types |
 | `framework-retry.md` | `retryUntil`, `RetryCondition`, custom-ring wrappers |
-| `framework-config.md` | OWNER config, static data, project layout, gates |
+| `framework-config.md` | POM setup, property files, environments, parallelism, layout |
 
 Module detail lives in the `ui-*`, `api-*` and `db-*` chunks in this same folder.
 Anything specific to one module — the three UI layers, `Endpoint`, `DbQuery` — is
