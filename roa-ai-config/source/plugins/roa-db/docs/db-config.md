@@ -23,8 +23,51 @@ the default.
 
 ## Where values come from
 
-Configuration is OWNER-backed and resolved from properties, environment variables,
-or system properties. Never a literal in source.
+Configuration is OWNER-backed. The DB adapter reads `${db.config.file}.properties`
+(named in `system.properties`) merged over system properties, so every key can be
+overridden with `-Dkey=value`. Never a literal in source.
+
+| Key | Meaning |
+| --- | --- |
+| `db.default.type` | a constant of your own `DbType` enum — driver and dialect; see `db-types.md` |
+| `db.default.host` | host |
+| `db.default.port` | port |
+| `db.default.name` | database name |
+| `db.default.username` | user |
+| `db.default.password` | password |
+| `db.full.connection.string` | complete JDBC URL |
+
+`db.full.connection.string` wins when set: host, port and name are ignored. Use it
+for anything whose URL carries options — an in-memory H2, a TLS-pinned Postgres:
+
+```properties
+db.default.type=H2
+db.full.connection.string=jdbc:h2:mem:AppDb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false
+```
+
+and the discrete keys for a plain external database:
+
+```properties
+db.default.type=POSTGRES
+db.default.host=localhost
+db.default.port=5432
+db.default.name=appdb
+db.default.username=app
+db.default.password=
+```
+
+`db.default.type` is resolved reflectively: the string names a constant of the one
+enum implementing `DbType` inside `project.packages`. Zero such enums, or a name that
+matches no constant, fails at startup rather than at the first query — and with more
+than one such enum only the first configured package is searched, so keep the `DbType`
+enum in the primary package.
+
+A password in a committed properties file is a leak like any other. Keep it out of
+the file and pass it in — `-Ddb.default.password=…` from the CI secret store, since
+system properties merge over the file.
+
+Per-environment files (`config-dev`, `config-staging`) are selected by a Maven
+profile; `framework-config.md` has the layout.
 
 ## MCP-facing configuration
 

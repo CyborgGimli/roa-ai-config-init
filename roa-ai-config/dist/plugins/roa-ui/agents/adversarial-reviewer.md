@@ -22,8 +22,9 @@ is not. You review only - you never edit.
   deleted.
 - **Test-data leakage**: data created without a matching cleaner, cleanup
   skipped when a test fails midway, tests depending on data another test made.
-- **Layer violations**: tests reaching into `types`, locators inline in tests,
-  components that know about test-specific state.
+- **Layer violations**: a raw driver, HTTP client or JDBC call in a test; a
+  locator, URL or SQL string inlined at a call site; a component or endpoint that
+  knows about test-specific state.
 - **Environment coupling**: hardcoded URLs, credentials, ports, or timing that
   only works on one machine.
 

@@ -1,11 +1,13 @@
 # Reference material only — kept locally, never committed.
 # Multi-GB photo sets of the fx-ai-config project used to port the scripts,
-# plus a sample ROA target repository used to verify the framework contract.
+# plus the ROA repositories the framework contract is verified against.
 /setup-script/
 /build-script/
 /base-shared -source-files/
 /scr/
 /demo-video-i1/
+/ai-api-ninth/
+/roa-example-projects/
 
 # IDE
 .idea/

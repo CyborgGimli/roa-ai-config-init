@@ -55,6 +55,28 @@ Extend `FluentService` (`io.cyborgcode.roa.framework.chain`), annotate
 `@Ring("Name")`, and return `this` from every method. A custom ring may orchestrate
 several rings internally — that is what it is for.
 
+### One-time ring setup
+
+`quest` is injected after the ring is constructed, so a constructor cannot touch it.
+Anything that needs the Quest goes in `postQuestSetupInitialization()`, which the
+framework calls once the wiring is done:
+
+```java
+@Ring("ZeroBank")
+public class ZeroBankService extends FluentService implements ClassLevelHook {
+
+    @Override
+    protected void postQuestSetupInitialization() {
+        quest.getStorage().sub(ZeroBankKeys.ZEROBANK);
+    }
+}
+```
+
+It is `protected void` and does nothing by default. Never call it yourself. Creating
+the ring's namespace here is the common use — it makes the later `sub()` calls
+cheap and, when this namespace is the configured `default.storage`, it is what
+latches the default (see `framework-storage.md`).
+
 ## Enabling modules
 
 Class-level annotations enable rings: `@UI`, `@API`, `@DB`. A class may carry more

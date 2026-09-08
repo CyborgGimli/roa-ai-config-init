@@ -15,7 +15,7 @@ not fix what you find - you report it precisely enough that someone else can.
 
 - `mvn clean compile` - does it build at all.
 - `mvn test -Dtest=<TheTest>` - does the specific change pass.
-- `mvn pandora:open -U` - only when dependencies or framework version changed.
+- `mvn pandora:navigation -U` - only when dependencies or framework version changed.
 
 ## What to report
 

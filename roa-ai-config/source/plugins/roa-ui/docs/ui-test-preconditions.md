@@ -13,7 +13,7 @@ void dashboard_whenSignedIn_showsDisplayName(Quest quest) {
     quest
         .use(RING_OF_UI)
         .browser().navigate(getUiConfig().baseUrl() + "/dashboard")
-        .label().validateValue(LabelFields.DISPLAY_NAME, "Ada Lovelace")
+        .validate().validateTextInField(HTML.Tag.SPAN, "Ada Lovelace")
         .drop()
         .complete();
 }

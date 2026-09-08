@@ -12,13 +12,16 @@ reviewing code. Each file covers one topic; open only what you need.
 | --- | --- |
 | Orientation / getting started | `api-usage.md` |
 | The ring and its operations | `api-ring.md` |
+| `RestService` — hooks, auth clients, `LogApi` | `api-rest-service.md` |
 | Typed endpoints and parameterisation | `api-endpoints.md` |
+| Where a class goes; constants discipline | `api-project-structure.md` |
 | Request/response DTOs | `api-dtos.md` |
 | Centralised JSONPaths | `api-extractors.md` |
-| Response storage and chaining | `api-storage.md` |
+| Response storage, `retrieve`, extractors | `api-storage.md` |
 | `@AuthenticateViaApi` | `api-authentication.md` |
 | Class-level `@ApiHook` flows | `api-hooks.md` |
 | Retry and eventual consistency | `api-retry.md` |
+| Base URL, logging, body truncation | `api-config.md` |
 | Targets, types, assertion patterns | `api-validation.md` |
 | Required imports | `api-imports.md` |
 | Non-negotiable rules and mistakes | `api-rules.md` |
@@ -32,10 +35,11 @@ reviewing code. Each file covers one topic; open only what you need.
 | Quest, base classes, `complete()` | `framework-quest.md` |
 | Rings, `drop()`, custom rings | `framework-rings.md` |
 | Storage, `retrieve`, extractors, indexes | `framework-storage.md` |
-| `@Journey` / `@Ripper` / `@Craft` / `Late` | `framework-lifecycle.md` |
+| `@Journey` / `@Ripper` / `@Craft` / `Late`, hooks, tags | `framework-lifecycle.md` |
 | `DataCreator` / `Preconditions` / `DataCleaner` | `framework-registries.md` |
 | Hard vs soft, `Assertion.builder()`, types | `framework-validation.md` |
-| Config, static data, project layout | `framework-config.md` |
+| `retryUntil` and `RetryCondition` | `framework-retry.md` |
+| POM setup, property files, environments, layout | `framework-config.md` |
 | Code standards and the forbidden list | `code-standards.md` |
 | Test shape and validation patterns | `testing-standards.md` |
 | Gate commands and evidence format | `quality-gates.md` |
@@ -44,6 +48,6 @@ reviewing code. Each file covers one topic; open only what you need.
 Prefer the chunk that matches the change in front of you. These docs are reference,
 not law — never apply a pattern that contradicts working code already in the repo.
 
-For the authoritative class contract, load `roa-pandora-metadata` and read
+For the authoritative class contract, load `ai-compass` and read
 `target/pandora/metadata/` directly. That is the source of truth when a signature is
 unclear or something does not compile; module rules still outrank it.

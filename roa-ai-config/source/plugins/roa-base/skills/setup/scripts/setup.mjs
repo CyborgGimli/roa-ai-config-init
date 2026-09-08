@@ -501,6 +501,66 @@ function listInstalledPlugins(claudeBinary, targetRoot) {
   }
 }
 
+function listMarketplaces(claudeBinary, targetRoot) {
+  const result = runClaude(claudeBinary, ["plugin", "marketplace", "list", "--json"], targetRoot);
+  if (result.status !== 0 || !result.stdout.trim()) {
+    return [];
+  }
+
+  try {
+    const data = JSON.parse(result.stdout);
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+// `claude plugin install <plugin>@<marketplace>` resolves the marketplace from the
+// user-scope registry, not from the target repo's extraKnownMarketplaces, so a
+// machine that has never seen this marketplace fails with a bare
+// "Plugin not found in marketplace" that says nothing about the real cause.
+// Register it first.
+function ensureMarketplaceRegistered(spec, targetRoot, claudeBinary) {
+  const marketplaceName = spec.marketplaceName;
+  if (typeof marketplaceName !== "string" || !marketplaceName) {
+    return null;
+  }
+
+  const known = listMarketplaces(claudeBinary, targetRoot);
+  if (known.some((entry) => entry && entry.name === marketplaceName)) {
+    return null;
+  }
+
+  const source = spec.marketplaceRepo;
+  if (typeof source !== "string" || !source) {
+    throw new SetupError(
+      `marketplace ${marketplaceName} is not registered on this machine and the registry declares no repository to add it from. Run: claude plugin marketplace add <source>`
+    );
+  }
+
+  if (process.env.ROA_SETUP_NO_MARKETPLACE_ADD) {
+    throw new SetupError(
+      `marketplace ${marketplaceName} is not registered. Run: claude plugin marketplace add ${source}`
+    );
+  }
+
+  const result = runClaude(claudeBinary, ["plugin", "marketplace", "add", source], targetRoot);
+  if (result.status !== 0) {
+    const output = `${result.stdout ?? ""}${result.stderr ?? ""}`.trim();
+    throw new SetupError(
+      `failed to register marketplace ${marketplaceName} from ${source}. Run it by hand: claude plugin marketplace add ${source}${output ? ` — Claude output: ${output}` : ""}`
+    );
+  }
+
+  return ["registered marketplace (user scope)", `${marketplaceName} <- ${source}`];
+}
+
+// installPluginIfMissing reports one or two lines: the marketplace registration,
+// when it had to happen, followed by what became of the plugin itself.
+function withMarketplaceNote(registered, entry) {
+  return registered ? [registered, entry] : [entry];
+}
+
 function isInstalledForProject(plugins, pluginId, targetRoot) {
   return Boolean(findProjectPlugin(plugins, pluginId, targetRoot));
 }
@@ -553,11 +613,11 @@ function restoreFile(filePath, originalText) {
 function installPluginIfMissing(spec, targetRoot, settingsPath) {
   const install = spec.install ?? {};
   if (install.enabled === false) {
-    return ["skipped plugin install", spec.enabledPlugin];
+    return [["skipped plugin install", spec.enabledPlugin]];
   }
   // Testing/CI escape hatch: generate project files without invoking the Claude CLI.
   if (process.env.ROA_SETUP_SKIP_INSTALL) {
-    return ["skipped plugin install (ROA_SETUP_SKIP_INSTALL)", spec.enabledPlugin];
+    return [["skipped plugin install (ROA_SETUP_SKIP_INSTALL)", spec.enabledPlugin]];
   }
 
   const enabledPlugin = spec.enabledPlugin;
@@ -572,6 +632,8 @@ function installPluginIfMissing(spec, targetRoot, settingsPath) {
     );
   }
 
+  const registered = ensureMarketplaceRegistered(spec, targetRoot, claudeBinary);
+
   const installed = findProjectPlugin(listInstalledPlugins(claudeBinary, targetRoot), enabledPlugin, targetRoot);
   if (installed) {
     if (spec.pluginVersion && installed.version && installed.version !== spec.pluginVersion) {
@@ -584,9 +646,9 @@ function installPluginIfMissing(spec, targetRoot, settingsPath) {
           `failed to update ${enabledPlugin} from ${installed.version} to ${spec.pluginVersion}.${output ? ` Claude output: ${output}` : ""}`
         );
       }
-      return [`updated plugin (${installed.version} -> ${spec.pluginVersion})`, enabledPlugin];
+      return withMarketplaceNote(registered, [`updated plugin (${installed.version} -> ${spec.pluginVersion})`, enabledPlugin]);
     }
-    return ["plugin already installed", enabledPlugin];
+    return withMarketplaceNote(registered, ["plugin already installed", enabledPlugin]);
   }
 
   const scope = typeof install.scope === "string" && install.scope ? install.scope : "project";
@@ -601,7 +663,7 @@ function installPluginIfMissing(spec, targetRoot, settingsPath) {
     );
   }
 
-  return [`installed plugin (${scope} scope)`, enabledPlugin];
+  return withMarketplaceNote(registered, [`installed plugin (${scope} scope)`, enabledPlugin]);
 }
 
 function enablePlugin(spec, targetRoot) {
@@ -1018,7 +1080,7 @@ function run(options) {
 
   const changed = [];
   const settingsPath = resolveTargetPath(targetRoot, ".claude/settings.json");
-  changed.push(installPluginIfMissing(spec, targetRoot, settingsPath));
+  changed.push(...installPluginIfMissing(spec, targetRoot, settingsPath));
 
   for (const directory of spec.extraDirectories ?? []) {
     const result = ensureDirectory(targetRoot, directory);

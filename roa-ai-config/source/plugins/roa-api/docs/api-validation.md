@@ -3,6 +3,16 @@
 Prefer `requestAndValidate(...)` with `Assertion.builder()`. Fall back to
 `request(...)` then `validate(...)` only when the check needs custom logic.
 
+## The builder
+
+| Field | Meaning |
+| --- | --- |
+| `target` | where to assert — `RestAssertionTarget` |
+| `key` | refines the target: the JSONPath for `BODY`, the header name for `HEADER`; omitted for `STATUS` |
+| `type` | how to compare — `AssertionTypes` |
+| `expected` | the reference value |
+| `soft` | collect the failure until `complete()` instead of failing now |
+
 ## Targets
 
 `RestAssertionTarget`: `STATUS`, `BODY`, `HEADER`.

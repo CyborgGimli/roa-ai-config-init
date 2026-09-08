@@ -7,14 +7,46 @@ read replica has not caught up, or CI is briefly unstable.
 
 ```java
 quest.use(RING_OF_API)
-     .retryUntil(condition, Duration.ofSeconds(10), Duration.ofSeconds(1))
-     .requestAndValidate(GET_USER.withPathParam(ID_PARAM, id),
+     .retryUntil(
+         statusEquals(GET_USER.withPathParam(ID_PARAM, USER_ID_TWO), SC_OK),
+         Duration.ofSeconds(10),
+         Duration.ofSeconds(2))
+     .requestAndValidate(GET_USER.withPathParam(ID_PARAM, USER_ID_TWO),
          Assertion.builder().target(STATUS).type(IS).expected(SC_OK).build())
      .complete();
 ```
 
-`retryUntil(condition, maxWait, interval)` — build conditions with
-`RetryConditionApi` (`io.cyborgcode.roa.api.retry`).
+`retryUntil(condition, maxWait, retryInterval)` polls until the condition holds or
+`maxWait` elapses, then continues the chain.
+
+## Ready-made conditions
+
+`RetryConditionApi` (`io.cyborgcode.roa.api.retry`) covers the API cases. Prefer
+these over a custom condition.
+
+| Factory | Polls until |
+| --- | --- |
+| `statusEquals(endpoint, status)` | the status code matches |
+| `statusEquals(endpoint, body, status)` | same, for an endpoint needing a payload |
+| `responseFieldEqualsTo(endpoint, jsonPath, expected)` | a body field equals a value |
+| `responseFieldEqualsTo(endpoint, body, jsonPath, expected)` | same, with a payload |
+| `responseFieldNonNull(endpoint, jsonPath)` | a body field becomes non-null |
+| `responseFieldNonNull(endpoint, body, jsonPath)` | same, with a payload |
+
+```java
+responseFieldEqualsTo(GET_USER.withPathParam(ID_PARAM, id), USER_EMAIL.getJsonPath(), USER_FOUR_EMAIL)
+responseFieldNonNull(POST_LOGIN, loginRequest, TOKEN.getJsonPath())
+```
+
+Take the JSONPath from `ApiResponsesJsonPaths`, never as a raw string — the rule does
+not relax inside a retry condition.
+
+Each of these **issues a fresh request on every attempt**. They do not inspect the
+stored response, so the endpoint is genuinely hit `maxWait / retryInterval` times in
+the worst case. Keep the interval honest.
+
+Custom conditions are `RetryConditionImpl` and are covered by `framework-retry.md`,
+along with the protected four-argument `retryUntil` for custom rings.
 
 ## When retry is right
 

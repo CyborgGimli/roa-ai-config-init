@@ -7,10 +7,10 @@ allowed-tools: Read, Glob, Grep, Bash
 Diagnose before you change anything.
 
 1. Reproduce it. Run the single failing test and capture the real error.
-2. Re-run it. A test that passes on re-run without a code change is flaky -
-   say so rather than "fixing" it.
-3. Localize: is the failure in the test, the component, the locator, the data,
-   or the environment?
+2. Re-run it. A test that passes on re-run without a code change may be flaky -
+   hand it to `flaky-triage` rather than "fixing" it here.
+3. Localize: is the failure in the test, in the definition it drives (element,
+   endpoint, query), in the data, or in the environment?
 4. Read the log at `logs/roa.log` (surfaced via `ROA_LOG_FILE`).
 5. State the cause with evidence before proposing a fix.
 

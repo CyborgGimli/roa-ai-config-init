@@ -17,10 +17,15 @@ non-secret repository values and run setup again to generate `.mcp.json`.
 
 1. Confirm the contract first: path, method, request shape, response shape, and the
    documented error cases.
-2. Extend the service layer to cover the endpoint.
-3. Write the test against the service wrapper, never a raw HTTP client.
-4. Cover the error paths, not only the happy path.
-5. Compile, run the single test, then run the suite.
+2. Add the endpoint constant to `AppEndpoints`; add any missing param/header keys to
+   `api/constants/` and any newly asserted field to `ApiResponsesJsonPaths`.
+3. Add request/response DTOs if the body is meaningful.
+4. Write the test against `quest.use(RING_OF_API)`, never a raw HTTP client.
+5. Cover the error paths, not only the happy path.
+6. Clean up what the test creates, via `@Ripper`.
+7. Compile, run the single test, then run the suite.
+
+Where each class belongs: `api-project-structure.md`.
 
 ## The ring
 
@@ -62,7 +67,7 @@ entered — cross-ring tests are normal (drive the UI, then verify in the databa
 mvn clean compile                      # builds
 mvn test -Pe2e -Dtest=YourTestClass    # the change passes
 mvn clean install                      # full quality checks
-mvn pandora:open -U                    # regenerate framework metadata
+mvn pandora:navigation -U              # regenerate framework metadata
 ```
 
 See `quality-gates.md` for the evidence format these produce.

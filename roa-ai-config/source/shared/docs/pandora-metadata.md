@@ -1,8 +1,8 @@
 # Pandora Metadata
 
-> The full contract — JSON schema, `availableOptions` semantics, the regeneration
-> trigger list, and the rules — lives in the `roa-pandora-metadata` skill. This page
-> is the short orientation.
+> The full contract — JSON schema, options semantics, the regeneration trigger
+> list, and the rules — lives in the `ai-compass` skill. This page is the short
+> orientation.
 
 Pandora is the generated description of the ROA framework contract. It is the
 authority when the correct API is unclear — prefer it over guessing from a method
@@ -11,8 +11,13 @@ name.
 ## Generating
 
 ```bash
-mvn pandora:open -U
+mvn pandora:navigation -U
 ```
+
+Older Pandora releases name this goal `pandora:open` and call the options field
+`availableOptions` rather than `aiCompassOptions`. If the goal above fails as
+unknown, try `mvn pandora:open -U`. The plugin is normally also bound to
+`process-classes`, so a plain `mvn compile` refreshes metadata as well.
 
 Output lands in:
 

@@ -12,7 +12,7 @@
   "paths": {
     "pluginConfigGlob": "source/plugins/*/plugin-config.json",
     "distPlugins": "dist/plugins",
-    "marketplaceFile": ".claude-plugin/marketplace.json",
+    "marketplaceFile": "../.claude-plugin/marketplace.json",
     "setupRegistryFile": "dist/plugins/roa-base/skills/setup/generated/setup-registry.json"
   }
 }

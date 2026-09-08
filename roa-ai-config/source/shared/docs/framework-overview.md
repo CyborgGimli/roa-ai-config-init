@@ -23,7 +23,7 @@ Then the module chunk for what you are working on (`ui-*`, `api-*`, `db-*`).
 ## Source of truth
 
 `target/pandora/metadata/` is authoritative for signatures. Load the
-`roa-pandora-metadata` skill before writing `io.cyborgcode.roa` code, and whenever
+`ai-compass` skill before writing `io.cyborgcode.roa` code, and whenever
 something does not compile.
 
 ## Precedence

@@ -12,26 +12,50 @@ public class AppUiService extends UiServiceFluent<AppUiService> {
         postQuestSetupInitialization();
     }
 
-    public InputServiceFluent<AppUiService> input()         { return getInputField(); }
-    public ButtonServiceFluent<AppUiService> button()       { return getButtonField(); }
-    public SelectServiceFluent<AppUiService> select()       { return getSelectField(); }
-    public TableServiceFluent<AppUiService> table()         { return getTable(); }
-    public InsertionServiceFluent<AppUiService> insertion() { return getInsertionService(); }
-    public NavigationServiceFluent<AppUiService> browser()  { return getNavigation(); }
+    public InputServiceFluent<AppUiService> input()             { return getInputField(); }
+    public ButtonServiceFluent<AppUiService> button()           { return getButtonField(); }
+    public LinkServiceFluent<AppUiService> link()               { return getLinkField(); }
+    public SelectServiceFluent<AppUiService> select()           { return getSelectField(); }
+    public AlertServiceFluent<AppUiService> alert()             { return getAlertField(); }
+    public TableServiceFluent<AppUiService> table()             { return getTable(); }
+    public InsertionServiceFluent<AppUiService> insertion()     { return getInsertionService(); }
+    public InterceptorServiceFluent<AppUiService> interceptor() { return getInterceptor(); }
+    public NavigationServiceFluent<AppUiService> browser()      { return getNavigation(); }
+    public ValidationServiceFluent<AppUiService> validate()     { return getValidation(); }
 }
 ```
 
-Register it as the UI ring:
+## The constructor
+
+Three things, in this order, and none of them optional:
+
+| Line | Why |
+| --- | --- |
+| `super(driver)` | hands the `SmartWebDriver` to `UiServiceFluent` |
+| `this.quest = quest` | the ring needs the `SuperQuest` for storage and reporting |
+| `postQuestSetupInitialization()` | wires the services up now that both are set |
+
+Omitting `postQuestSetupInitialization()` compiles, and then every service accessor
+returns something unusable at runtime.
+
+## Register it as the ring
 
 ```java
 public static final Class<AppUiService> RING_OF_UI = AppUiService.class;
 ```
+
+The generic parameter is the facade's own type — `UiServiceFluent<AppUiService>` —
+which is what makes each service chain back to `AppUiService` rather than to the base
+class.
 
 ## Adding a service
 
 The facade exposes only what your project has needed. When you start using a service
 for the first time, add its shorthand here rather than reaching for the raw accessor
 in a test.
+
+Name the shorthand after the concept, not the class: `browser()` for navigation,
+`validate()` for validation. A test reads better for it.
 
 ## Raw accessors
 
@@ -41,4 +65,4 @@ the facade is not available — inside a `BaseLoginClient`, which is generic ove
 
 ## The full service list
 
-See `ui-services.md` for all 22 service fluents and what each covers.
+See `ui-services.md` for all 19 service fluents and every method each one offers.

@@ -18,6 +18,14 @@ Runs before the test body. Multiple journeys run in `order`.
 void testWithPreconditions(Quest quest) { }
 ```
 
+`@JourneyData` names the `DataCreator` constants the journey takes as arguments; omit
+it for a journey that needs no input. The values arrive as the `Object[]` the
+`Preconditions` enum unpacks.
+
+`@PreQuest({ @Journey(...), @Journey(...) })` is an older container form for the same
+thing. `@Journey` repeats on its own, so stacking it is the shorter spelling — use
+the container only in code that already does.
+
 ## @Ripper — cleanup
 
 Runs after the test **even when it fails** — which is the case that matters, since a
@@ -65,6 +73,43 @@ void testWithLateData(Quest quest,
          .complete();
 }
 ```
+
+## Class-level hooks
+
+`@ApiHook` (API) and `@DbHook` (DB) run a named flow once per class. `when` takes
+`HookExecution` (`io.cyborgcode.roa.framework.hooks`):
+
+| Value | Runs |
+| --- | --- |
+| `HookExecution.BEFORE` | once before any `@Test` in the class |
+| `HookExecution.AFTER` | once after every `@Test` in the class has finished |
+
+```java
+@DB
+@DbHook(when = HookExecution.BEFORE, type = "INITIALIZE_H2")
+class AdvancedFeaturesTest extends BaseQuest {
+}
+```
+
+Use `BEFORE` for one-time environment setup (seed, warm-up) and `AFTER` for one-time
+teardown. Cleanup that must run **per test** is `@Ripper`, not an `AFTER` hook — a
+class hook does not run between tests, so a failure leaves state behind for the rest
+of the class.
+
+What a hook stored is read back with `hookData(...)`. See `api-hooks.md` and
+`db-hooks.md`.
+
+## Selection tags
+
+Two mechanisms exist and both are in use:
+
+| Form | Notes |
+| --- | --- |
+| `@Smoke`, `@Regression` | ROA annotations, `io.cyborgcode.roa.framework.annotation` |
+| `@Tag("Smoke")`, `@Tag("Regression")` | plain JUnit 5 tags |
+
+Pick one per repository and stay with it — a suite filtered by `-Dgroups=Smoke` will
+silently miss tests marked the other way.
 
 ## Module annotations
 

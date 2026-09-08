@@ -9,7 +9,7 @@ Run the checks and report exactly what happened.
 ```bash
 mvn clean compile
 mvn test -Dtest=<TheTest>
-mvn pandora:open -U     # only when dependencies or framework version changed
+mvn pandora:navigation -U     # only when dependencies or framework version changed
 ```
 
 Report the exact command, its result, and only the relevant error output.

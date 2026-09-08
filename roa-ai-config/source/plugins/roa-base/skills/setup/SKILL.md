@@ -44,10 +44,24 @@ $ARGUMENTS
    ```
 
    The script reads `${CLAUDE_PLUGIN_ROOT}/skills/setup/generated/setup-registry.json`,
+   registers the `roa-ai` marketplace on this machine if it is not registered yet,
    installs or updates the requested plugin at project scope, reads the target repo's
    `ai-config.yaml`, and generates the project `.mcp.json` from bundled ROA MCP
    defaults. If `ai-config.yaml` is missing it writes a starter and stops before
    generating `.mcp.json`.
+
+   The marketplace is resolved from the **user-scope** registry, not from the target
+   repo's `extraKnownMarketplaces` — that block only records which ref the repo
+   expects. On a machine that has never seen it, the script adds it for you and
+   reports `registered marketplace (user scope)`. If that step fails, the error
+   carries the command to run by hand:
+
+   ```bash
+   claude plugin marketplace add CyborgGimli/roa-ai-config-init
+   ```
+
+   Set `ROA_SETUP_NO_MARKETPLACE_ADD=1` to make setup refuse instead of registering
+   it, on a machine where that has to be done deliberately.
 
 4. Read the files created or updated by the script:
    - `.claude/settings.json`

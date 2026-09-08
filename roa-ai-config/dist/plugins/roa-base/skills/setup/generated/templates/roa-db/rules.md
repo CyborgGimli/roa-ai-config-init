@@ -9,7 +9,7 @@ the owning team before committing.
 - Use the target repository's own build and test commands before introducing new tools.
 - Prefer the Maven wrapper (`./mvnw` or `mvnw.cmd`) when the repository provides one.
 - Prefer small implementation steps with tests next to the changed behaviour.
-- Regenerate framework metadata with `mvn pandora:open -U` after changing dependencies
+- Regenerate framework metadata with `mvn pandora:navigation -U` after changing dependencies
   or the ROA framework version.
 - Document any local deviation from these rules in this file.
 

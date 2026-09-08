@@ -1,85 +1,87 @@
-# ROA UI — Services and Element Inventory
+# ROA UI — Service Fluents
 
-What the UI ring actually offers. Verified against the generated Pandora metadata;
-open the metadata file for a type before using it.
+What each service on the `AppUiService` facade can actually do. Verified against the
+generated Pandora metadata; open the metadata file for a service before relying on
+an overload that is not listed here.
 
-## Service fluents
+Every method takes the Layer 2 element enum constant as its first argument and
+returns the service, so calls chain. `validate*` methods take an optional trailing
+`boolean soft` — `true` collects until `complete()`, omitted or `false` fails
+immediately.
 
-Reached through the `AppUiService` facade. Each returns a typed service that chains
-back to the facade.
+## Interaction services
 
-| Service | Facade shorthand (typical) | Covers |
+| Service | Shorthand | Actions | Reads | Validators |
+| --- | --- | --- | --- | --- |
+| `InputServiceFluent` | `input()` | `insert`, `clear`, `insertion` | `getValue`, `getErrorMessage`, `isEnabled` | `validateValue`, `validateErrorMessage`, `validateIsEnabled`, `validateIsDisabled` |
+| `ButtonServiceFluent` | `button()` | `click` | `isEnabled`, `isVisible` | `validateIsEnabled`, `validateIsDisabled`, `validateIsVisible`, `validateIsHidden` |
+| `LinkServiceFluent` | `link()` | `click`, `doubleClick` | `isEnabled`, `isVisible` | same four as button |
+| `SelectServiceFluent` | `select()` | `selectOption`, `selectOptions`, `insertion` | `getAvailableOptions`, `getSelectedOptions`, `isOptionEnabled`, `isOptionVisible` | `validateSelectedOptions`, `validateAvailableOptions`, `validateIsOption{Enabled,Disabled,Visible,Hidden}` |
+| `CheckboxServiceFluent` | `checkbox()` | `select`, `deSelect`, `insertion` | `getAll`, `getSelected`, `isSelected`, `isEnabled`, `areSelected`, `areEnabled` | `validateIsSelected`, `validateIsEnabled` |
+| `RadioServiceFluent` | `radio()` | `select`, `insertion` | `getAll`, `getSelected`, `isSelected`, `isEnabled`, `isVisible` | `validateSelected`, `validateAllRadioInputs`, `validateIs{Selected,NotSelected,Enabled,Disabled,Visible,Hidden}` |
+| `ToggleServiceFluent` | `toggle()` | `activate`, `deactivate` | `isActivated`, `isEnabled` | `validateIsActivated`, `validateIsDeactivated`, `validateIsEnabled`, `validateIsDisabled` |
+| `TabServiceFluent` | `tab()` | `click` | `isSelected`, `isEnabled`, `isVisible` | `validateIs{Selected,NotSelected,Enabled,Disabled,Visible,Hidden}` |
+| `AccordionServiceFluent` | `accordion()` | `expand`, `collapse` | `getAll`, `getExpanded`, `getCollapsed`, `getTitle`, `getText`, `isEnabled`, `areEnabled` | `validateExpandedItems`, `validateCollapsedItems`, `validateAllAccordions`, `validateTitle`, `validateText`, `validateAre{Enabled,Disabled}`, `validateIs{Enabled,Disabled}` |
+| `ListServiceFluent` | `list()` | `select`, `deSelect`, `insertion` | `getAll`, `getSelected`, `isSelected`, `isEnabled`, `isVisible`, and the `are*` plural forms | `validateSelectedItems`, `validateNotSelectedItems`, `validateAllItems`, plus the `validateIs*` / `validateAre*` pairs for selected, enabled and visible |
+
+## Read-and-assert services
+
+| Service | Shorthand | Methods |
 | --- | --- | --- |
-| `NavigationServiceFluent` | `browser()` | navigation, URLs, window handling |
-| `InputServiceFluent` | `input()` | text inputs |
-| `ButtonServiceFluent` | `button()` | buttons |
-| `LinkServiceFluent` | `link()` | anchors |
-| `SelectServiceFluent` | `select()` | dropdowns |
-| `CheckboxServiceFluent` | `checkbox()` | checkboxes |
-| `RadioServiceFluent` | `radio()` | radio groups |
-| `ToggleServiceFluent` | `toggle()` | toggles / switches |
-| `TabServiceFluent` | `tab()` | tab strips |
-| `AccordionServiceFluent` | `accordion()` | expand/collapse panels |
-| `AlertServiceFluent` | `alert()` | alerts and banners |
-| `ModalServiceFluent` | `modal()` | dialogs |
-| `ListServiceFluent` | `list()` | item lists |
-| `LoaderServiceFluent` | `loader()` | spinners and progress states |
-| `TableServiceFluent` | `table()` | tables — see `ui-tables.md` |
-| `InsertionServiceFluent` | `insertion()` | model-driven form filling — see `ui-insertion.md` |
-| `InterceptorServiceFluent` | — | request interception — see `ui-interception.md` |
-| `ValidationServiceFluent` | `validate()` | generic hard/soft assertions |
+| `AlertServiceFluent` | `alert()` | `getValue`, `isVisible`, `validateValue`, `validateIsVisible`, `validateIsHidden` |
+| `ModalServiceFluent` | `modal()` | `click`, `close`, `getTitle`, `getContentTitle`, `getBodyText`, `isOpened`, `validateTitle`, `validateContentTitle`, `validateBodyText`, `validateIsOpened`, `validateIsClosed` |
+| `LoaderServiceFluent` | `loader()` | `waitToBeShown`, `waitToBeRemoved`, `waitToBeShownAndRemoved`, `isVisible`, `validateIsVisible`, `validateIsHidden` |
 
-The facade only exposes what your project declares. Add a shorthand to
-`AppUiService` when you start using a service the project has not needed yet.
+`waitToBeShownAndRemoved` is the one to reach for after an action that triggers a
+spinner: it covers both edges, so it cannot pass by running before the spinner
+appeared.
 
-## Element interfaces
+## Cross-cutting services
 
-Layer 2 enums implement one of these. The interface you implement decides which
-service can drive the element.
+| Service | Shorthand | Methods |
+| --- | --- | --- |
+| `NavigationServiceFluent` | `browser()` | `navigate`, `back`, `forward`, `refresh`; `openNewTab`, `switchToNewTab`, `closeCurrentTab`, `switchToWindow`; `switchToFrameByIndex`, `switchToFrameByNameOrId`, `switchToParentFrame`, `switchToDefaultContent`; `acceptAlert`, `dismissAlert`, `validateAlertText` |
+| `TableServiceFluent` | `table()` | see `ui-tables.md` and `ui-tables-operations.md` |
+| `InsertionServiceFluent` | `insertion()` | `insertData(model)` — see `ui-insertion.md` |
+| `InterceptorServiceFluent` | `interceptor()` | `validateResponseHaveStatus` — see `ui-interception.md` |
+| `ValidationServiceFluent` | `validate()` | `validateTextInField(HTML.Tag, expected[, soft])` |
+| `UiServiceFluent` | — | the base: `validate(Runnable)` and `validate(Consumer<SoftAssertions>)` |
 
-`AccordionUiElement`, `AlertUiElement`, `ButtonUiElement`, `CheckboxUiElement`,
-`InputUiElement`, `LinkUiElement`, `ListUiElement`, `LoaderUiElement`,
-`ModalUiElement`, `RadioUiElement`, `SelectUiElement`, `TabUiElement`,
-`ToggleUiElement` — all extending `UiElement`.
+`acceptAlert` / `dismissAlert` handle the **browser's** native dialog, not a page
+alert element. A Bootstrap banner is `alert()`; a `window.confirm` is `browser()`.
 
-Every one requires `locator()`, `componentType()`, `enumImpl()`, and the optional
-`before()` / `after()` hooks.
+`validateTextInField` takes `javax.swing.text.html.HTML.Tag` — not JUnit's `@Tag`.
+Import it explicitly, or the file will not compile in a test class that also uses
+`org.junit.jupiter.api.Tag`.
 
-## Component interfaces and their types
+That is 19 services. The facade exposes only what your project has declared — add a
+shorthand to `AppUiService` when you first need one, rather than reaching for the
+raw `get*` accessor in a test.
 
-Layer 3 implements the component interface; Layer 1 implements the matching
-`*ComponentType`.
+## Strategy
 
-| Component | Component type |
-| --- | --- |
-| `Accordion` | `AccordionComponentType` |
-| `Alert` | `AlertComponentType` |
-| `Button` | `ButtonComponentType` |
-| `Checkbox` | `CheckboxComponentType` |
-| `Input` | `InputComponentType` |
-| `ItemList` | `ItemListComponentType` |
-| `Link` | `LinkComponentType` |
-| `Loader` | `LoaderComponentType` |
-| `Modal` | `ModalComponentType` |
-| `Radio` | `RadioComponentType` |
-| `Select` | `SelectComponentType` |
-| `Tab` | `TabComponentType` |
-| `Table` | `TableComponentType` |
-| `Toggle` | `ToggleComponentType` |
+`Strategy` (`io.cyborgcode.roa.ui.util.strategy`) picks an element when the target is
+not predetermined: `FIRST`, `LAST`, `RANDOM`, `ALL`. It is accepted by the
+`select` / `deSelect` / `expand` / `collapse` / `selectOptions` overloads.
 
-Signatures differ per component — `Alert.getText(SmartWebElement container)` takes a
-resolved container, while `Input.insert(By locator, String value)` takes the locator.
-**Read the interface metadata before implementing it.**
+```java
+quest.use(RING_OF_UI)
+     .accordion().expand(AccordionSections.FILTERS, Strategy.FIRST)
+     .drop().complete();
+```
+
+Use it for exploratory flows or where labels are not stable. `Strategy.RANDOM` in an
+assertion path makes the failure unreproducible — prefer an explicit target whenever
+the test is asserting something.
 
 ## Supporting types
 
-- `SmartWebDriver` / `SmartWebElement` — the wrapper API. `findSmartElement()`,
-  `clearAndSendKeys()`, `getDomAttribute()`.
-- `Strategy` (`io.cyborgcode.roa.ui.util`) — interaction strategy for components
-  that support more than one way to act.
-- `UiConfigHolder.getUiConfig()` — static accessor for UI config, e.g. `baseUrl()`.
-- `DataExtractorsUi` — storage extractors for UI, e.g. `responseBodyExtraction(...)`.
-- `DataIntercept` — the request-interception contract.
+| Type | Purpose |
+| --- | --- |
+| `SmartWebDriver` / `SmartWebElement` | the wrapper API: `findSmartElement()`, `clearAndSendKeys()`, `getDomAttribute()`, `getDomProperty()` |
+| `UiConfigHolder.getUiConfig()` | static accessor for UI config, e.g. `baseUrl()` |
+| `DataExtractorsUi` | storage extractors — see `ui-storage.md` |
+| `DataIntercept` | the request-interception contract — see `ui-interception.md` |
 
 ## Validation
 
@@ -87,7 +89,7 @@ resolved container, while `Input.insert(By locator, String value)` takes the loc
 // Direct, component-specific validators — preferred for UI
 .button().validateIsVisible(ButtonFields.SUBMIT)
 .input().validateValue(InputFields.NAME, "expected")
-.select().validateValue(SelectFields.ACCOUNT, "Savings")
+.select().validateSelectedOptions(SelectFields.ACCOUNT, "Savings")
 
 // Generic hard assertion (JUnit)
 .validate(() -> Assertions.assertTrue(condition))
@@ -96,6 +98,6 @@ resolved container, while `Input.insert(By locator, String value)` takes the loc
 .validate(soft -> soft.assertThat(actual).isEqualTo(expected))
 ```
 
-`Assertion.builder()` is for **tables** — see `ui-tables.md`. Metadata shows it
-exists for other targets; the UI module rules still forbid it for ordinary
-components, and module rules outrank metadata.
+`Assertion.builder()` is for **tables**. Metadata shows it exists for other targets;
+the UI module rules still forbid it for ordinary components, and module rules outrank
+metadata.

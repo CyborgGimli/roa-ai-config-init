@@ -1,0 +1,69 @@
+{
+  "name": "roa-ai",
+  "owner": {
+    "name": "ROA Platform Team",
+    "email": "roa-platform@example.com"
+  },
+  "description": "Private Claude Code plugin marketplace for the ROA test automation framework",
+  "version": "0.1.0",
+  "plugins": [
+    {
+      "name": "roa-base",
+      "displayName": "ROA Base",
+      "source": "./roa-ai-config/dist/plugins/roa-base",
+      "description": "Bootstrap plugin providing setup and update machinery for ROA Claude Code plugins",
+      "category": "framework",
+      "tags": [
+        "roa",
+        "base",
+        "framework",
+        "install",
+        "setup"
+      ],
+      "defaultEnabled": true
+    },
+    {
+      "name": "roa-api",
+      "displayName": "ROA API Testing",
+      "source": "./roa-ai-config/dist/plugins/roa-api",
+      "description": "REST API testing with fluent request patterns and response assertions",
+      "category": "testing",
+      "tags": [
+        "roa",
+        "api",
+        "rest",
+        "testing"
+      ],
+      "defaultEnabled": true
+    },
+    {
+      "name": "roa-db",
+      "displayName": "ROA Database Testing",
+      "source": "./roa-ai-config/dist/plugins/roa-db",
+      "description": "Database testing with query abstractions and managed test data lifecycle",
+      "category": "testing",
+      "tags": [
+        "roa",
+        "database",
+        "sql",
+        "testing"
+      ],
+      "defaultEnabled": true
+    },
+    {
+      "name": "roa-ui",
+      "displayName": "ROA UI Testing",
+      "source": "./roa-ai-config/dist/plugins/roa-ui",
+      "description": "UI automation with three-layer component architecture, Selenium SmartWebDriver, and fluent testing patterns",
+      "category": "testing",
+      "tags": [
+        "roa",
+        "ui",
+        "selenium",
+        "automation",
+        "testing"
+      ],
+      "defaultEnabled": true
+    }
+  ]
+}

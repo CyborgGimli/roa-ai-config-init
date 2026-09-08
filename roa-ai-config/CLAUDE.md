@@ -24,8 +24,8 @@ npm run validate   # Validate plugins
 ## Using in Target Projects
 
 1. Add this marketplace to Claude Code settings
-2. Run `/roa-setup` in a new project
-3. Or `/roa-update` to update existing projects
+2. Run `/roa-base:setup <plugin>` in a new project
+3. Or `/roa-base:update <plugin> [version]` to update existing projects
 
 ## Structure
 

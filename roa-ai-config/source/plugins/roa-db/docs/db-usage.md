@@ -61,7 +61,7 @@ entered — cross-ring tests are normal (drive the UI, then verify in the databa
 mvn clean compile                      # builds
 mvn test -Pe2e -Dtest=YourTestClass    # the change passes
 mvn clean install                      # full quality checks
-mvn pandora:open -U                    # regenerate framework metadata
+mvn pandora:navigation -U              # regenerate framework metadata
 ```
 
 See `quality-gates.md` for the evidence format these produce.

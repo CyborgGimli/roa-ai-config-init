@@ -49,6 +49,21 @@ void testWithInterception(Quest quest) {
 }
 ```
 
+## Asserting on captured traffic
+
+```java
+quest.use(RING_OF_UI)
+     .button().click(ButtonFields.SIGN_IN)
+     .interceptor().validateResponseHaveStatus(
+         RequestsInterceptor.INTERCEPT_REQUEST_AUTH.getEndpointSubString(), 2, true)
+     .drop()
+     .complete();
+```
+
+`validateResponseHaveStatus(urlSubString, statusClass[, soft])`. The second argument
+is the status **class** — `2` for any 2xx — not a full status code. The optional
+trailing flag makes it soft.
+
 ## Reading an intercepted response
 
 ```java
@@ -59,14 +74,16 @@ String token = retrieve(
     String.class);
 ```
 
-The second argument is a JSONPath into the response body. See `framework-index.md`
-for how storage reads work generally.
+The second argument is a JSONPath into the response body. Where the same endpoint is
+called more than once, a third argument selects which capture — see `ui-storage.md`.
 
 ## When to use it
 
 - Pulling a token or id the UI never displays, so a later step can use it.
 - Asserting that an action actually triggered the call it was supposed to.
 - Waiting on a request having settled rather than on an element appearing.
+- Asserting that a click actually issued the call, when the visible result is
+  identical either way.
 
 ## When not to
 
