@@ -84,9 +84,14 @@ function parseArgs(args) {
   return parsed;
 }
 
-// "1.3.0" -> "roa-ui--v1.3.0". Anything that already looks like a full ref
-// (contains "--v", "/" or "@") is passed through untouched.
-function normalizeRequestedRef(pluginName, requestedRef) {
+// "1.3.0" -> "v1.3.0". The ref names a release of the whole marketplace, not of
+// a single plugin, because a target repo records one ref per marketplace.
+//
+// Anything that already looks like a full ref is passed through untouched: a
+// branch or path ("/"), an owner-qualified ref ("@"), or a ref in the retired
+// per-plugin form ("roa-ui--v1.3.0"), so repositories pinned by an older setup
+// can still be updated to the exact tag they were using.
+function normalizeRequestedRef(requestedRef) {
   if (!requestedRef) {
     return "";
   }
@@ -94,7 +99,7 @@ function normalizeRequestedRef(pluginName, requestedRef) {
     return requestedRef;
   }
   const version = requestedRef.replace(/^v/, "");
-  return `${pluginName}--v${version}`;
+  return `v${version}`;
 }
 
 function loadSetupRegistry() {
@@ -270,19 +275,60 @@ function loadGeneratedJson(relativePath, label) {
 }
 
 // ---------------------------------------------------------------------------
-// Minimal YAML reader for ai-config.yaml. Dependency-free on purpose: it only
-// needs to handle nested maps, lists and scalars, which is all the schema uses.
+// Minimal YAML reader for ai-config.yaml. Dependency-free on purpose. It covers
+// the subset this schema needs: nested maps, lists, scalars, inline comments,
+// and single-line flow collections ({a: 1} and [a, b]).
+//
+// Values read here are written straight into .claude/settings.json and
+// .mcp.json, so anything it cannot parse is reported with a line number rather
+// than coerced into a plausible-looking string - a quietly mangled value would
+// land in a config file and be much harder to trace than a refusal.
 // ---------------------------------------------------------------------------
 
-function normalizeYamlLine(line) {
-  const content = line.replace(/\t/g, "  ");
+// "#" opens a comment only at the start of a token, so "a#b" keeps its "#" and
+// a "#" inside a quoted string is left alone.
+function stripInlineComment(content) {
+  let quote = null;
+  for (let index = 0; index < content.length; index += 1) {
+    const char = content[index];
+    if (quote === '"') {
+      if (char === "\\") {
+        index += 1;
+        continue;
+      }
+      if (char === '"') quote = null;
+      continue;
+    }
+    if (quote === "'") {
+      // YAML escapes a single quote by doubling it.
+      if (char === "'" && content[index + 1] === "'") {
+        index += 1;
+        continue;
+      }
+      if (char === "'") quote = null;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+    if (char === "#" && (index === 0 || /\s/.test(content[index - 1]))) {
+      return content.slice(0, index);
+    }
+  }
+  return content;
+}
+
+function normalizeYamlLine(line, number) {
+  const content = stripInlineComment(line.replace(/\t/g, "  "));
   const trimmed = content.trim();
-  if (!trimmed || trimmed.startsWith("#")) {
+  if (!trimmed) {
     return null;
   }
   return {
     indent: content.length - content.trimStart().length,
     text: trimmed,
+    line: number,
   };
 }
 
@@ -292,8 +338,6 @@ function parseYamlScalar(value) {
   if (trimmed === "true") return true;
   if (trimmed === "false") return false;
   if (trimmed === "null") return null;
-  if (trimmed === "[]") return [];
-  if (trimmed === "{}") return {};
   if (/^-?\d+(\.\d+)?$/.test(trimmed)) return Number(trimmed);
   if (
     (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
@@ -304,10 +348,178 @@ function parseYamlScalar(value) {
   return trimmed;
 }
 
-function splitYamlKeyValue(text, label) {
+function yamlError(label, lineNumber, message) {
+  return new SetupError(`${label} line ${lineNumber}: ${message}`);
+}
+
+// --- single-line flow collections -----------------------------------------
+
+const UNTERMINATED =
+  "unterminated flow collection - keep { } and [ ] on a single line";
+
+function skipFlowSpace(state) {
+  while (state.pos < state.text.length && /\s/.test(state.text[state.pos])) {
+    state.pos += 1;
+  }
+}
+
+function readQuotedScalar(state, label, lineNumber) {
+  const quote = state.text[state.pos];
+  state.pos += 1;
+  let out = "";
+  while (state.pos < state.text.length) {
+    const char = state.text[state.pos];
+    if (quote === '"' && char === "\\") {
+      const next = state.text[state.pos + 1];
+      if (next === undefined) break;
+      out += next === "n" ? "\n" : next === "t" ? "\t" : next;
+      state.pos += 2;
+      continue;
+    }
+    if (char === quote) {
+      if (quote === "'" && state.text[state.pos + 1] === "'") {
+        out += "'";
+        state.pos += 2;
+        continue;
+      }
+      state.pos += 1;
+      return out;
+    }
+    out += char;
+    state.pos += 1;
+  }
+  throw yamlError(label, lineNumber, "unterminated quoted string");
+}
+
+function readFlowScalar(state, label, lineNumber, isKey) {
+  skipFlowSpace(state);
+  const char = state.text[state.pos];
+  if (char === '"' || char === "'") {
+    return readQuotedScalar(state, label, lineNumber);
+  }
+  const start = state.pos;
+  while (state.pos < state.text.length) {
+    const current = state.text[state.pos];
+    if (current === "," || current === "}" || current === "]") break;
+    // Only a key stops at ":", so a value like http://host keeps its colon.
+    if (isKey && current === ":") break;
+    state.pos += 1;
+  }
+  const raw = state.text.slice(start, state.pos).trim();
+  if (raw === "") {
+    // Running out of text mid-collection is the multi-line case, which is far
+    // more common than a genuinely empty entry - name it directly.
+    throw yamlError(
+      label,
+      lineNumber,
+      state.pos >= state.text.length ? UNTERMINATED : "empty entry in a flow collection"
+    );
+  }
+  return parseYamlScalar(raw);
+}
+
+function readFlowMap(state, label, lineNumber) {
+  state.pos += 1; // consume "{"
+  const result = {};
+  skipFlowSpace(state);
+  if (state.text[state.pos] === "}") {
+    state.pos += 1;
+    return result;
+  }
+  for (;;) {
+    const key = String(readFlowScalar(state, label, lineNumber, true));
+    skipFlowSpace(state);
+    if (state.text[state.pos] !== ":") {
+      throw yamlError(label, lineNumber, `expected ":" after flow key ${JSON.stringify(key)}`);
+    }
+    state.pos += 1;
+    result[key] = readFlowNode(state, label, lineNumber);
+    skipFlowSpace(state);
+    const next = state.text[state.pos];
+    if (next === "}") {
+      state.pos += 1;
+      return result;
+    }
+    if (next !== ",") {
+      throw yamlError(label, lineNumber, UNTERMINATED);
+    }
+    state.pos += 1;
+    skipFlowSpace(state);
+    // Tolerate a trailing comma before the closing brace.
+    if (state.text[state.pos] === "}") {
+      state.pos += 1;
+      return result;
+    }
+  }
+}
+
+function readFlowSequence(state, label, lineNumber) {
+  state.pos += 1; // consume "["
+  const result = [];
+  skipFlowSpace(state);
+  if (state.text[state.pos] === "]") {
+    state.pos += 1;
+    return result;
+  }
+  for (;;) {
+    result.push(readFlowNode(state, label, lineNumber));
+    skipFlowSpace(state);
+    const next = state.text[state.pos];
+    if (next === "]") {
+      state.pos += 1;
+      return result;
+    }
+    if (next !== ",") {
+      throw yamlError(label, lineNumber, UNTERMINATED);
+    }
+    state.pos += 1;
+    skipFlowSpace(state);
+    if (state.text[state.pos] === "]") {
+      state.pos += 1;
+      return result;
+    }
+  }
+}
+
+function readFlowNode(state, label, lineNumber) {
+  skipFlowSpace(state);
+  const char = state.text[state.pos];
+  if (char === undefined) {
+    throw yamlError(label, lineNumber, UNTERMINATED);
+  }
+  if (char === "{") return readFlowMap(state, label, lineNumber);
+  if (char === "[") return readFlowSequence(state, label, lineNumber);
+  return readFlowScalar(state, label, lineNumber, false);
+}
+
+function parseFlowCollection(text, label, lineNumber) {
+  const state = { text, pos: 0 };
+  const value = readFlowNode(state, label, lineNumber);
+  skipFlowSpace(state);
+  if (state.pos < state.text.length) {
+    throw yamlError(
+      label,
+      lineNumber,
+      `unexpected ${JSON.stringify(state.text.slice(state.pos))} after a flow collection`
+    );
+  }
+  return value;
+}
+
+// A value written on the same line as its key: either a flow collection or a
+// plain scalar.
+function parseYamlValue(rawValue, label, lineNumber) {
+  const trimmed = rawValue.trim();
+  if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+    return parseFlowCollection(trimmed, label, lineNumber);
+  }
+  return parseYamlScalar(trimmed);
+}
+
+function splitYamlKeyValue(text, label, lineNumber) {
   const index = text.indexOf(":");
   if (index <= 0) {
-    throw new SetupError(`${label} must use "key: value" syntax`);
+    throw yamlError(label, lineNumber, `expected "key: value" syntax, got ${JSON.stringify(text)}`);
   }
   return [text.slice(0, index).trim(), text.slice(index + 1).trim()];
 }
@@ -316,7 +528,7 @@ function parseYamlText(text, label) {
   const lines = text
     .replace(/\r\n/g, "\n")
     .split("\n")
-    .map(normalizeYamlLine)
+    .map((line, index) => normalizeYamlLine(line, index + 1))
     .filter(Boolean);
 
   function nextMeaningful(index) {
@@ -329,7 +541,7 @@ function parseYamlText(text, label) {
       return [{}, index];
     }
     if (current.indent !== indent) {
-      throw new SetupError(`${label} has invalid indentation near: ${current.text}`);
+      throw yamlError(label, current.line, `invalid indentation near: ${current.text}`);
     }
     return current.text.startsWith("- ")
       ? parseList(index, indent)
@@ -342,11 +554,11 @@ function parseYamlText(text, label) {
       const line = lines[index];
       if (line.indent < indent) break;
       if (line.indent !== indent) {
-        throw new SetupError(`${label} has invalid indentation near: ${line.text}`);
+        throw yamlError(label, line.line, `invalid indentation near: ${line.text}`);
       }
       if (line.text.startsWith("- ")) break;
 
-      const [key, rawValue] = splitYamlKeyValue(line.text, label);
+      const [key, rawValue] = splitYamlKeyValue(line.text, label, line.line);
       if (rawValue === "") {
         const next = nextMeaningful(index + 1);
         if (!next || next.indent <= indent) {
@@ -358,7 +570,7 @@ function parseYamlText(text, label) {
           index = parsed[1];
         }
       } else {
-        result[key] = parseYamlScalar(rawValue);
+        result[key] = parseYamlValue(rawValue, label, line.line);
         index += 1;
       }
     }
@@ -386,10 +598,18 @@ function parseYamlText(text, label) {
         continue;
       }
 
+      // A flow collection is a whole item, so it is taken before the "key: value"
+      // check below - otherwise "- {name: a}" would split on the inner colon.
+      if (rest.startsWith("{") || rest.startsWith("[")) {
+        result.push(parseFlowCollection(rest, label, line.line));
+        index += 1;
+        continue;
+      }
+
       if (rest.includes(":")) {
-        const [key, rawValue] = splitYamlKeyValue(rest, label);
+        const [key, rawValue] = splitYamlKeyValue(rest, label, line.line);
         const item = {
-          [key]: rawValue === "" ? {} : parseYamlScalar(rawValue),
+          [key]: rawValue === "" ? {} : parseYamlValue(rawValue, label, line.line),
         };
         const next = nextMeaningful(index + 1);
         if (next && next.indent > indent) {
@@ -1010,7 +1230,7 @@ function updateLogEnv(filePath, logFile) {
   return writeIfChanged(filePath, JSON.stringify(data, null, 2) + "\n");
 }
 
-function updateSettings(filePath, spec) {
+function updateSettings(filePath, spec, notes = []) {
   const data = loadSettings(filePath);
   for (const fragmentPath of spec.settingsFragments ?? []) {
     mergeSettingsFragment(data, loadSettingsFragment(fragmentPath));
@@ -1025,6 +1245,24 @@ function updateSettings(filePath, spec) {
   if (typeof data.extraKnownMarketplaces !== "object" || Array.isArray(data.extraKnownMarketplaces)) {
     throw new SetupError("extraKnownMarketplaces exists but is not an object");
   }
+
+  // The ref is recorded once per marketplace, so changing it moves every ROA
+  // plugin already enabled from that marketplace, not just this one. That is
+  // the intended behaviour - all plugins here are released from one commit -
+  // but it must be stated rather than happen silently.
+  const previousRef = data.extraKnownMarketplaces[marketplaceName]?.source?.ref;
+  if (previousRef && previousRef !== spec.marketplaceRef) {
+    const alsoAffected = Object.keys(data.enabledPlugins ?? {})
+      .filter((entry) => entry.endsWith(`@${marketplaceName}`) && entry !== enabledPlugin)
+      .sort();
+    notes.push(
+      `marketplace ${marketplaceName} moves ${previousRef} -> ${spec.marketplaceRef}.` +
+        (alsoAffected.length > 0
+          ? ` This also repoints ${alsoAffected.join(", ")}; rerun setup for those plugins so their generated docs match.`
+          : "")
+    );
+  }
+
   data.extraKnownMarketplaces[marketplaceName] = {
     source: {
       source: "github",
@@ -1057,7 +1295,7 @@ function run(options) {
   if (!spec || typeof spec !== "object" || Array.isArray(spec)) {
     throw new SetupError(`config for ${pluginName} must be an object`);
   }
-  const requestedRef = normalizeRequestedRef(pluginName, options.requestedRef);
+  const requestedRef = normalizeRequestedRef(options.requestedRef);
   if (mode === "update" && !requestedRef) {
     throw new SetupError(
       "missing version/ref. Use: /roa-base:update <plugin-name> <version> or ref=<plugin-ref>"
@@ -1115,7 +1353,8 @@ function run(options) {
     ]);
   }
 
-  changed.push([updateSettings(settingsPath, spec), settingsPath]);
+  const settingsNotes = [];
+  changed.push([updateSettings(settingsPath, spec, settingsNotes), settingsPath]);
   const mcpResult = updateProjectMcp(targetRoot, spec);
   changed.push(...mcpResult.changed);
 
@@ -1143,7 +1382,14 @@ function run(options) {
   console.log();
   console.log("Next step: run /reload-plugins --force or restart Claude Code so MCP-backed plugin changes are picked up.");
   console.log(`Expected enabled plugin: ${spec.enabledPlugin}`);
-  console.log(`Pinned marketplace ref: ${spec.marketplaceRef}`);
+  console.log(`Pinned marketplace ref: ${spec.marketplaceRef} (applies to every ${spec.marketplaceName} plugin in this repository)`);
+  if (settingsNotes.length > 0) {
+    console.log();
+    console.log("Marketplace notes:");
+    for (const note of settingsNotes) {
+      console.log(`- ${note}`);
+    }
+  }
   if (mcpResult.warnings.length > 0) {
     console.log();
     console.log("MCP notes:");

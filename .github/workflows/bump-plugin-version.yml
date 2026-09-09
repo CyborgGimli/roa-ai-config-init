@@ -55,10 +55,14 @@ jobs:
       - name: Validate generated plugins
         run: node scripts/validate.mjs
 
+      # The pinned ref is built from the marketplace version, so the tag has to
+      # be read from the same place build.mjs reads it - not from a plugin
+      # config, which could drift and leave every target repo pinned to a tag
+      # that was never pushed.
       - name: Read bumped version
         id: version
         run: |
-          NEW_VERSION="$(node -e "const fs=require('fs'); const c=JSON.parse(fs.readFileSync('source/plugins/roa-base/plugin-config.json','utf8')); process.stdout.write(c.version);")"
+          NEW_VERSION="$(node -e "const fs=require('fs'); const c=JSON.parse(fs.readFileSync('build-config.json','utf8')); process.stdout.write(c.marketplace.version);")"
           echo "version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Commit version bump
@@ -68,10 +72,14 @@ jobs:
           commit_message: "chore: bump plugins to v${{ steps.version.outputs.version }}"
           file_pattern: "roa-ai-config/source roa-ai-config/dist .claude-plugin roa-ai-config/README.md roa-ai-config/build-config.json roa-ai-config/package.json"
 
-      # setup.mjs pins each target repo to marketplace ref "<plugin>--v<version>",
-      # so every bump has to publish those tags or the pinned ref dangles and a
-      # consumer resolving the marketplace from GitHub cannot install anything.
-      - name: Tag plugin releases
+      # setup.mjs pins each target repo to marketplace ref "v<version>", so every
+      # bump has to publish that tag or the pinned ref dangles and a consumer
+      # resolving the marketplace from GitHub cannot install anything.
+      #
+      # One tag, not one per plugin: a target repo records a single ref per
+      # marketplace, so per-plugin tags could never be pinned independently -
+      # they only created the illusion of per-plugin versioning.
+      - name: Tag marketplace release
         if: steps.commit.outputs.changes_detected == 'true'
         working-directory: .
         env:
@@ -81,13 +89,11 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for plugin in $(ls roa-ai-config/source/plugins); do
-            tag="${plugin}--v${VERSION}"
-            if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
-              echo "tag ${tag} already exists, skipping"
-              continue
-            fi
-            git tag -a "${tag}" "${SHA}" -m "${plugin} v${VERSION}"
+          tag="v${VERSION}"
+          if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+            echo "tag ${tag} already exists, skipping"
+          else
+            git tag -a "${tag}" "${SHA}" -m "roa-ai marketplace ${tag}"
             echo "tagged ${tag} -> ${SHA}"
-          done
-          git push origin --tags
+            git push origin "refs/tags/${tag}"
+          fi

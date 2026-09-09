@@ -1,10 +1,16 @@
 #!/usr/bin/env node
-// Bump all plugin versions together and refresh plugin refs.
+// Bump all plugin versions together and refresh the pinned marketplace ref.
 //
 // Every plugin in this marketplace moves as one unit: the script refuses to run
 // unless all plugin-config.json files already agree on a version, then rewrites
-// each version, refreshes the `plugin_ref` placeholder, and updates the pinned
-// refs quoted in README.md so documentation never lags the release.
+// each version, pins build-config.json's marketplace version to the same value,
+// and updates the refs quoted in README.md so documentation never lags the
+// release.
+//
+// The marketplace version is what release tags and target-repo pins are built
+// from ("0.2.0" -> tag "v0.2.0"), so it is set to the new plugin version rather
+// than incremented on its own - independent counters would let the pinned ref
+// drift away from the tag the release workflow actually pushes.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -89,7 +95,8 @@ function pluginConfigPaths() {
     .sort((a, b) => a.localeCompare(b));
 }
 
-// README quotes pinned refs like `roa-ui--v0.1.0`; rewrite them so the docs
+// README quotes the pinned marketplace ref (`v0.1.0`), and may still quote refs
+// in the retired per-plugin form (`roa-ui--v0.1.0`); rewrite both so the docs
 // match the release that was just cut.
 function replaceRefsInReadme(pluginNames, oldVersion, newVersion) {
   const readmePath = path.join(ROOT, "README.md");
@@ -103,12 +110,15 @@ function replaceRefsInReadme(pluginNames, oldVersion, newVersion) {
       .split(`${pluginName}--v${oldVersion}`)
       .join(`${pluginName}--v${newVersion}`);
   }
+  // Backtick-delimited so a bare "v0.1.0" inside prose is left alone.
+  text = text.split(`\`v${oldVersion}\``).join(`\`v${newVersion}\``);
   fs.writeFileSync(readmePath, text, "utf8");
 }
 
 // The generated marketplace catalog takes its version from build-config.json,
-// so the catalog moves with the plugins rather than drifting behind them.
-function bumpMarketplaceVersion(increment) {
+// and that version is also the release tag every target repo pins ("v0.2.0"),
+// so it is set to the plugin version rather than incremented separately.
+function alignMarketplaceVersion(newVersion) {
   if (!fs.existsSync(BUILD_CONFIG_PATH)) {
     return null;
   }
@@ -117,9 +127,9 @@ function bumpMarketplaceVersion(increment) {
     fail("build-config.json must contain a marketplace object");
   }
   const oldVersion = config.marketplace.version ?? "0.0.0";
-  config.marketplace.version = bumpVersion(oldVersion, increment);
+  config.marketplace.version = newVersion;
   writeJson(BUILD_CONFIG_PATH, config);
-  return [oldVersion, config.marketplace.version];
+  return [oldVersion, newVersion];
 }
 
 function main() {
@@ -158,15 +168,20 @@ function main() {
 
   for (const { filePath, data } of configs) {
     data.version = newVersion;
-    if (!data.placeholders || typeof data.placeholders !== "object" || Array.isArray(data.placeholders)) {
-      data.placeholders = {};
+    // The pinned ref is marketplace-wide and derived at build time from
+    // build-config.json, so no per-plugin ref placeholder is written here.
+    // Clear a stale one left by an older bump.
+    if (data.placeholders && typeof data.placeholders === "object" && !Array.isArray(data.placeholders)) {
+      delete data.placeholders.plugin_ref;
+      if (Object.keys(data.placeholders).length === 0) {
+        delete data.placeholders;
+      }
     }
-    data.placeholders.plugin_ref = `${data.name}--v${newVersion}`;
     writeJson(filePath, data);
   }
 
   replaceRefsInReadme(pluginNames, oldVersion, newVersion);
-  const marketplaceBump = bumpMarketplaceVersion(increment);
+  const marketplaceBump = alignMarketplaceVersion(newVersion);
 
   console.log(`Bumped plugins ${oldVersion} -> ${newVersion} (${increment})`);
   for (const pluginName of pluginNames) {
@@ -174,6 +189,7 @@ function main() {
   }
   if (marketplaceBump) {
     console.log(`- marketplace ${marketplaceBump[0]} -> ${marketplaceBump[1]}`);
+    console.log(`- pinned marketplace ref: v${marketplaceBump[1]} (release tag to push)`);
   }
   console.log("\nNext step: run node scripts/build.mjs to regenerate dist/ and the marketplace catalog.");
 }
