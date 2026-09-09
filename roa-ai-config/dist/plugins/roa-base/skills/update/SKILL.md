@@ -16,15 +16,9 @@ $ARGUMENTS
 ## Procedure
 
 1. Determine the plugin name and the requested version/ref from `$ARGUMENTS`.
-   Accept `roa-ui 1.3.0`, `roa-ui ref=v1.3.0`, or `version=1.3.0`.
-   A bare version is normalized to the release convention (`v1.3.0`), which
-   names a release of the whole marketplace. A version is **required** for
-   update; without one the script exits 2.
-
-   The ref is recorded once per marketplace in `.claude/settings.json`, so
-   updating it moves every ROA plugin enabled in this repository. When the
-   script reports other affected plugins under "Marketplace notes", rerun
-   `/roa-base:update` for each of them so their generated blocks agree.
+   Accept `roa-ui 1.3.0`, `roa-ui ref=roa-ui--v1.3.0`, or `version=1.3.0`.
+   A bare version is normalized to the release convention (`roa-ui--v1.3.0`).
+   A version is **required** for update; without one the script exits 2.
 
 2. Before changing files, inspect the current target repo files when present:
    - `CLAUDE.md`

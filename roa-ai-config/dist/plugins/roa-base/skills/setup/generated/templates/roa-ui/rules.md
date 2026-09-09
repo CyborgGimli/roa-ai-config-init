@@ -17,6 +17,6 @@ the owning team before committing.
 
 - Marketplace: `${marketplace_name}`
 - Repository: `${marketplace_repo}`
-- Marketplace ref: `${marketplace_ref}` (shared by every ROA plugin in this repository)
+- Ref: `${marketplace_ref}`
 - Enabled plugin: `${enabled_plugin}`
 <!-- END ROA AI CONFIG: ${plugin_name} -->
