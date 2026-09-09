@@ -1283,6 +1283,53 @@ function updateSettings(filePath, spec, notes = []) {
   return writeIfChanged(filePath, JSON.stringify(data, null, 2) + "\n");
 }
 
+// Claude Code ignores a project's permissions.allow until the workspace is
+// trusted, so a freshly configured repository runs without the allowlist setup
+// just wrote - the team gets prompts this setup was meant to remove, with
+// nothing on screen explaining why. Trust lives in ~/.claude.json under
+// projects, keyed by absolute path with forward slashes.
+//
+// Returns true (trusted), false (known to be untrusted) or null (cannot tell -
+// no config, unreadable, or an unexpected shape). Only a definite false is
+// worth warning about; guessing would put a scary note on every run.
+function workspaceTrusted(targetRoot) {
+  const home = process.env.USERPROFILE || process.env.HOME;
+  if (!home) {
+    return null;
+  }
+  const configPath = path.join(home, ".claude.json");
+  if (!fs.existsSync(configPath)) {
+    return null;
+  }
+
+  let data;
+  try {
+    data = JSON.parse(readText(configPath));
+  } catch {
+    return null;
+  }
+
+  const projects = data?.projects;
+  if (!projects || typeof projects !== "object" || Array.isArray(projects)) {
+    return null;
+  }
+
+  const key = path.resolve(targetRoot).split(path.sep).join("/");
+  let entry = projects[key];
+  if (!entry && process.platform === "win32") {
+    // Drive-letter case can differ between what we resolve and what was stored.
+    const match = Object.keys(projects).find(
+      (candidate) => candidate.toLowerCase() === key.toLowerCase()
+    );
+    entry = match ? projects[match] : undefined;
+  }
+
+  if (!entry || typeof entry !== "object") {
+    return false; // never opened here, so certainly not trusted yet
+  }
+  return entry.hasTrustDialogAccepted === true;
+}
+
 function run(options) {
   const { pluginName, mode } = options;
   const plugins = loadSetupRegistry();
@@ -1381,6 +1428,16 @@ function run(options) {
   }
   console.log();
   console.log("Next step: run /reload-plugins --force or restart Claude Code so MCP-backed plugin changes are picked up.");
+  if (workspaceTrusted(targetRoot) === false) {
+    console.log();
+    console.log(
+      "Trust this workspace, or the permissions above do not apply: Claude Code ignores\n" +
+        "permissions.allow in .claude/settings.json until the repository is trusted, so you\n" +
+        "will still be prompted for the commands this setup just allowed. Open Claude Code\n" +
+        "interactively here once and accept the trust prompt. Skills, agents, rules and\n" +
+        "hooks all work either way - only the permission allowlist is withheld."
+    );
+  }
   console.log(`Expected enabled plugin: ${spec.enabledPlugin}`);
   console.log(`Pinned marketplace ref: ${spec.marketplaceRef} (applies to every ${spec.marketplaceName} plugin in this repository)`);
   if (settingsNotes.length > 0) {
