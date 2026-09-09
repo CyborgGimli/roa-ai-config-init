@@ -61,7 +61,9 @@ $ARGUMENTS
    and say what you moved.
 
 8. Report the changed files and remind the user to run `/reload-plugins --force`
-   or restart Claude Code if plugin state does not refresh automatically.
+   or restart Claude Code if plugin state does not refresh automatically. If the
+   script printed a "Trust this workspace" note, pass it on: `permissions.allow`
+   is ignored until the repository is trusted.
 
 This skill updates project-level files only, installs or updates the requested
 plugin at project scope if needed, and explicitly enables it.
