@@ -6,5 +6,6 @@
 *.yml text eol=lf
 
 # Generated build output: collapse in diffs and exclude from language stats.
+# The marketplace manifest is written to the repository root, so it is covered
+# by the root .gitattributes instead.
 dist/plugins/** linguist-generated=true
-.claude-plugin/marketplace.json linguist-generated=true
