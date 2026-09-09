@@ -1,5 +1,5 @@
 ---
-name: roa-pandora-metadata
+name: pandora
 description: Metadata for ROA framework classes. Use when writing code with io.cyborgcode.roa dependencies.
 ---
 
