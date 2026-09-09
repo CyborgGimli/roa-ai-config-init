@@ -20,6 +20,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PLUGINS_DIR = path.join(ROOT, "source", "plugins");
 const BUILD_CONFIG_PATH = path.join(ROOT, "build-config.json");
+const PACKAGE_JSON_PATH = path.join(ROOT, "package.json");
 const VALID_INCREMENTS = new Set(["patch", "minor", "major"]);
 
 class BumpError extends Error {
@@ -132,6 +133,23 @@ function alignMarketplaceVersion(newVersion) {
   return [oldVersion, newVersion];
 }
 
+// Nothing reads this version - the package is private build tooling - but a
+// stale number here reads as "the repo is on 0.1.0" to anyone opening the file,
+// and the gap widens by one release every bump. Keep it with the rest.
+function alignPackageVersion(newVersion) {
+  if (!fs.existsSync(PACKAGE_JSON_PATH)) {
+    return null;
+  }
+  const data = readJson(PACKAGE_JSON_PATH);
+  const oldVersion = data.version ?? "0.0.0";
+  if (oldVersion === newVersion) {
+    return null;
+  }
+  data.version = newVersion;
+  writeJson(PACKAGE_JSON_PATH, data);
+  return [oldVersion, newVersion];
+}
+
 function main() {
   const increment = parseIncrement(process.argv.slice(2));
   const configs = pluginConfigPaths().map((filePath) => ({
@@ -182,6 +200,7 @@ function main() {
 
   replaceRefsInReadme(pluginNames, oldVersion, newVersion);
   const marketplaceBump = alignMarketplaceVersion(newVersion);
+  const packageBump = alignPackageVersion(newVersion);
 
   console.log(`Bumped plugins ${oldVersion} -> ${newVersion} (${increment})`);
   for (const pluginName of pluginNames) {
@@ -190,6 +209,9 @@ function main() {
   if (marketplaceBump) {
     console.log(`- marketplace ${marketplaceBump[0]} -> ${marketplaceBump[1]}`);
     console.log(`- pinned marketplace ref: v${marketplaceBump[1]} (release tag to push)`);
+  }
+  if (packageBump) {
+    console.log(`- package.json ${packageBump[0]} -> ${packageBump[1]}`);
   }
   console.log("\nNext step: run node scripts/build.mjs to regenerate dist/ and the marketplace catalog.");
 }
