@@ -88,6 +88,13 @@ $ARGUMENTS
 8. Report the setup summary, any memory files changed by the agent, and tell the
    user to run `/reload-plugins --force` or restart Claude Code.
 
+9. If the script printed a "Trust this workspace" note, pass it on rather than
+   dropping it. Claude Code ignores `permissions.allow` until the repository is
+   trusted, so until the user opens Claude Code interactively here and accepts
+   the trust prompt, they keep being prompted for the very commands setup just
+   allowed — and nothing on screen connects the two. Skills, agents, rules and
+   hooks are unaffected; only the permission allowlist is withheld.
+
 ## Notes
 
 - Set `ROA_SETUP_SKIP_INSTALL=1` to generate all project files without invoking
