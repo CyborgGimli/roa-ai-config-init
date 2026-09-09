@@ -84,13 +84,6 @@ function parseArgs(args) {
   return parsed;
 }
 
-// "1.3.0" -> "v1.3.0". The ref names a release of the whole marketplace, not of
-// a single plugin, because a target repo records one ref per marketplace.
-//
-// Anything that already looks like a full ref is passed through untouched: a
-// branch or path ("/"), an owner-qualified ref ("@"), or a ref in the retired
-// per-plugin form ("roa-ui--v1.3.0"), so repositories pinned by an older setup
-// can still be updated to the exact tag they were using.
 function normalizeRequestedRef(requestedRef) {
   if (!requestedRef) {
     return "";
@@ -275,18 +268,10 @@ function loadGeneratedJson(relativePath, label) {
 }
 
 // ---------------------------------------------------------------------------
-// Minimal YAML reader for ai-config.yaml. Dependency-free on purpose. It covers
-// the subset this schema needs: nested maps, lists, scalars, inline comments,
-// and single-line flow collections ({a: 1} and [a, b]).
-//
-// Values read here are written straight into .claude/settings.json and
-// .mcp.json, so anything it cannot parse is reported with a line number rather
-// than coerced into a plausible-looking string - a quietly mangled value would
-// land in a config file and be much harder to trace than a refusal.
+// Minimal YAML reader for ai-config.yaml. Dependency-free on purpose: nested
+// maps, lists, scalars, inline comments, and single-line flow collections.
 // ---------------------------------------------------------------------------
 
-// "#" opens a comment only at the start of a token, so "a#b" keeps its "#" and
-// a "#" inside a quoted string is left alone.
 function stripInlineComment(content) {
   let quote = null;
   for (let index = 0; index < content.length; index += 1) {
@@ -300,7 +285,6 @@ function stripInlineComment(content) {
       continue;
     }
     if (quote === "'") {
-      // YAML escapes a single quote by doubling it.
       if (char === "'" && content[index + 1] === "'") {
         index += 1;
         continue;
@@ -401,14 +385,11 @@ function readFlowScalar(state, label, lineNumber, isKey) {
   while (state.pos < state.text.length) {
     const current = state.text[state.pos];
     if (current === "," || current === "}" || current === "]") break;
-    // Only a key stops at ":", so a value like http://host keeps its colon.
     if (isKey && current === ":") break;
     state.pos += 1;
   }
   const raw = state.text.slice(start, state.pos).trim();
   if (raw === "") {
-    // Running out of text mid-collection is the multi-line case, which is far
-    // more common than a genuinely empty entry - name it directly.
     throw yamlError(
       label,
       lineNumber,
@@ -445,7 +426,6 @@ function readFlowMap(state, label, lineNumber) {
     }
     state.pos += 1;
     skipFlowSpace(state);
-    // Tolerate a trailing comma before the closing brace.
     if (state.text[state.pos] === "}") {
       state.pos += 1;
       return result;
@@ -506,8 +486,6 @@ function parseFlowCollection(text, label, lineNumber) {
   return value;
 }
 
-// A value written on the same line as its key: either a flow collection or a
-// plain scalar.
 function parseYamlValue(rawValue, label, lineNumber) {
   const trimmed = rawValue.trim();
   if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
@@ -598,8 +576,6 @@ function parseYamlText(text, label) {
         continue;
       }
 
-      // A flow collection is a whole item, so it is taken before the "key: value"
-      // check below - otherwise "- {name: a}" would split on the inner colon.
       if (rest.startsWith("{") || rest.startsWith("[")) {
         result.push(parseFlowCollection(rest, label, line.line));
         index += 1;
@@ -1246,10 +1222,6 @@ function updateSettings(filePath, spec, notes = []) {
     throw new SetupError("extraKnownMarketplaces exists but is not an object");
   }
 
-  // The ref is recorded once per marketplace, so changing it moves every ROA
-  // plugin already enabled from that marketplace, not just this one. That is
-  // the intended behaviour - all plugins here are released from one commit -
-  // but it must be stated rather than happen silently.
   const previousRef = data.extraKnownMarketplaces[marketplaceName]?.source?.ref;
   if (previousRef && previousRef !== spec.marketplaceRef) {
     const alsoAffected = Object.keys(data.enabledPlugins ?? {})
@@ -1283,15 +1255,6 @@ function updateSettings(filePath, spec, notes = []) {
   return writeIfChanged(filePath, JSON.stringify(data, null, 2) + "\n");
 }
 
-// Claude Code ignores a project's permissions.allow until the workspace is
-// trusted, so a freshly configured repository runs without the allowlist setup
-// just wrote - the team gets prompts this setup was meant to remove, with
-// nothing on screen explaining why. Trust lives in ~/.claude.json under
-// projects, keyed by absolute path with forward slashes.
-//
-// Returns true (trusted), false (known to be untrusted) or null (cannot tell -
-// no config, unreadable, or an unexpected shape). Only a definite false is
-// worth warning about; guessing would put a scary note on every run.
 function workspaceTrusted(targetRoot) {
   const home = process.env.USERPROFILE || process.env.HOME;
   if (!home) {
@@ -1317,7 +1280,6 @@ function workspaceTrusted(targetRoot) {
   const key = path.resolve(targetRoot).split(path.sep).join("/");
   let entry = projects[key];
   if (!entry && process.platform === "win32") {
-    // Drive-letter case can differ between what we resolve and what was stored.
     const match = Object.keys(projects).find(
       (candidate) => candidate.toLowerCase() === key.toLowerCase()
     );

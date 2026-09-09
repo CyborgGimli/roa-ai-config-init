@@ -1,16 +1,6 @@
 #!/usr/bin/env node
-// Bump all plugin versions together and refresh the pinned marketplace ref.
-//
-// Every plugin in this marketplace moves as one unit: the script refuses to run
-// unless all plugin-config.json files already agree on a version, then rewrites
-// each version, pins build-config.json's marketplace version to the same value,
-// and updates the refs quoted in README.md so documentation never lags the
-// release.
-//
-// The marketplace version is what release tags and target-repo pins are built
-// from ("0.2.0" -> tag "v0.2.0"), so it is set to the new plugin version rather
-// than incremented on its own - independent counters would let the pinned ref
-// drift away from the tag the release workflow actually pushes.
+// Bump all plugin versions, the marketplace version and package.json together,
+// and refresh the refs quoted in README.md.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -96,9 +86,6 @@ function pluginConfigPaths() {
     .sort((a, b) => a.localeCompare(b));
 }
 
-// README quotes the pinned marketplace ref (`v0.1.0`), and may still quote refs
-// in the retired per-plugin form (`roa-ui--v0.1.0`); rewrite both so the docs
-// match the release that was just cut.
 function replaceRefsInReadme(pluginNames, oldVersion, newVersion) {
   const readmePath = path.join(ROOT, "README.md");
   if (!fs.existsSync(readmePath)) {
@@ -111,14 +98,10 @@ function replaceRefsInReadme(pluginNames, oldVersion, newVersion) {
       .split(`${pluginName}--v${oldVersion}`)
       .join(`${pluginName}--v${newVersion}`);
   }
-  // Backtick-delimited so a bare "v0.1.0" inside prose is left alone.
   text = text.split(`\`v${oldVersion}\``).join(`\`v${newVersion}\``);
   fs.writeFileSync(readmePath, text, "utf8");
 }
 
-// The generated marketplace catalog takes its version from build-config.json,
-// and that version is also the release tag every target repo pins ("v0.2.0"),
-// so it is set to the plugin version rather than incremented separately.
 function alignMarketplaceVersion(newVersion) {
   if (!fs.existsSync(BUILD_CONFIG_PATH)) {
     return null;
@@ -133,9 +116,6 @@ function alignMarketplaceVersion(newVersion) {
   return [oldVersion, newVersion];
 }
 
-// Nothing reads this version - the package is private build tooling - but a
-// stale number here reads as "the repo is on 0.1.0" to anyone opening the file,
-// and the gap widens by one release every bump. Keep it with the rest.
 function alignPackageVersion(newVersion) {
   if (!fs.existsSync(PACKAGE_JSON_PATH)) {
     return null;
@@ -186,9 +166,6 @@ function main() {
 
   for (const { filePath, data } of configs) {
     data.version = newVersion;
-    // The pinned ref is marketplace-wide and derived at build time from
-    // build-config.json, so no per-plugin ref placeholder is written here.
-    // Clear a stale one left by an older bump.
     if (data.placeholders && typeof data.placeholders === "object" && !Array.isArray(data.placeholders)) {
       delete data.placeholders.plugin_ref;
       if (Object.keys(data.placeholders).length === 0) {

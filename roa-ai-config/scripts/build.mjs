@@ -449,11 +449,6 @@ function pluginPlaceholders(marketplace, plugin, extraPlaceholders = {}) {
     plugin_version: plugin.version ?? "",
     plugin_description: plugin.description ?? "",
     marketplace_version: marketplace.version ?? "",
-    // One repository holds one marketplace, and a target repo pins that
-    // marketplace once - .claude/settings.json has a single
-    // extraKnownMarketplaces entry per marketplace name, with a single ref.
-    // So the ref has to be marketplace-wide; a per-plugin ref would be
-    // silently overwritten by whichever plugin was set up last.
     marketplace_ref: `v${marketplace.version ?? ""}`,
     plugin_dir: plugin._source_dir ?? `source/plugins/${plugin.name ?? ""}`,
     plugin_config_path: plugin._config_path ?? "",
@@ -622,10 +617,6 @@ function buildSetupRegistry(config) {
     registry[name] = setupEntry;
   }
 
-  // A target repo records one ref per marketplace name, so two plugins that
-  // share a marketplace but disagree on the ref cannot both be honoured: the
-  // last /roa-base:setup to run would silently repoint the others. Fail here
-  // rather than ship a registry that cannot be applied faithfully.
   const refsByMarketplace = new Map();
   for (const [name, entry] of Object.entries(registry)) {
     const key = entry.marketplaceName;
