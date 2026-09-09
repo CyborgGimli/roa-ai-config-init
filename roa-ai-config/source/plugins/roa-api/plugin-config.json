@@ -1,7 +1,7 @@
 {
   "name": "roa-api",
   "displayName": "ROA API Testing",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "REST API testing with fluent request patterns and response assertions",
   "category": "testing",
   "tags": [

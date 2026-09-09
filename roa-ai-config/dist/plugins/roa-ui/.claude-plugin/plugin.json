@@ -1,7 +1,7 @@
 {
   "name": "roa-ui",
   "displayName": "ROA UI Testing",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "UI automation with three-layer component architecture, Selenium SmartWebDriver, and fluent testing patterns",
   "author": {
     "name": "ROA Platform Team",

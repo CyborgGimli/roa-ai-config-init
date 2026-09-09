@@ -3,9 +3,9 @@
     "roa-api": {
       "marketplaceName": "roa-ai",
       "marketplaceRepo": "CyborgGimli/roa-ai-config-init",
-      "marketplaceRef": "v0.1.0",
+      "marketplaceRef": "v0.1.1",
       "enabledPlugin": "roa-api@roa-ai",
-      "pluginVersion": "0.1.0",
+      "pluginVersion": "0.1.1",
       "install": {
         "enabled": true,
         "scope": "project"
@@ -70,16 +70,16 @@
         "plugin_display_name": "ROA API Testing",
         "marketplace_name": "roa-ai",
         "marketplace_repo": "CyborgGimli/roa-ai-config-init",
-        "marketplace_ref": "v0.1.0",
+        "marketplace_ref": "v0.1.1",
         "enabled_plugin": "roa-api@roa-ai"
       }
     },
     "roa-db": {
       "marketplaceName": "roa-ai",
       "marketplaceRepo": "CyborgGimli/roa-ai-config-init",
-      "marketplaceRef": "v0.1.0",
+      "marketplaceRef": "v0.1.1",
       "enabledPlugin": "roa-db@roa-ai",
-      "pluginVersion": "0.1.0",
+      "pluginVersion": "0.1.1",
       "install": {
         "enabled": true,
         "scope": "project"
@@ -144,16 +144,16 @@
         "plugin_display_name": "ROA Database Testing",
         "marketplace_name": "roa-ai",
         "marketplace_repo": "CyborgGimli/roa-ai-config-init",
-        "marketplace_ref": "v0.1.0",
+        "marketplace_ref": "v0.1.1",
         "enabled_plugin": "roa-db@roa-ai"
       }
     },
     "roa-ui": {
       "marketplaceName": "roa-ai",
       "marketplaceRepo": "CyborgGimli/roa-ai-config-init",
-      "marketplaceRef": "v0.1.0",
+      "marketplaceRef": "v0.1.1",
       "enabledPlugin": "roa-ui@roa-ai",
-      "pluginVersion": "0.1.0",
+      "pluginVersion": "0.1.1",
       "install": {
         "enabled": true,
         "scope": "project"
@@ -223,7 +223,7 @@
         "plugin_display_name": "ROA UI Testing",
         "marketplace_name": "roa-ai",
         "marketplace_repo": "CyborgGimli/roa-ai-config-init",
-        "marketplace_ref": "v0.1.0",
+        "marketplace_ref": "v0.1.1",
         "enabled_plugin": "roa-ui@roa-ai"
       }
     }
