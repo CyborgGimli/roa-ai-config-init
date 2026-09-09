@@ -60,12 +60,23 @@ claude plugin uninstall roa-ui --prune
 
 ## Versioning
 
-Releases are tagged `{plugin-name}--v{version}`:
+Releases are tagged `v{version}`, once for the whole marketplace:
 
 ```bash
-git tag roa-ui--v0.1.0
-git push origin roa-ui--v0.1.0
+git tag v0.1.0
+git push origin v0.1.0
 ```
+
+The tag covers every plugin, because a target repository pins a marketplace, not
+a plugin: `.claude/settings.json` holds one `extraKnownMarketplaces` entry per
+marketplace name, carrying one ref. A per-plugin tag scheme cannot be honoured
+there — whichever plugin ran `/roa-base:setup` last would silently repoint the
+others — so `build.mjs` rejects a configuration whose plugins disagree on
+`setup.marketplaceRef`.
+
+Refs in the retired `{plugin-name}--v{version}` form are still accepted by
+`/roa-base:setup` and `/roa-base:update` so repositories pinned by an older
+setup can be moved forward, but new pins use `v{version}`.
 
 All plugins in this marketplace share one version. Bump them together:
 
