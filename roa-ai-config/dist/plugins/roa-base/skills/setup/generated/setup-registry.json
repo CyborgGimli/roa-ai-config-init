@@ -50,6 +50,16 @@
           "marker": "shared/validation"
         },
         {
+          "to": "generated/rules/shared/test-automation.md",
+          "target": ".claude/rules/test-automation.md",
+          "marker": "shared/test-automation"
+        },
+        {
+          "to": "generated/rules/shared/repository-safety.md",
+          "target": ".claude/rules/repository-safety.md",
+          "marker": "shared/repository-safety"
+        },
+        {
           "to": "generated/rules/roa-api/contracts.md",
           "target": ".claude/rules/contracts.md",
           "marker": "roa-api/contracts"
@@ -124,6 +134,16 @@
           "marker": "shared/validation"
         },
         {
+          "to": "generated/rules/shared/test-automation.md",
+          "target": ".claude/rules/test-automation.md",
+          "marker": "shared/test-automation"
+        },
+        {
+          "to": "generated/rules/shared/repository-safety.md",
+          "target": ".claude/rules/repository-safety.md",
+          "marker": "shared/repository-safety"
+        },
+        {
           "to": "generated/rules/roa-db/queries.md",
           "target": ".claude/rules/queries.md",
           "marker": "roa-db/queries"
@@ -196,6 +216,16 @@
           "to": "generated/rules/shared/validation.md",
           "target": ".claude/rules/validation.md",
           "marker": "shared/validation"
+        },
+        {
+          "to": "generated/rules/shared/test-automation.md",
+          "target": ".claude/rules/test-automation.md",
+          "marker": "shared/test-automation"
+        },
+        {
+          "to": "generated/rules/shared/repository-safety.md",
+          "target": ".claude/rules/repository-safety.md",
+          "marker": "shared/repository-safety"
         },
         {
           "to": "generated/rules/roa-ui/three-layer.md",

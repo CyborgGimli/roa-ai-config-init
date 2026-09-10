@@ -11,6 +11,7 @@ import {
   readPayload, currentWorkingDirectory, extractTouchedPaths, resolveToolPath,
   isJavaPath, isPomPath, isTestJavaPath, pathExists, findMavenCommand,
   block, runCommand, withWorkspaceLock, groupByModule, formatCommandFailure,
+  markJavaTouched,
 } from "./maven-hook-utils.mjs";
 
 const EDIT_GATE_TIMEOUT_MS = 120000;
@@ -60,6 +61,8 @@ function main() {
   if (existing.length === 0) {
     process.exit(0); // deleted or moved; nothing to compile
   }
+
+  markJavaTouched(cwd, payload?.session_id);
 
   withWorkspaceLock(cwd, "maven", { waitMs: LOCK_WAIT_MS, staleMs: EDIT_GATE_TIMEOUT_MS + 30000 }, () => {
     const groups = groupByModule(existing, cwd);
