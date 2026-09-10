@@ -31,6 +31,12 @@ questions:
 class should take, load `ai-teacher` and read the curated lessons in
 `target/pandora/ai-teacher/`.
 
-These chunks are written against a specific ROA release; `verified-against.json`
-in this folder records which one. When the project is on a different version,
-generated metadata wins over anything documented here.
+These chunks were verified against `io.cyborgcode.roa` **1.0.0-SNAPSHOT**, as
+recorded in `verified-against.json` in this folder.
+
+A snapshot is a moving target: the same version string resolves to different
+bytes over time, so matching versions does not prove these signatures are still
+current. Treat what is written here as a guide, and confirm anything
+load-bearing against `target/pandora/metadata/` through the `ai-compass` skill.
+Generated metadata always wins, because it is produced from the framework
+actually on the classpath.
