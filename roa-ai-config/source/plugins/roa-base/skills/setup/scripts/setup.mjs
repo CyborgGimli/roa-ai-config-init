@@ -666,14 +666,19 @@ function findClaudeBinary() {
 }
 
 // Node refuses to spawn .cmd/.bat directly on Windows (CVE-2024-27980 mitigation),
-// so batch shims must go through a shell. Args here are simple tokens, never paths.
+// so batch shims must go through a shell. Passing an args array alongside
+// shell:true concatenates them unescaped (DEP0190), so build one quoted command
+// line instead and pass no array.
 function runClaude(claudeBinary, args, cwd) {
-  return spawnSync(claudeBinary, args, {
-    cwd,
-    stdio: "pipe",
-    encoding: "utf8",
-    shell: process.platform === "win32" && /\.(cmd|bat)$/i.test(String(claudeBinary)),
-  });
+  const options = { cwd, stdio: "pipe", encoding: "utf8" };
+
+  if (process.platform === "win32" && /\.(cmd|bat)$/i.test(String(claudeBinary))) {
+    const quote = (value) => (/[\s"&|<>^()]/.test(value) ? JSON.stringify(value) : value);
+    const line = [quote(String(claudeBinary)), ...args.map((arg) => quote(String(arg)))].join(" ");
+    return spawnSync(line, { ...options, shell: true });
+  }
+
+  return spawnSync(claudeBinary, args, options);
 }
 
 function samePath(left, right) {
