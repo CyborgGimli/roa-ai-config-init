@@ -18,7 +18,19 @@ Module detail lives in the `ui-*`, `api-*` and `db-*` chunks in this same folder
 Anything specific to one module — the three UI layers, `Endpoint`, `DbQuery` — is
 documented there, not here.
 
+Two generated sources sit beside this reference and outrank it on their own
+questions:
+
+| Chunk | Covers |
+| --- | --- |
+| `pandora-metadata.md` | the generated framework contract — signatures, options, preference |
+| `ai-teacher-lessons.md` | the curated catalog — the patterns this team approves |
+
 `target/pandora/metadata/` is the authority for signatures — load the
 `ai-compass` skill before writing `io.cyborgcode.roa` code. For the shape a new
 class should take, load `ai-teacher` and read the curated lessons in
 `target/pandora/ai-teacher/`.
+
+These chunks are written against a specific ROA release; `verified-against.json`
+in this folder records which one. When the project is on a different version,
+generated metadata wins over anything documented here.

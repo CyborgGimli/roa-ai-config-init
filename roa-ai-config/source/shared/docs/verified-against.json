@@ -1,0 +1,10 @@
+{
+  "$comment": "Which ROA release the bundled docs were verified against. Read by scripts/check-doc-currency.mjs at session start to warn when the target project is on a different version. Set roaVersion once, then bump it whenever the docs are re-verified.",
+  "roaVersion": null,
+  "groupId": "io.cyborgcode.roa",
+  "verifiedOn": null,
+  "provenance": [
+    "Signatures were read from ROA sources jars and example projects rather than inferred from names.",
+    "Record the exact release here the next time the docs are checked against a known ROA version."
+  ]
+}
