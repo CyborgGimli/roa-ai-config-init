@@ -1,6 +1,6 @@
 ---
 name: roa-api-definition-of-done
-description: The concrete API Definition of Done - the completion checklist for a API change in an ROA repository. Consumed by definition-of-done.
+description: The concrete API Definition of Done - the completion checklist for an API change in an ROA repository. Consumed by definition-of-done.
 user-invocable: false
 allowed-tools: Read, Grep, Glob
 ---

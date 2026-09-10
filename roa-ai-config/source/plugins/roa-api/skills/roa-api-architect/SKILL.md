@@ -1,31 +1,39 @@
 ---
 name: roa-api-architect
-description: Generate ROA API tests - typed endpoints, DTOs, and RING_OF_API chains with Assertion.builder() validation
-user-invocable: true
-allowed-tools: Read, Glob, Bash, Write, Edit, PowerShell
+description: Design and generate ROA API tests - typed endpoints, DTOs, and RING_OF_API chains with Assertion.builder() validation. Use when a task needs new API test coverage rather than a change to an existing test.
+allowed-tools: Read, Glob, Grep, Bash, Write, Edit, Task, Skill
 ---
 
 # ROA API Architect
 
-Generate REST API tests against the ROA API ring.
+Design and generate REST API tests against the ROA API ring for:
 
-## Usage
-
-```bash
-/roa-api-architect
+```text
+$ARGUMENTS
 ```
 
-Describe the operations to cover:
+Invoked as `/roa-api:roa-api-architect <what to cover>`, for example:
+
 - "Test user creation and the 400 on a missing field"
 - "Login, then use the token to fetch the profile"
 - "Cover the paginated user list"
 
 ## Before generating
 
-1. Load `ai-compass` and read `target/pandora/metadata/` for any ROA
-   signature you are about to use. Never guess a method name.
-2. Read the closest existing test and follow its shape.
-3. Read `${CLAUDE_PLUGIN_ROOT}/docs/api-ring.md` and `api-validation.md`.
+1. Load `roa-api-task-profile` for the rules and task sequence that apply here.
+2. Establish the contract — path, method, request and response shape, status
+   codes, auth — from the authoritative Swagger/OpenAPI source. Never infer an
+   endpoint from a REST convention or a similarly named one.
+3. Find what already exists. Delegate to the `codebase-investigator` agent when
+   the current endpoints, DTOs, constants, or JSONPaths are not obvious. Extend
+   what is there rather than adding a second representation of the same shape.
+4. Load `ai-compass` and read `target/pandora/metadata/` for any ROA signature
+   you are about to use. Never guess a method name.
+5. Load `ai-teacher` before writing a new class and follow the closest
+   `EXCELLENT` lesson's shape.
+6. Read the closest existing test and follow its structure.
+7. Deep reference: `${CLAUDE_PLUGIN_ROOT}/docs/api-ring.md` and
+   `api-validation.md`.
 
 Generate only what the requested tests need — no speculative endpoints, DTOs,
 constants, or hooks. If nothing references it, do not create it.
@@ -144,6 +152,8 @@ Generated code must:
 - ✓ Clean up what it creates, via `@Ripper`
 - ✓ End every chain with `.complete()`
 
-Then run `mvn test -Pe2e -Dtest=YourTestClass`.
+Then execute the new tests through `run-tests`, and confirm the change against
+`roa-api-definition-of-done` with `validate-code` before reporting it complete.
+Generated code that has only compiled is not finished work.
 
 Deep reference: `${CLAUDE_PLUGIN_ROOT}/docs/` — start at `api-architecture.md`.
