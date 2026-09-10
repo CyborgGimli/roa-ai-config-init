@@ -1,0 +1,16 @@
+{
+  "name": "ROA Dark",
+  "base": "dark",
+  "overrides": {
+    "claude": "#7dd3fc",
+    "text": "#e5e7eb",
+    "success": "#34d399",
+    "warning": "#fbbf24",
+    "error": "#fb7185",
+    "permission": "#c084fc",
+    "promptBorder": "#38bdf8",
+    "suggestion": "#93c5fd",
+    "fastMode": "#f97316",
+    "inactive": "#64748b"
+  }
+}

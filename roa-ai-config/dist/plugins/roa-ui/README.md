@@ -1,42 +1,53 @@
 # ROA UI Plugin
 
-AI-assisted UI test development for ROA framework.
+AI-assisted UI test development for the ROA framework.
 
-## What It Does
+## What it does
 
-Guides UI test creation following ROA's three-layer architecture:
+Guides UI test creation through ROA's three-layer component architecture:
 
-1. **Component Types** (enums in `ui/types/`)
-   - Identify UI technology (Bootstrap, Vaadin, etc.)
-   
-2. **UI Elements** (enums in `ui/elements/`)
-   - Define locators and element metadata
-   
-3. **Component Implementations** (classes in `ui/components/`)
-   - Concrete Selenium interactions using SmartWebDriver
+1. **Component types** (`ui/types/`) — which UI technology variant a control uses
+   (Bootstrap, Vaadin, Angular, web components)
+2. **UI elements** (`ui/elements/`) — locators, the type each uses, and optional
+   synchronisation hooks
+3. **Component implementations** (`ui/components/`) — the actual Selenium
+   interaction, annotated `@ImplementationOfType`
 
-## Using This Plugin
+Every component exists in all three layers. A test carrying its own locator is a
+layering bug, not a shortcut: locators in Layer 2 make a markup change one edit,
+and Selenium confined to Layer 3 means a Selenium upgrade never touches a test.
 
-1. Start with `/roa-ui-architect` to generate UI tests
-2. Reference `.codex/instructions/ui-framework-instructions.md`
-3. Check `.codex/examples/ui-test-examples.md` for patterns
-4. Verify against `.codex/rules/rules.md`
+## Using this plugin
 
-## Core Concepts
+1. `/roa-base:setup roa-ui`, then `/reload-plugins --force`
+2. `/roa-ui:roa-ui-architect <flow to cover>` to design and generate tests
+3. Read the single-topic chunks in `docs/` — start at `ui-architecture.md`, then
+   `ui-layers.md`
+4. Load `ai-compass` for any ROA signature that is unclear
 
-- **AppUiService** — Central UI facade (extends UiServiceFluent)
-- **Fluent chaining** — All methods return `this` for readable chains
-- **SmartWebDriver** — Use `findSmartElement()`, not `findElement()`
-- **Validation** — Direct methods (`.input().validateValue()`) or `Assertion.builder()` for tables
+## Core concepts
 
-## Key Constraints
+- **AppUiService** — the central UI facade, extending `UiServiceFluent`
+- **Fluent chaining** — every method returns `this`; the chain ends `.complete()`
+- **SmartWebDriver** — use `findSmartElement()`, never `findElement()`
+- **Validation** — direct methods (`.input().validateValue()`), or
+  `Assertion.builder()` for tables
 
-- ✓ Three layers MANDATORY (types → elements → implementations)
-- ✓ Enums use nested `Data` class for annotation references
-- ✓ Component implementations use `@ImplementationOfType` annotation
-- ✓ All test validation must be in fluent chains
-- ✓ Tests end with `.complete()`
+## Key constraints
+
+- ✓ Three layers mandatory — types → elements → implementations
+- ✓ Enums use a nested `Data` class for the string keys annotations reference
+- ✓ Component implementations carry `@ImplementationOfType`
+- ✓ Locators come from the rendered application, never from a guess
+- ✓ Waits target an observable condition — never `Thread.sleep`
+- ✓ Assertions prove a visible or business outcome, not that a click succeeded
+- ✓ Table rows are selected by business data, not by row index
+- ✓ Every chain ends with `.complete()`
+
+Layers 1 and 2 are both on the Pandora regeneration list — run
+`mvn pandora:navigation -U` after changing either.
 
 ---
 
-See `.claude/AGENTS.md` for AI orchestration details.
+Reference docs ship in `docs/`; skills in `skills/`; the flakiness reviewer and
+application investigator in `agents/`.

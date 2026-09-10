@@ -12,5 +12,12 @@
   "license": "Proprietary",
   "keywords": ["roa","api","rest","testing"],
   "dependencies": ["roa-base"],
-  "defaultEnabled": true
+  "defaultEnabled": true,
+  "hooks": "./hooks/hooks.json",
+  "outputStyles": "./output-styles/",
+  "lspServers": "./.lsp.json",
+  "experimental": {
+    "themes": "./themes/",
+    "monitors": "./monitors/monitors.json"
+  }
 }

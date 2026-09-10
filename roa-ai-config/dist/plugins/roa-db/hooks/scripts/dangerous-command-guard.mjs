@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-// PreToolUse guard for Bash: block destructive shell commands before they run.
+// PreToolUse guard for Bash and PowerShell: block destructive commands before
+// they run.
 //
-// Reads the hook payload on stdin and exits 0 to allow, 2 to block (the reason
-// on stderr is shown to the model). Node.js built-ins only.
+// Reads the hook payload on stdin and returns a PreToolUse permission decision.
+// Node.js built-ins only.
 //
 // The guard lexes the command rather than pattern-matching the raw string, so
 // `rm  -rf  /`, `rm --recursive --force /`, and `rm -r -f /` are all caught,
@@ -14,6 +15,9 @@
 
 import fs from "node:fs";
 import process from "node:process";
+
+const GUARDED_TOOLS = new Set(["Bash", "PowerShell"]);
+const MAX_NESTING_DEPTH = 4;
 
 const BROAD_TARGETS = new Set([
   "/", "/*", ".", "./", "./*", "..", "../", "../*", "*",
@@ -51,7 +55,12 @@ function op(value) {
 }
 
 // Split a command line into words and operators, honouring quotes and escapes.
-function lexShell(command) {
+//
+// PowerShell escapes with a backtick and treats a backslash as an ordinary path
+// character, so lexing `C:\Users` with POSIX rules would silently yield
+// `C:Users` and defeat every path comparison below.
+function lexShell(command, dialect) {
+  const escapeChar = dialect === "powershell" ? "`" : "\\";
   const tokens = [];
   let current = "";
   let quote = "";
@@ -84,7 +93,7 @@ function lexShell(command) {
     }
 
     if (quote === '"') {
-      if (char === "\\" && (next === '"' || next === "\\")) {
+      if (char === escapeChar && (next === '"' || next === escapeChar)) {
         escaped = true;
         continue;
       }
@@ -96,7 +105,7 @@ function lexShell(command) {
       continue;
     }
 
-    if (char === "\\") {
+    if (char === escapeChar) {
       escaped = true;
       continue;
     }
@@ -134,12 +143,12 @@ function lexShell(command) {
 
 // Group the token stream into individual commands, remembering the operator
 // that preceded each so `curl ... | sh` can be recognised as one pipeline.
-function shellSegments(command) {
+function shellSegments(command, dialect) {
   const segments = [];
   let words = [];
   let separatorBefore = null;
 
-  for (const token of lexShell(command)) {
+  for (const token of lexShell(command, dialect)) {
     if (token.type === "op") {
       segments.push({ words, separatorBefore });
       separatorBefore = token.value;
@@ -316,7 +325,7 @@ function checkSystemPower(words) {
   return null;
 }
 
-function checkNestedShell(words) {
+function checkPermissions(words) {
   const name = commandName(words[0]);
   if (name === "chmod" || name === "chown") {
     const args = words.slice(1);
@@ -328,6 +337,32 @@ function checkNestedShell(words) {
   return null;
 }
 
+// A destructive command hidden behind `bash -c`, `pwsh -Command`, or `cmd /c`
+// is still destructive, so unwrap it and run the same checks on the payload.
+function checkNestedShell(words, depth) {
+  const name = commandName(words[0]);
+  if (!SHELL_EXECUTORS.has(name)) return null;
+
+  const isPowerShell = name === "powershell" || name === "pwsh";
+
+  if (isPowerShell && words.some((arg) => /^-(e|ec|enc|encodedcommand)$/i.test(arg))) {
+    return "blocked base64-encoded PowerShell command; pass the command in clear text";
+  }
+
+  const flagIndex = words.findIndex((arg) => {
+    const lower = arg.toLowerCase();
+    if (name === "cmd") return lower === "/c" || lower === "/k";
+    if (isPowerShell) return lower === "-c" || lower === "-command";
+    return lower === "-c";
+  });
+
+  const payload = words.slice(flagIndex + 1).join(" ");
+  if (flagIndex < 0 || !payload.trim()) return null;
+
+  const nested = analyzeCommand(payload, isPowerShell ? "powershell" : "posix", depth + 1);
+  return nested ? `blocked nested shell command: ${nested.reason}` : null;
+}
+
 function isRemoteFetcher(words) {
   return REMOTE_FETCHERS.has(commandName(words[0]));
 }
@@ -336,7 +371,7 @@ function isShellExecutor(words) {
   return SHELL_EXECUTORS.has(commandName(words[0]));
 }
 
-function checkSegment(words) {
+function checkSegment(words, depth) {
   const normalizedWords = stripCommandPrefixes(words);
   const name = commandName(normalizedWords[0]);
   if (!name) return null;
@@ -349,12 +384,15 @@ function checkSegment(words) {
   return (
     checkFormatting(normalizedWords) ||
     checkSystemPower(normalizedWords) ||
-    checkNestedShell(normalizedWords)
+    checkPermissions(normalizedWords) ||
+    checkNestedShell(normalizedWords, depth)
   );
 }
 
-function analyzeCommand(command) {
-  const segments = shellSegments(command);
+function analyzeCommand(command, dialect, depth = 0) {
+  if (depth > MAX_NESTING_DEPTH) return null;
+
+  const segments = shellSegments(command, dialect);
   let previousWords = null;
 
   for (const segment of segments) {
@@ -369,7 +407,7 @@ function analyzeCommand(command) {
       return { reason: "blocked remote download piped into a shell" };
     }
 
-    const reason = checkSegment(segment.words);
+    const reason = checkSegment(segment.words, depth);
     if (reason) {
       return { reason };
     }
@@ -388,6 +426,20 @@ function readStdin() {
   }
 }
 
+function deny(reason) {
+  console.log(
+    JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "deny",
+        permissionDecisionReason:
+          `ROA safety policy: ${reason}. If this is genuinely intended, run it ` +
+          "yourself or narrow the command.",
+      },
+    })
+  );
+}
+
 function main() {
   let payload;
   try {
@@ -396,19 +448,23 @@ function main() {
     process.exit(0); // Unreadable payload: do not block ordinary work.
   }
 
+  if (!GUARDED_TOOLS.has(String(payload?.tool_name ?? ""))) {
+    process.exit(0);
+  }
+
   const command = payload?.tool_input?.command;
   if (typeof command !== "string" || !command.trim()) {
     process.exit(0);
   }
 
-  const verdict = analyzeCommand(command);
+  const dialect = payload.tool_name === "PowerShell" ? "powershell" : "posix";
+  const verdict = analyzeCommand(command, dialect);
   if (!verdict) {
     process.exit(0);
   }
 
-  console.error(`dangerous-command-guard: ${verdict.reason}`);
-  console.error("If this is genuinely intended, run it yourself or narrow the command.");
-  process.exit(2);
+  deny(verdict.reason);
+  process.exit(0);
 }
 
 main();

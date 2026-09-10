@@ -56,6 +56,16 @@ export function resolveToolPath(cwd, candidate) {
   return path.isAbsolute(candidate) ? candidate : path.resolve(cwd, candidate);
 }
 
+export function isPathWithin(parent, candidate) {
+  const relative = path.relative(path.resolve(parent), path.resolve(candidate));
+  return relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative);
+}
+
+// Pandora writes metadata and AI Teacher lessons under target/. Editing either by
+// hand produces guidance that the next regeneration silently discards.
+export const isPandoraGeneratedPath = (p) =>
+  /[\\/]target[\\/]pandora[\\/]/i.test(String(p));
+
 export const isJavaPath = (p) => /\.java$/i.test(p);
 export const isPomPath = (p) => /(^|[\\/])pom\.xml$/i.test(p);
 export const isTestJavaPath = (p) => /[\\/]src[\\/]test[\\/]java[\\/]/i.test(p);

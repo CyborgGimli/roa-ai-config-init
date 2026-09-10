@@ -7,14 +7,21 @@
 import process from "node:process";
 import { readPayload, block } from "./maven-hook-utils.mjs";
 
+// Matches `mvn`, `./mvnw`, `.\mvnw.cmd`, and an `&`-call-operator invocation, so
+// the guard covers PowerShell as well as POSIX shells.
 const isMavenCommand = (command) =>
-  /(^|[\s;&|()])(\.\/mvnw|mvnw(?:\.cmd)?|mvn)(\s|$)/i.test(command);
+  /(^|[\s;&|(])(?:[.][\\/])?mvnw?(?:\.cmd)?(?=\s|$)/i.test(command);
 
 const skipsTests = (command) =>
-  /(^|\s)(-DskipTests(?:=true)?|-Dmaven\.test\.skip(?:=true)?|-DskipITs(?:=true)?)(\s|$)/i.test(command);
+  /(^|[\s"'])(-DskipTests(?:=true)?|-Dmaven\.test\.skip(?:=true)?|-DskipITs(?:=true)?)(?=[\s"']|$)/i.test(command);
+
+const GUARDED_TOOLS = new Set(["Bash", "PowerShell"]);
 
 function main() {
   const payload = readPayload();
+  if (!GUARDED_TOOLS.has(String(payload?.tool_name ?? ""))) {
+    process.exit(0);
+  }
   const command = payload?.tool_input?.command;
   if (typeof command !== "string" || !command.trim()) {
     process.exit(0);
