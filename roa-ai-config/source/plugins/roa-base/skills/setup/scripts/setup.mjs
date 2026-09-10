@@ -779,16 +779,33 @@ function findProjectPlugin(plugins, pluginId, targetRoot) {
 
 // `claude plugin install` refuses to work against a marketplace entry that is
 // already registered in the target settings, so the entry is pulled out for the
-// duration of the call and re-added by updateSettings() afterwards.
+// duration of the call. It must come back on every exit path: the CLI call is a
+// slow network operation, which is exactly when someone reaches for Ctrl-C, and
+// leaving it out silently strips a marketplace from the user's settings.
+let pendingMarketplaceRestore = null;
+let interruptRestoreRegistered = false;
+
+function registerInterruptRestore() {
+  if (interruptRestoreRegistered) {
+    return;
+  }
+  interruptRestoreRegistered = true;
+  for (const signal of ["SIGINT", "SIGTERM"]) {
+    process.on(signal, () => {
+      flushMarketplaceRestore();
+      process.exit(130);
+    });
+  }
+}
+
 function temporarilyRemoveMarketplace(settingsPath, marketplaceName) {
   if (!fs.existsSync(settingsPath)) {
     return null;
   }
 
-  const originalText = readText(settingsPath);
   let data;
   try {
-    data = JSON.parse(originalText);
+    data = JSON.parse(readText(settingsPath));
   } catch {
     return null;
   }
@@ -797,17 +814,40 @@ function temporarilyRemoveMarketplace(settingsPath, marketplaceName) {
     return null;
   }
 
+  const entry = data.extraKnownMarketplaces[marketplaceName];
   delete data.extraKnownMarketplaces[marketplaceName];
   if (Object.keys(data.extraKnownMarketplaces).length === 0) {
     delete data.extraKnownMarketplaces;
   }
   fs.writeFileSync(settingsPath, JSON.stringify(data, null, 2) + "\n", "utf8");
-  return originalText;
+
+  pendingMarketplaceRestore = { settingsPath, marketplaceName, entry };
+  registerInterruptRestore();
+  return pendingMarketplaceRestore;
 }
 
-function restoreFile(filePath, originalText) {
-  if (originalText !== null) {
-    fs.writeFileSync(filePath, originalText, "utf8");
+// Re-add only the key that was removed, re-reading whatever the CLI wrote in the
+// meantime. Restoring the whole file would discard the enabledPlugins entry that
+// `claude plugin install` legitimately adds to the same file.
+function flushMarketplaceRestore() {
+  const pending = pendingMarketplaceRestore;
+  pendingMarketplaceRestore = null;
+  if (!pending) {
+    return;
+  }
+
+  try {
+    const data = fs.existsSync(pending.settingsPath) ? JSON.parse(readText(pending.settingsPath)) : {};
+    if (!isPlainObject(data.extraKnownMarketplaces)) {
+      data.extraKnownMarketplaces = {};
+    }
+    if (!data.extraKnownMarketplaces[pending.marketplaceName]) {
+      data.extraKnownMarketplaces[pending.marketplaceName] = pending.entry;
+      fs.writeFileSync(pending.settingsPath, JSON.stringify(data, null, 2) + "\n", "utf8");
+    }
+  } catch {
+    // A settings file we can no longer parse is not something to make worse by
+    // overwriting it; updateSettings reports the problem with better context.
   }
 }
 
@@ -838,10 +878,14 @@ function installPluginIfMissing(spec, targetRoot, settingsPath) {
   const installed = findProjectPlugin(listInstalledPlugins(claudeBinary, targetRoot), enabledPlugin, targetRoot);
   if (installed) {
     if (spec.pluginVersion && installed.version && installed.version !== spec.pluginVersion) {
-      const originalSettings = temporarilyRemoveMarketplace(settingsPath, spec.marketplaceName);
-      const updateResult = runClaude(claudeBinary, ["plugin", "update", enabledPlugin, "--scope", "project"], targetRoot);
+      temporarilyRemoveMarketplace(settingsPath, spec.marketplaceName);
+      let updateResult;
+      try {
+        updateResult = runClaude(claudeBinary, ["plugin", "update", enabledPlugin, "--scope", "project"], targetRoot);
+      } finally {
+        flushMarketplaceRestore();
+      }
       if (updateResult.status !== 0) {
-        restoreFile(settingsPath, originalSettings);
         const output = `${updateResult.stdout ?? ""}${updateResult.stderr ?? ""}`.trim();
         throw new SetupError(
           `failed to update ${enabledPlugin} from ${installed.version} to ${spec.pluginVersion}.${output ? ` Claude output: ${output}` : ""}`
@@ -853,11 +897,15 @@ function installPluginIfMissing(spec, targetRoot, settingsPath) {
   }
 
   const scope = typeof install.scope === "string" && install.scope ? install.scope : "project";
-  const originalSettings = temporarilyRemoveMarketplace(settingsPath, spec.marketplaceName);
-  const result = runClaude(claudeBinary, ["plugin", "install", enabledPlugin, "--scope", scope], targetRoot);
+  temporarilyRemoveMarketplace(settingsPath, spec.marketplaceName);
+  let result;
+  try {
+    result = runClaude(claudeBinary, ["plugin", "install", enabledPlugin, "--scope", scope], targetRoot);
+  } finally {
+    flushMarketplaceRestore();
+  }
 
   if (result.status !== 0) {
-    restoreFile(settingsPath, originalSettings);
     const output = `${result.stdout ?? ""}${result.stderr ?? ""}`.trim();
     throw new SetupError(
       `failed to install ${enabledPlugin} at ${scope} scope.${output ? ` Claude output: ${output}` : ""}`
