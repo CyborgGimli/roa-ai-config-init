@@ -94,7 +94,8 @@
     "hooks/scripts/validate-java-edit.mjs",
     "hooks/scripts/stop-test-gate.mjs",
     "hooks/scripts/generated-artifact-guard.mjs",
-    "scripts/jdtls-launcher.mjs"
+    "scripts/jdtls-launcher.mjs",
+    "scripts/check-doc-currency.mjs"
   ],
   "setup": {
     "enabled": true,
@@ -156,6 +157,18 @@
         "to": "generated/rules/shared/validation.md",
         "target": ".claude/rules/validation.md",
         "marker": "shared/validation"
+      },
+      {
+        "from": "${shared_dir}/rules/test-automation.md",
+        "to": "generated/rules/shared/test-automation.md",
+        "target": ".claude/rules/test-automation.md",
+        "marker": "shared/test-automation"
+      },
+      {
+        "from": "${shared_dir}/rules/repository-safety.md",
+        "to": "generated/rules/shared/repository-safety.md",
+        "target": ".claude/rules/repository-safety.md",
+        "marker": "shared/repository-safety"
       },
       {
         "from": "${plugin_dir}/setup/rules/queries.md",
