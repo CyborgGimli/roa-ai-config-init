@@ -81,8 +81,7 @@
   "mergeHooks": [
     {
       "from": [
-        "${shared_dir}/hooks/hooks.json",
-        "${plugin_dir}/hooks/hooks.json"
+        "${shared_dir}/hooks/hooks.json"
       ],
       "to": "hooks/hooks.json",
       "description": "ROA Database Testing hooks."

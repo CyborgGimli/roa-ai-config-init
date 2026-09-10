@@ -9,7 +9,7 @@ import path from "node:path";
 import process from "node:process";
 import {
   readPayload, currentWorkingDirectory, findMavenRoot, findMavenCommand,
-  block, runCommand, withWorkspaceLock, relevantOutput,
+  block, runCommand, withWorkspaceLock, relevantOutput, consumeJavaTouched,
 } from "./maven-hook-utils.mjs";
 
 const TEST_TIMEOUT_MS = 10 * 60 * 1000;
@@ -65,6 +65,14 @@ function main() {
   }
 
   const cwd = currentWorkingDirectory(payload);
+
+  // Gate only sessions that actually edited Java. Running the whole suite after a
+  // session that asked a question or edited a README costs minutes for no
+  // evidence, and a gate that slow is one people turn off.
+  if (!consumeJavaTouched(cwd, payload?.session_id)) {
+    process.exit(0);
+  }
+
   const root = findMavenRoot(cwd);
   if (!root) {
     process.exit(0); // not a Maven repository; nothing to gate

@@ -56,6 +56,40 @@ export function resolveToolPath(cwd, candidate) {
   return path.isAbsolute(candidate) ? candidate : path.resolve(cwd, candidate);
 }
 
+// Marks that this session actually edited Java. The Stop gate runs the suite only
+// when the marker exists, so a session that asked a question or edited a README
+// does not pay for a full `mvn test`.
+function sessionMarkerPath(cwd, sessionId) {
+  const key = createHash("sha1")
+    .update(`${path.resolve(cwd)}::${sessionId || "no-session"}`)
+    .digest("hex")
+    .slice(0, 16);
+  return path.join(os.tmpdir(), `roa-java-touched-${key}.marker`);
+}
+
+export function markJavaTouched(cwd, sessionId) {
+  try {
+    fs.writeFileSync(sessionMarkerPath(cwd, sessionId), String(Date.now()));
+  } catch {
+    // A marker we cannot write only costs a skipped gate, never a failed edit.
+  }
+}
+
+export function consumeJavaTouched(cwd, sessionId) {
+  const marker = sessionMarkerPath(cwd, sessionId);
+  try {
+    fs.readFileSync(marker, "utf8");
+  } catch {
+    return false;
+  }
+  try {
+    fs.unlinkSync(marker);
+  } catch {
+    /* already gone */
+  }
+  return true;
+}
+
 export function isPathWithin(parent, candidate) {
   const relative = path.relative(path.resolve(parent), path.resolve(candidate));
   return relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative);
