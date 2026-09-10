@@ -121,6 +121,19 @@ function main() {
         "wins — load the ai-compass skill and read target/pandora/metadata before relying on a " +
         "signature quoted in docs/."
     );
+    process.exit(0);
+  }
+
+  // A snapshot resolves to different bytes over time under one version string, so
+  // a matching version proves only that nobody bumped it — not that the API the
+  // docs describe is still the API on the classpath.
+  if (/-SNAPSHOT$/i.test(projectVersion)) {
+    console.log(
+      `ROA docs currency: this project and the bundled docs are both on ${groupId} ` +
+        `${projectVersion}. A snapshot moves without changing its version, so treat the ` +
+        "signatures in docs/ as a guide and confirm anything load-bearing against " +
+        "target/pandora/metadata via the ai-compass skill."
+    );
   }
 
   process.exit(0);
