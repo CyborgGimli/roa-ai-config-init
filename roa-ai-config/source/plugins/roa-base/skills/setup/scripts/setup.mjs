@@ -185,6 +185,7 @@ function upsertManagedBlock(filePath, pluginName, renderedTemplate) {
   let updated;
   if (fs.existsSync(filePath)) {
     const text = fs.readFileSync(filePath, "utf8").trimEnd();
+    assertMarkersBalanced(filePath, text, begin, end);
     updated = markerPattern.test(text)
       ? text.replace(markerPattern, newBlock).trimEnd() + "\n"
       : `${text}\n\n${newBlock}\n`;
@@ -193,6 +194,37 @@ function upsertManagedBlock(filePath, pluginName, renderedTemplate) {
   }
 
   return writeIfChanged(filePath, updated);
+}
+
+function countOccurrences(text, needle) {
+  return text.split(needle).length - 1;
+}
+
+// The whole point of the markers is that repository-owned content is never
+// touched, and that guarantee depends on there being exactly one balanced pair.
+// A hand-edited file with a stray BEGIN would otherwise append a second block on
+// one run and then, on the next, let the non-greedy match swallow everything
+// between the orphan and the real END - deleting the user's own text silently.
+// Refusing is the only safe answer: the script cannot know which half is wanted.
+function assertMarkersBalanced(filePath, text, begin, end) {
+  const beginCount = countOccurrences(text, begin);
+  const endCount = countOccurrences(text, end);
+
+  if (beginCount === endCount && beginCount <= 1) {
+    return;
+  }
+
+  const name = path.basename(filePath);
+  const detail =
+    beginCount !== endCount
+      ? `found ${beginCount} begin marker(s) and ${endCount} end marker(s)`
+      : `found ${beginCount} managed blocks where there should be one`;
+
+  throw new SetupError(
+    `${name} has malformed ROA managed markers: ${detail}. ` +
+      `Leave exactly one "${begin}" ... "${end}" pair (or delete the block entirely) ` +
+      "and rerun setup. Nothing was written, so no content has been lost."
+  );
 }
 
 function loadSettings(filePath) {
@@ -1224,14 +1256,76 @@ function updateProjectMcp(targetRoot, spec) {
     return { changed, warnings };
   }
 
-  if (Object.keys(mcpServers).length > 0) {
-    const mcpPath = resolveTargetPath(targetRoot, ".mcp.json");
-    changed.push([writeIfChanged(mcpPath, JSON.stringify({ mcpServers }, null, 2) + "\n"), mcpPath]);
-  } else {
+  changed.push(...writeProjectMcp(targetRoot, mcpServers));
+  if (Object.keys(mcpServers).length === 0) {
     warnings.push("No MCP servers were generated. Fill ai-config.yaml and rerun setup.");
   }
 
   return { changed, warnings };
+}
+
+// `.mcp.json` is a shared project file: a repository may already declare MCP
+// servers that have nothing to do with ROA. Overwriting it wholesale destroys
+// them silently, so merge, and only drop entries this script wrote on an earlier
+// run. That ownership list is what makes disabling a server in ai-config.yaml
+// actually remove it without also removing somebody else's.
+function writeProjectMcp(targetRoot, mcpServers) {
+  const mcpPath = resolveTargetPath(targetRoot, ".mcp.json");
+  const ownedPath = resolveTargetPath(targetRoot, ".claude/roa-mcp-owned.json");
+
+  let document = {};
+  if (fs.existsSync(mcpPath)) {
+    try {
+      const parsed = JSON.parse(readText(mcpPath));
+      if (isPlainObject(parsed)) {
+        document = parsed;
+      }
+    } catch (error) {
+      throw new SetupError(
+        `.mcp.json is not valid JSON (${error.message}). Fix or remove it, then rerun setup; ` +
+          "it was left untouched so nothing is lost."
+      );
+    }
+  }
+
+  let previouslyOwned = [];
+  if (fs.existsSync(ownedPath)) {
+    try {
+      const parsed = JSON.parse(readText(ownedPath));
+      if (Array.isArray(parsed.servers)) {
+        previouslyOwned = parsed.servers.filter((name) => typeof name === "string");
+      }
+    } catch {
+      // An unreadable ownership list means we cannot prove what was ours, so keep
+      // every existing entry rather than risk deleting a server we did not write.
+    }
+  }
+
+  const existing = isPlainObject(document.mcpServers) ? document.mcpServers : {};
+  const retained = Object.fromEntries(
+    Object.entries(existing).filter(([name]) => !previouslyOwned.includes(name))
+  );
+
+  const merged = { ...retained, ...mcpServers };
+  const changed = [];
+
+  if (Object.keys(merged).length > 0 || Object.keys(existing).length > 0) {
+    const next = { ...document, mcpServers: merged };
+    changed.push([writeIfChanged(mcpPath, JSON.stringify(next, null, 2) + "\n"), mcpPath]);
+  }
+
+  // Most repositories never enable an MCP server. Writing an ownership file that
+  // records nothing would put an unexplained file in every one of them, so only
+  // keep it once there is something to own or something previously owned to track.
+  const owned = Object.keys(mcpServers).sort();
+  if (owned.length > 0 || fs.existsSync(ownedPath)) {
+    const ownedStatus = writeIfChanged(ownedPath, JSON.stringify({ servers: owned }, null, 2) + "\n");
+    if (ownedStatus !== "unchanged") {
+      changed.push([ownedStatus, ownedPath]);
+    }
+  }
+
+  return changed;
 }
 
 function resolveLogFile(targetRoot) {
