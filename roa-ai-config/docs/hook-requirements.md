@@ -7,10 +7,16 @@ hook can be checked against them.
 
 | Event | Matcher | Hook | Purpose |
 | --- | --- | --- | --- |
-| `PreToolUse` | `Bash` | `dangerous-command-guard.mjs` | Block destructive shell commands |
-| `PreToolUse` | `Bash` | `maven-command-guard.mjs` | Block Maven runs that skip tests |
-| `PostToolUse` | `Write\|Edit\|MultiEdit` | `validate-java-edit.mjs` | Compile the changed modules |
-| `Stop` | — | `stop-test-gate.mjs` | Run the suite before the session ends |
+| `SessionStart` | `startup\|resume\|clear` | `check-doc-currency.mjs` | Warn when the project's ROA version has moved away from the one the bundled docs describe |
+| `PreToolUse` | `Bash\|PowerShell` | `dangerous-command-guard.mjs` | Block destructive shell commands |
+| `PreToolUse` | `Bash\|PowerShell` | `maven-command-guard.mjs` | Block Maven runs that skip tests |
+| `PreToolUse` | `Write\|Edit\|MultiEdit\|NotebookEdit` | `generated-artifact-guard.mjs` | Refuse hand edits to generated Pandora output |
+| `PostToolUse` | `Write\|Edit\|MultiEdit` | `validate-java-edit.mjs` | Compile the changed modules, and mark the session as having touched Java |
+| `Stop` | — | `stop-test-gate.mjs` | Run the suite before the session ends, but only if Java changed |
+
+Both shell guards must match `PowerShell` as well as `Bash`. Matching only
+`Bash` leaves every PowerShell call ungated on Windows, which is where most of
+this team works.
 
 ## Exit-code contract
 

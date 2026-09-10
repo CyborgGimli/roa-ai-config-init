@@ -107,7 +107,7 @@
     "ruleFile": ".claude/rules/${plugin_name}.md",
     "ruleTemplate": "generated/templates/${plugin_name}/rules.md",
     "claudeTemplate": "generated/templates/${plugin_name}/CLAUDE.md",
-    "ruleTemplateSource": "${plugin_dir}/setup/rules.md",
+    "ruleTemplateSource": "${shared_dir}/setup/rules.md",
     "claudeTemplateSource": "${plugin_dir}/setup/CLAUDE.md",
     "settingsFragments": [
       {
