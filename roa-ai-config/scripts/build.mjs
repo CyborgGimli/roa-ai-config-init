@@ -472,12 +472,16 @@ function cleanDist(distRoot) {
       fs.rmSync(distRoot, { recursive: true, force: true });
     } catch (error) {
       // On Windows an editor or antivirus can hold a handle on dist/. Overwriting
-      // in place still produces a correct build, so warn instead of aborting.
+      // in place produces every current file, but cannot remove one whose source
+      // was deleted, so the result may still carry stale files. CI builds from a
+      // clean checkout, so this only affects a local dist.
       if (error.code !== "EPERM" && error.code !== "EBUSY") {
         throw error;
       }
       console.warn(
-        `Warning: ${repoRelative(distRoot)} is locked by another process; overwriting generated files in place.`
+        `Warning: ${repoRelative(distRoot)} is locked by another process; overwriting generated ` +
+          "files in place. Files deleted from source/ will survive in dist/ until the directory " +
+          "can be removed - close the process holding it and rebuild before trusting this output."
       );
     }
   }
