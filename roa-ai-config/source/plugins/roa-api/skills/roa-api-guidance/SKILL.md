@@ -1,6 +1,6 @@
 ---
 name: roa-api-guidance
-description: On-demand actionable guidance for writing API tests in ROA repositories - idioms, structure, and the traps that make suites flaky. Loaded when a API change is being written or reviewed.
+description: On-demand actionable guidance for writing API tests in ROA repositories - idioms, structure, and the traps that make suites flaky. Loaded when an API change is being written or reviewed.
 user-invocable: false
 allowed-tools: Read, Grep, Glob
 ---

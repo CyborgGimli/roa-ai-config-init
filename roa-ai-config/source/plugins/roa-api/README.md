@@ -14,7 +14,7 @@ Guides API test creation through ROA's API ring:
 ## Using this plugin
 
 1. `/roa-base:setup roa-api`, then `/reload-plugins --force`
-2. `/roa-api-architect` to generate tests
+2. `/roa-api:roa-api-architect <what to cover>` to design and generate tests
 3. Read the single-topic chunks in `docs/` — start at `api-architecture.md`
 4. Load `ai-compass` for any signature that is unclear
 

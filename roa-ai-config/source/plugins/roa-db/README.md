@@ -1,39 +1,51 @@
 # ROA DB Plugin
 
-AI-assisted database test development for ROA framework.
+AI-assisted database test development for the ROA framework.
 
-## What It Does
+## What it does
 
-Guides database test creation using SQL query patterns with:
+Guides database test creation through ROA's query abstractions:
 
-1. **Query Enums** — Define SQL queries with parameterized statements
-2. **Result Mappers** — Type-safe result object mapping
-3. **Fluent Assertions** — Readable result validation patterns
-4. **Transaction Control** — Test isolation and cleanup
+1. **Query enums** — `DbQuery<T>` implementations holding the SQL, with `{name}`
+   placeholders filled at runtime by `withParam`
+2. **Result types** — typed row-to-object mapping
+3. **Fluent assertions** — readable validation of the returned data
+4. **Cleanup** — `@Ripper` and `DataCleaner` for test isolation
 
-## Using This Plugin
+## Using this plugin
 
-1. Start with `/roa-db-architect` to generate DB tests
-2. Reference `.codex/instructions/` for patterns
-3. Check examples for query and mapper patterns
-4. Verify against `.codex/rules/rules.md`
+1. `/roa-base:setup roa-db`, then `/reload-plugins --force`
+2. `/roa-db:roa-db-architect <what to cover>` to design and generate tests
+3. Read the single-topic chunks in `docs/` — start at `db-architecture.md`, then
+   `db-queries.md`
+4. Load `ai-compass` for any ROA signature that is unclear
 
-## Core Concepts
+## Core concepts
 
-- **Queries as enums** — Parameterized SQL with ? placeholders
-- **Result mappers** — Type-safe row→object mapping
-- **Fluent validation** — `.hasColumn()`, `.expectRowCount()`
-- **Transactions** — @Transactional for automatic rollback
-- **Data cleanup** — @Ripper lifecycle for test isolation
+- **Queries as enums** — SQL lives in the registry, never as a string at a call site
+- **`{name}` placeholders** — every value goes through `withParam`; quote the
+  placeholder in the SQL for strings, leave it unquoted for numerics
+- **Result mappers** — tolerate null and absent columns rather than throwing on
+  the first unexpected row
+- **Explicit column lists** — `SELECT *` couples the test to column order
+- **Data cleanup** — `@Ripper` scoped to the rows this test created
 
-## Key Constraints
+## Key constraints
 
-- ✓ Always use parameterized queries (no string interpolation)
-- ✓ Queries defined in enums with nested Data class
-- ✓ Result mappers handle null safely
-- ✓ Tests end with `.complete()`
-- ✓ Transactions ensure test isolation
+- ✓ Every value bound through `withParam` — no SQL assembled by concatenation,
+  even inside a helper. It is an injection bug, and it breaks on any value
+  containing a quote, which is exactly the input a test should exercise
+- ✓ Queries defined in enums with a nested `Data` class
+- ✓ Explicit column lists rather than `SELECT *`
+- ✓ Rows created uniquely per run, so reruns and parallel execution do not collide
+- ✓ `DELETE` / `TRUNCATE` / unqualified `UPDATE` only inside a registered cleaner
+- ✓ Assertions prove the data invariant, not merely a non-zero row count
+- ✓ Every chain ends with `.complete()`
+
+`DbQuery` implementations are on the Pandora regeneration list — run
+`mvn pandora:navigation -U` after changing the enum.
 
 ---
 
-See `.claude/AGENTS.md` for AI orchestration details.
+Reference docs ship in `docs/`; skills in `skills/`; the data reviewer in
+`agents/roa-db-data-reviewer.md`.

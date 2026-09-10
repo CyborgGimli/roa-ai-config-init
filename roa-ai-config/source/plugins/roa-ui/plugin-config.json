@@ -63,6 +63,14 @@
     {
       "from": "${shared_dir}/hooks/scripts",
       "to": "hooks/scripts"
+    },
+    {
+      "from": "${shared_dir}/themes",
+      "to": "themes"
+    },
+    {
+      "from": "${shared_dir}/lsp/lsp.json",
+      "to": ".lsp.json"
     }
   ],
   "render": [
@@ -86,7 +94,9 @@
     "hooks/scripts/dangerous-command-guard.mjs",
     "hooks/scripts/maven-command-guard.mjs",
     "hooks/scripts/validate-java-edit.mjs",
-    "hooks/scripts/stop-test-gate.mjs"
+    "hooks/scripts/stop-test-gate.mjs",
+    "hooks/scripts/generated-artifact-guard.mjs",
+    "scripts/jdtls-launcher.mjs"
   ],
   "setup": {
     "enabled": true,
