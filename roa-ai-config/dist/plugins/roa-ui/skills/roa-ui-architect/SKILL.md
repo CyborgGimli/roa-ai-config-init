@@ -90,7 +90,7 @@ or the absence of an exception does not prove the user was signed in.
 
 Generated code must:
 
-- ✓ Compile — `mvn -q test-compile` succeeds
+- ✓ Compile — `mvn test-compile` succeeds
 - ✓ Keep all three layers intact, with no locator in a test
 - ✓ Reach the browser through `AppUiService` and `findSmartElement()` — never a
   raw `WebDriver` or `findElement()` in a test
