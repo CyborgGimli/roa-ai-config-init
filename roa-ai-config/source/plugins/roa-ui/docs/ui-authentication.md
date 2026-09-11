@@ -1,7 +1,10 @@
 # ROA UI — Authentication
 
-Signing in is a precondition, not a test. Push it into the lifecycle so tests start
-where the behaviour under test begins.
+Signing in is a precondition, not a test — unless login, logout, session expiry or
+access control *is* the behaviour under test. Push it into the lifecycle so tests
+start where the behaviour under test begins; when authentication itself is the
+requirement, drive the login flow in the test and do not let `@AuthenticateViaUi`
+or cached credentials bypass what the test exists to prove.
 
 ## Credentials
 

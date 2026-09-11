@@ -1,173 +1,120 @@
 # ROA AI Configuration Marketplace
 
-Build system for Claude Code plugins for the ROA test automation framework.
+Build system for the Claude Code plugins that support the ROA (Ring of Automation)
+test-automation framework.
 
 ## Overview
 
-This repository generates and maintains four Claude Code plugins:
+This repository generates and maintains four plugins:
 
 | Plugin | Purpose |
 |--------|---------|
-| **roa-base** | Setup/update machinery, shared agents and skills |
-| **roa-ui** | UI testing with three-layer component architecture |
-| **roa-api** | REST API testing with fluent patterns |
-| **roa-db** | Database testing with query abstractions |
+| **roa-base** | Bootstrap only: `/roa-base:setup` and `/roa-base:update`, plus the `repo-memory-architect` agent. Carries no shared payload. |
+| **roa-ui** | UI testing — three-layer component architecture, typed elements, synchronisation, tables, insertion, interception |
+| **roa-api** | REST API testing — typed endpoints, DTOs, `RING_OF_API` chains, `Assertion.builder()` validation |
+| **roa-db** | Database testing — `DbQuery` enums, bound parameters, `DataCleaner`-owned cleanup |
 
 ## Architecture
 
-### Shared Sources (`source/shared/`)
+### Shared sources (`source/shared/`)
 
-**Agents** — Specialist AI agents for different domains:
-- `roa-ui-specialist.md` — UI test expert
-- `roa-api-specialist.md` — API test expert
-- `roa-db-specialist.md` — Database test expert
+Everything here ships verbatim into each domain plugin (roa-ui, roa-api, roa-db).
+A file belongs here only if an API-only or DB-only reader would find it correct and
+complete; module-specific material lives in that plugin's own folder.
 
-**Skills** — Utility skills for common tasks
-**Instructions** — Framework documentation
-**Rules** — Coding standards
+| Folder | Contents |
+| --- | --- |
+| `agents/` | `codebase-investigator`, `planner`, `implementation-engineer`, `validator`, `test-debugger`, `adversarial-reviewer`, `security-reviewer`, `researcher` |
+| `skills/` | Stack-agnostic workflows (`plan-task`, `implement-task`, `run-tests`, `validate-code`, `review-change`, `debug`, `fix-tests`, `flaky-triage`, …) and the hidden policy skills (`ai-compass`, `ai-teacher`, `java-standards`, `definition-of-done`, `validation-policy`, `git-pr-lifecycle-policy`). See `source/shared/skills/README.md`. |
+| `docs/` | Single-topic framework reference chunks (`framework-*.md`, `code-standards.md`, `testing-standards.md`, `quality-gates.md`, `pandora-metadata.md`, …) |
+| `rules/` | Always-on repository rules delivered to the target's `.claude/rules/` |
+| `hooks/` | `hooks.json` plus the guard and validation scripts |
+| `settings/`, `mcp/`, `monitors/`, `output-styles/`, `themes/`, `lsp/`, `scripts/`, `templates/` | Remaining plugin payload and build templates |
 
-All shared sources are copied into every plugin's dist/ output, ensuring each plugin is self-contained.
+### Plugin sources (`source/plugins/<name>/`)
 
-### Plugin Sources (`source/plugins/`)
+| Item | Purpose |
+| --- | --- |
+| `plugin-config.json` | Metadata, `copy`/`render`/`mergeHooks` rules, and the `setup` block that drives `/roa-base:setup` |
+| `agents/` | Module-specific agents, e.g. `roa-api-contract-investigator`, `roa-ui-flakiness-reviewer`, `roa-db-data-reviewer` |
+| `skills/` | `roa-<module>-architect` plus the hidden profile skills the shared workflows load by name (`-task-profile`, `-validation-profile`, `-quality-gate`, `-definition-of-done`, `-guidance`, `-examples`) |
+| `docs/` | Module reference chunks |
+| `setup/` | The `CLAUDE.md` managed-block template, per-module rules, and settings fragment |
+| `mcp/` | Module MCP catalog |
 
-Each plugin directory contains:
-- `plugin-config.json` — Metadata, dependencies, agents, skills
-- `skills/` — Plugin-specific skills
-- `agents/` — Plugin-specific agents (references to shared agents)
+### Generated plugins (`dist/plugins/<name>/`)
 
-### Generated Plugins (`dist/plugins/`)
+Each generated plugin is self-contained and laid out at the plugin root:
 
-Build process generates each plugin with:
-- `.claude/agents/` — Shared agents (copied from `source/shared/agents/`)
-- `.claude/skills/` — Plugin skills
-- `.claude/instructions/` — Framework documentation
-- `.claude/rules/` — Coding standards
-- `plugin-config.json` — Plugin metadata
+```text
+.claude-plugin/plugin.json   agents/   skills/   docs/   hooks/   mcp/
+monitors/   output-styles/   scripts/   themes/   .lsp.json   README.md
+```
 
-**Key:** Each dist/ plugin is completely self-contained. No inter-plugin dependencies.
+Shared sources are copied into every domain plugin, so installed plugins never
+depend on a sibling `shared/` folder. The generated `.claude-plugin/marketplace.json`
+is written to the repository root (one level above this directory).
+
+Rules are **not** plugin payload: they reach the target repository through each
+plugin's `setup.rules[]` and land in the target's `.claude/rules/`.
 
 ## Building
 
-### Prerequisites
-- Node.js 18+
-
-### Commands
+Requires Node.js 20+.
 
 ```bash
-npm install              # Install dependencies (currently none)
-npm run build            # Generate dist/plugins
-npm run validate         # Validate plugin configs
-npm run bump-version <type>  # Bump all versions (patch/minor/major)
+npm install
+npm run build            # generate dist/plugins and the marketplace manifest
+npm run validate         # validate plugin configs and generated output
+npm run bump-version -- <patch|minor|major>
 ```
 
-### What Build Does
+### What the build does
 
-1. Reads `source/plugins/*/plugin-config.json`
-2. Copies shared agents, skills, instructions, rules to each plugin
-3. Copies plugin-specific skills
-4. Writes each plugin's `.claude-plugin/plugin-config.json`
-5. Outputs complete, self-contained plugins to `dist/plugins/`
+1. Reads `source/plugins/*/plugin-config.json` and orders plugins by local dependencies.
+2. Applies each plugin's `copy`, `render` and `mergeHooks` rules.
+3. Renders `.claude-plugin/plugin.json` from the shared templates.
+4. Produces the setup registry and generated templates under
+   `dist/plugins/roa-base/skills/setup/generated/` (see `docs/setup-registry-contract.md`).
+5. Writes the marketplace manifest.
 
-## Dependencies
+## Dependencies and versioning
 
-Each plugin declares dependencies in `plugin-config.json`:
+`roa-ui`, `roa-api` and `roa-db` declare `"dependencies": ["roa-base"]`; `roa-base`
+has none. All plugins share one version and one release tag (`v{version}`), because a
+target repository pins a marketplace ref, not a plugin. Details, including
+cross-marketplace dependencies, are in `docs/plugin-dependencies.md`.
 
-```json
-{
-  "dependencies": ["roa-base"]
-}
-```
+## Plugins in target projects
 
-Current dependency tree:
-- `roa-base` — no dependencies
-- `roa-ui` → depends on `roa-base`
-- `roa-api` → depends on `roa-base`
-- `roa-db` → depends on `roa-base`
+1. Add this marketplace to Claude Code.
+2. Run `/roa-base:setup <roa-ui|roa-api|roa-db>` in the target repository, then
+   `/reload-plugins --force`.
+3. Run `/roa-base:update <plugin> <version-or-ref>` to move an existing repository
+   forward.
 
-Build system validates and orders plugins correctly.
-
-## Plugins in Target Projects
-
-When users install these plugins in a target repository, they get:
-
-**roa-base:**
-- Agents: UI Specialist, API Specialist, DB Specialist
-- Skills: `/roa-setup`, `/roa-update`
-- Shared instructions and rules
-
-**roa-ui:**
-- Agent: UI Specialist (shared)
-- Skills: `/roa-ui-architect`
-- UI-specific instructions
-- All shared rules and instructions
-
-**roa-api:**
-- Agent: API Specialist (shared)
-- Skills: `/roa-api-architect`
-- API-specific instructions
-- All shared rules and instructions
-
-**roa-db:**
-- Agent: DB Specialist (shared)
-- Skills: `/roa-db-architect`
-- Database-specific instructions
-- All shared rules and instructions
-
-All are independent — install any combination.
+Setup writes the managed `CLAUDE.md` block, `.claude/settings.json`,
+`.claude/rules/`, and (when configured) `ai-config.yaml` / `.mcp.json`.
 
 ## CI/CD
 
-### GitHub Actions
+Workflows live at the repository root in `.github/workflows/`:
 
-**build-plugins.yml** — Triggered on PR and main branch:
-1. Runs build and validate
-2. Reports changes on PRs
-3. Auto-commits artifacts to main after merge
+- **build-plugins.yml** — on PRs and pushes touching `roa-ai-config/**`: builds,
+  validates, reports changes on PRs, and commits regenerated artifacts on `main`.
+- **bump-plugin-version.yml** — manual: bumps every plugin version together,
+  rebuilds, and commits to `main`.
 
-**bump-plugin-version.yml** — Manual workflow:
-1. Accepts `patch`, `minor`, or `major` increment
-2. Bumps all plugin versions
-3. Rebuilds and commits to main
+## Development workflow
 
-## Versioning
+1. Edit files under `source/`.
+2. `npm run build`, then `npm run validate`.
+3. Commit both `source/` and the regenerated `dist/`; never hand-edit `dist/` or
+   `.claude-plugin/marketplace.json`.
 
-Plugins use semantic versioning: `MAJOR.MINOR.PATCH`
-
-- **MAJOR** — Breaking changes to framework patterns
-- **MINOR** — New features, backward compatible
-- **PATCH** — Bug fixes, documentation
-
-Root package.json version tracks overall marketplace version.
-
-## Development Workflow
-
-1. **Edit sources** — Modify files in `source/`
-2. **Build** — `npm run build` generates `dist/plugins/`
-3. **Validate** — `npm run validate` checks configs
-4. **Commit** — Include both source and generated dist/
-5. **CI handles publishing** — Automatic on main branch merge
-
-## For Target Project Users
-
-If setting up or updating an ROA test project:
-
-1. Add this marketplace to Claude Code
-2. Run `/roa-setup` for new projects
-3. Or `/roa-update` to update existing projects
-
-See individual plugin descriptions for what each provides.
-
-## Contributing
-
-When updating shared sources:
-
-- Edit `source/shared/{agents|skills|instructions|rules}/`
-- Run `npm run build` to regenerate plugins
-- Commit both source and dist/
-- CI publishes changes
-
-Changes flow automatically to all plugins.
+Maintainer references: `docs/hook-requirements.md`, `docs/plugin-dependencies.md`,
+`docs/setup-registry-contract.md`, `docs/shared-agents.md`.
 
 ## License
 
-UNLICENSED (Private marketplace)
+UNLICENSED (private marketplace)

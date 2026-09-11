@@ -58,7 +58,8 @@ entered — cross-ring tests are normal (drive the UI, then verify in the databa
 | --- | --- |
 | Map an unfamiliar area | `codebase-investigator` |
 | Break the change before review does | `adversarial-reviewer` |
-| ROA API Testing-specific review | see this plugin's specialist agent |
+| Establish the contract before designing | `roa-api-contract-investigator` |
+| Review against the contract | `roa-api-contract-reviewer` |
 | Prove it passes | `validator` |
 
 ## Commands

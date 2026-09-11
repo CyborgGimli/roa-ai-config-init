@@ -143,7 +143,7 @@ Changing an `Endpoint` implementation means regenerating metadata:
 
 Generated code must:
 
-- ✓ Compile — `mvn -q test-compile` succeeds
+- ✓ Compile — `mvn test-compile` succeeds
 - ✓ Use `quest.use(RING_OF_API)` — never RestAssured directly in a test
 - ✓ Use typed endpoints with `withPathParam` / `withQueryParam` / `withHeader`
 - ✓ Assert status **and** payload

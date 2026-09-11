@@ -52,8 +52,9 @@ block, with an explanation the model can act on.
   deadlocking.
 - **X4** — Bounded runtime: every spawned command carries a timeout, and a timeout
   is treated as "cannot determine", not as failure.
-- **X5** — Ordering: format → static analysis → compile. Cheapest and most
-  deterministic first.
+- **X5** — Cheapest check first. `validate-java-edit` runs `compile`, and reaches
+  for `test-compile` only when a test source changed; the Stop gate runs the
+  tests only after Java was touched.
 
 ## Platform notes
 

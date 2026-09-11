@@ -2,14 +2,14 @@
 
 `setup.mjs` carries no build-time knowledge. Everything it needs is read from
 `<skill root>/generated/`, which `scripts/build.mjs` must produce and the build
-must copy into `dist/plugins/roa-base/.claude/skills/setup/generated/`.
+must copy into `dist/plugins/roa-base/skills/setup/generated/`.
 
 At runtime:
 
 ```
-SCRIPT_DIR    = .../.claude/skills/setup/scripts
-SKILL_ROOT    = .../.claude/skills/setup
-REGISTRY_PATH = .../.claude/skills/setup/generated/setup-registry.json
+SCRIPT_DIR    = .../skills/setup/scripts
+SKILL_ROOT    = .../skills/setup
+REGISTRY_PATH = .../skills/setup/generated/setup-registry.json
 ```
 
 **Every path inside the registry is resolved relative to `SKILL_ROOT`**, except
@@ -25,12 +25,12 @@ to the **target repository** and are rejected if they escape it.
     "roa-ui": {
       "marketplaceName": "roa-ai",
       "marketplaceRepo": "your-org/roa-ai-config",
-      "marketplaceRef": "roa-ui--v0.1.0",
+      "marketplaceRef": "v0.1.0",
       "enabledPlugin": "roa-ui@roa-ai",
       "pluginVersion": "0.1.0",
 
       "claudeTemplate": "generated/templates/roa-ui/CLAUDE.md",
-      "ruleTemplate": "generated/templates/roa-ui/rule.md",
+      "ruleTemplate": "generated/templates/roa-ui/rules.md",
       "ruleFile": ".claude/rules/roa-ui.md",
       "aiConfigTemplate": "generated/templates/roa-ui/ai-config.yaml",
 
@@ -56,8 +56,10 @@ to the **target repository** and are rejected if they escape it.
 
       "templateValues": {
         "plugin_name": "roa-ui",
+        "plugin_display_name": "ROA UI Testing",
         "marketplace_name": "roa-ai",
-        "marketplace_ref": "roa-ui--v0.1.0",
+        "marketplace_repo": "your-org/roa-ai-config",
+        "marketplace_ref": "v0.1.0",
         "enabled_plugin": "roa-ui@roa-ai"
       },
 
@@ -73,7 +75,7 @@ to the **target repository** and are rejected if they escape it.
 | --- | --- | --- |
 | `marketplaceName` | yes | key written under `extraKnownMarketplaces` |
 | `marketplaceRepo` | yes | `owner/repo` for the GitHub marketplace source |
-| `marketplaceRef` | yes | pinned ref; overridden by `/roa-base:update <version>` |
+| `marketplaceRef` | yes | pinned ref, `v{version}`, identical for every plugin; overridden by `/roa-base:update <version>` |
 | `enabledPlugin` | yes | must look like `plugin-name@marketplace-name` |
 | `pluginVersion` | no | when set and it differs from the installed version, `claude plugin update` runs |
 | `claudeTemplate` | yes | template for the `CLAUDE.md` managed block |
@@ -84,7 +86,7 @@ to the **target repository** and are rejected if they escape it.
 | `settingsFragments[]` | no | JSON fragments merged into `.claude/settings.json`, in order |
 | `mcpTemplates[]` | no | MCP catalogs; when empty, `.mcp.json` generation is skipped entirely |
 | `extraDirectories[]` | no | directories created in the target repo |
-| `templateValues` | no | `${key}` substitutions for every template; `plugin_name` is filled in automatically |
+| `templateValues` | no | `${key}` substitutions for every template; the build fills in `plugin_name`, `plugin_display_name`, `marketplace_name`, `marketplace_repo`, `marketplace_ref` and `enabled_plugin` |
 | `install.enabled` | no | `false` skips install and reports `skipped plugin install` |
 | `install.scope` | no | defaults to `project` |
 
