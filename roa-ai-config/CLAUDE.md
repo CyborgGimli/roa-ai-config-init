@@ -29,11 +29,12 @@ npm run validate   # Validate plugins
 
 ## Structure
 
-- `source/shared/` — Shared agents, skills, instructions, rules
+- `source/shared/` — Shared agents, skills, docs, rules, hooks, settings
 - `source/plugins/` — Plugin definitions
-- `dist/plugins/` — Generated plugin packages (self-contained)
+- `dist/plugins/` — Generated plugin packages (self-contained, laid out at the plugin root)
 - `scripts/` — Build, validate, version bump
-- `.github/workflows/` — CI/CD
+- `docs/` — Maintainer references (hooks, dependencies, setup registry); not shipped to targets
+- `../.github/workflows/` — CI/CD (repository root, one level above this directory)
 
 ## Key Architectural Insight
 

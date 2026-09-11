@@ -54,7 +54,8 @@ entered — cross-ring tests are normal (drive the UI, then verify in the databa
 | --- | --- |
 | Map an unfamiliar area | `codebase-investigator` |
 | Break the change before review does | `adversarial-reviewer` |
-| ROA UI Testing-specific review | see this plugin's specialist agent |
+| Verify DOM, locators and readiness first | `roa-ui-application-investigator` |
+| Review for flakiness | `roa-ui-flakiness-reviewer` |
 | Prove it passes | `validator` |
 
 ## Commands

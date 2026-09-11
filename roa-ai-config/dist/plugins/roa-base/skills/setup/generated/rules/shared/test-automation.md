@@ -17,7 +17,10 @@ what counts as proof it works (`validation.md`).
   or skipping the test, or changing a correct expectation. If that is the only
   way to green, the cause has not been found yet.
 - Keep tests independently executable. No dependence on execution order, on data
-  another test created, or on state left behind by a previous run.
+  another test created, or on state left behind by a previous run. The one
+  exception is a class that deliberately extends `BaseQuestSequential` because the
+  scenario genuinely requires shared state; that choice is part of the design and
+  must be stated, not a way to paper over missing setup.
 - Create data uniquely per run so reruns and parallel execution do not collide,
   and design the cleanup at the same time as the setup rather than afterwards.
 - Cleanup must be safe when the expected state is already missing — a test that

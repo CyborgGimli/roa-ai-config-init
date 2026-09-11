@@ -85,7 +85,7 @@ should be exercising.
 
 Generated code must:
 
-- ✓ Compile — `mvn -q test-compile` succeeds
+- ✓ Compile — `mvn test-compile` succeeds
 - ✓ Pass every value through `withParam`, with no concatenated SQL anywhere
 - ✓ Declare explicit column lists rather than `SELECT *`, which couples the test
   to column order

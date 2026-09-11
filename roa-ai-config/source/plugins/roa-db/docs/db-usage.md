@@ -52,7 +52,7 @@ entered — cross-ring tests are normal (drive the UI, then verify in the databa
 | --- | --- |
 | Map an unfamiliar area | `codebase-investigator` |
 | Break the change before review does | `adversarial-reviewer` |
-| ROA Database Testing-specific review | see this plugin's specialist agent |
+| Review query safety and row ownership | `roa-db-data-reviewer` |
 | Prove it passes | `validator` |
 
 ## Commands
