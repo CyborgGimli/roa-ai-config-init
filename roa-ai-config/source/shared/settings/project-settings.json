@@ -1,29 +1,20 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "model": "sonnet",
+  "effortLevel": "high",
+  "outputStyle": "ROA Concise",
   "permissions": {
-    "allow": [
-      "Bash(mvn:*)",
-      "Bash(git status)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git branch:*)",
-      "Bash(node:*)",
-      "Read(//**)",
-      "Glob(//**)",
-      "Grep(//**)"
-    ],
     "deny": [
-      "Read(//**/.env)",
-      "Read(//**/.env.*)",
-      "Read(//**/secrets/**)",
-      "Read(//**/id_rsa)",
-      "Read(//**/id_rsa*)",
-      "Read(//**/*.pem)",
-      "Read(//**/*.key)",
-      "Read(//**/*.p12)",
-      "Read(//**/*.pfx)",
-      "Read(//**/*.jks)",
-      "Read(//**/*.keystore)",
-      "Read(//**/credentials.json)",
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(secrets/**)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*.p12)",
+      "Read(**/*.pfx)",
+      "Read(**/*.jks)",
+      "Read(**/*.keystore)",
+      "Read(**/id_rsa*)",
       "Read(~/.ssh/**)",
       "Read(~/.aws/**)",
       "Read(~/.config/gh/**)",
@@ -52,8 +43,5 @@
       "PowerShell(docker push *)",
       "PowerShell(gh release *)"
     ]
-  },
-  "env": {
-    "MAVEN_OPTS": "-Xmx1g"
   }
 }

@@ -1328,31 +1328,6 @@ function writeProjectMcp(targetRoot, mcpServers) {
   return changed;
 }
 
-function resolveLogFile(targetRoot) {
-  const aiConfigPath = resolveTargetPath(targetRoot, "ai-config.yaml");
-  if (!fs.existsSync(aiConfigPath)) {
-    return "";
-  }
-  const parsed = parseYamlText(readText(aiConfigPath), "ai-config.yaml");
-  const logs = parsed.logs;
-  if (isPlainObject(logs) && typeof logs.file === "string" && logs.file.trim()) {
-    return logs.file.trim();
-  }
-  return "";
-}
-
-function updateLogEnv(filePath, logFile) {
-  if (!logFile) {
-    return null;
-  }
-  const data = loadSettings(filePath);
-  if (!isPlainObject(data.env)) {
-    data.env = {};
-  }
-  data.env.ROA_LOG_FILE = logFile;
-  return writeIfChanged(filePath, JSON.stringify(data, null, 2) + "\n");
-}
-
 function updateSettings(filePath, spec, notes = []) {
   const data = loadSettings(filePath);
   for (const fragmentPath of spec.settingsFragments ?? []) {
@@ -1513,15 +1488,6 @@ function run(options) {
   changed.push([updateSettings(settingsPath, spec, settingsNotes), settingsPath]);
   const mcpResult = updateProjectMcp(targetRoot, spec);
   changed.push(...mcpResult.changed);
-
-  // Point the log monitor at the log file declared in ai-config.yaml (if any).
-  const logFile = resolveLogFile(targetRoot);
-  if (logFile) {
-    const logEnvStatus = updateLogEnv(settingsPath, logFile);
-    if (logEnvStatus) {
-      changed.push([`${logEnvStatus} (env.ROA_LOG_FILE=${logFile})`, settingsPath]);
-    }
-  }
 
   const enabledResult = enablePlugin(spec, targetRoot);
   if (enabledResult) {

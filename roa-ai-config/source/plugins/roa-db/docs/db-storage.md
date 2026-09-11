@@ -41,4 +41,4 @@ quest.use(RING_OF_DB)
 
 Storage keeps every write, so running the same query twice stores both responses.
 `getByIndex(key, 2, ...)` reaches the previous one — useful for before/after
-comparisons around an action. See `framework-storage.md`.
+comparisons around an action. See `roa-data-and-storage.md`.

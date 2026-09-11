@@ -39,10 +39,10 @@ entered — cross-ring tests are normal (drive the UI, then verify in the databa
 
 | Task | Skill |
 | --- | --- |
-| Plan a change | `plan-task` |
-| Write the change | `implement-task` |
-| Prove it works | `validate-code` (runs `roa-db-quality-gate`) |
-| Diagnose a failure | `debug` |
+| Plan a change | `plan-test-automation` |
+| Write the change | `implement-test-automation` |
+| Prove it works | `validate-test-automation` (runs `roa-db-quality-gate`) |
+| Diagnose a failure | `debug-test-automation` |
 | Repair failing tests | `fix-tests` |
 | Check completeness | `roa-db-definition-of-done` |
 
@@ -51,7 +51,7 @@ entered — cross-ring tests are normal (drive the UI, then verify in the databa
 | Need | Agent |
 | --- | --- |
 | Map an unfamiliar area | `codebase-investigator` |
-| Break the change before review does | `adversarial-reviewer` |
+| Break the change before review does | `adversarial-test-reviewer` |
 | Review query safety and row ownership | `roa-db-data-reviewer` |
 | Prove it passes | `validator` |
 
@@ -64,4 +64,4 @@ mvn clean install                      # full quality checks
 mvn pandora:navigation -U              # regenerate framework metadata
 ```
 
-See `quality-gates.md` for the evidence format these produce.
+See `db-quality-gate.md` for the evidence format these produce.

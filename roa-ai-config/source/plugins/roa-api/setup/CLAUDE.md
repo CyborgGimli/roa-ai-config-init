@@ -1,49 +1,20 @@
-<!-- BEGIN ROA AI CONFIG: ${plugin_name} -->
-## ROA API Test Automation
+<!-- BEGIN ROA AI CONFIG: roa-api -->
 
-This repository is configured for the ROA framework via `${enabled_plugin}`
-(marketplace `${marketplace_name}`, ref `${marketplace_ref}`).
+# Project Claude Code Guide
 
-This block is generated. Put repository-specific guidance outside the markers so
-`/roa-base:update` preserves it.
+## ROA AI Config — ${plugin_name}
 
-### Workflows
+Configured for `${enabled_plugin}` (marketplace `${marketplace_name}`, ref `${marketplace_ref}`). This block is generated — put repository-specific guidance outside the managed markers so updates preserve it.
 
-`/${plugin_name}:plan-task` to plan, `/${plugin_name}:implement-task` to build,
-`/${plugin_name}:run-tests` to execute the narrowest sufficient scope,
-`/${plugin_name}:validate-code` before claiming done, and
-`/${plugin_name}:review-change` for an independent pass on anything substantial.
-On a failure: `/${plugin_name}:debug` to find the cause, then
-`/${plugin_name}:fix-tests` to repair it.
+- **Work through the ROA workflows:** use `/${plugin_name}:plan-test-automation` when planning is needed, `/${plugin_name}:implement-test-automation` for implementation, `/${plugin_name}:run-tests` for targeted execution, `/${plugin_name}:debug-test-automation` or `/${plugin_name}:fix-tests` for failures, `/${plugin_name}:validate-test-automation` before completion, and `/${plugin_name}:review-test-automation` for independent review.
+- **API architecture:** use `/${plugin_name}:architect-api-tests` when a task requires API contract investigation, endpoint/model design, or broader test-architecture decisions.
+- **ROA framework truth:** when exact `io.cyborgcode.roa.*` usage, annotations, methods, overloads, lifecycle behavior, or available options are uncertain, inspect Pandora metadata. Never guess ROA APIs.
+- **Project Java patterns:** before generating new Java code, consult relevant AI Teacher lessons when available. Prefer verified repository code and approved lessons over generic patterns.
+- **API contract truth:** derive endpoints, payloads, authentication, status expectations, and response behavior from authoritative Swagger/OpenAPI or verified project evidence. Do not invent missing contract details.
+- **Definition of done:** do not claim completion until the relevant implementation compiles, meaningful validation has been performed, failures are resolved or explicitly reported as blocked, and the applicable ROA definition-of-done criteria are satisfied.
+- **Validation integrity:** never skip, weaken, disable, or hide failing tests to obtain a green result. Report exactly what was executed and what remains unvalidated.
+- **Rules and references:** persistent repository rules live in `.claude/rules/`; deeper ROA/API reference material and examples ship with the installed plugin.
+- **Repository conventions:** preserve established project structure and reusable abstractions when they are compatible with installed ROA guidance. Do not infer conventions that are not supported by repository evidence.
+- **Update:** refresh this generated configuration with `/roa-base:update ${plugin_name} <version-or-ref>`.
 
-Use `/${plugin_name}:roa-api-architect` when a task needs new API coverage
-rather than a change to an existing test.
-
-### Non-negotiables
-
-- **Contract first.** Endpoint paths, methods, parameter locations, status codes
-  and schemas come from the authoritative Swagger/OpenAPI source. A `201` on
-  create is a common convention, not a fact about this API — check it.
-- **Framework truth.** When an `io.cyborgcode.roa.*` signature, annotation,
-  overload or option is unclear, load `ai-compass` and read
-  `target/pandora/metadata/`. Never guess a ROA API.
-- **Project patterns.** Before writing a new Java class, load `ai-teacher` and
-  follow the closest approved lesson.
-- **The ring, not the client.** API calls go through `quest.use(RING_OF_API)`.
-  RestAssured at a call site defeats the abstraction the repository is built on.
-- **Assert the outcome.** Status alone is not evidence when the requirement
-  depends on the payload or on resulting state.
-- **Done means proven.** Compiled is not done. Validation that skipped, weakened
-  or disabled a test is not evidence — report exactly what ran and what did not.
-
-### Where things are
-
-- Repository rules: `.claude/rules/` — start at `${plugin_name}.md`
-- Repository configuration: `ai-config.yaml` (non-secret values only)
-- Deep reference and examples ship inside the installed plugin's `docs/`
-
-Build with `mvn clean compile`; regenerate framework metadata with
-`mvn pandora:navigation -U` after changing dependencies or an `Endpoint`.
-
-Refresh this block with `/roa-base:update ${plugin_name} <version-or-ref>`.
-<!-- END ROA AI CONFIG: ${plugin_name} -->
+<!-- END ROA AI CONFIG: roa-api -->

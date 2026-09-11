@@ -1,6 +1,6 @@
 ---
 name: roa-db-quality-gate
-description: The reusable Database verification gate - runs the applicable build and tests for this repository and reports explicit pass/fail evidence. Consumed by validate-code.
+description: The reusable Database verification gate - runs the applicable build and tests for this repository and reports explicit pass/fail evidence. Consumed by validate-test-automation.
 user-invocable: false
 allowed-tools: Read, Grep, Glob, Bash
 ---

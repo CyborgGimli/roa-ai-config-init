@@ -1,46 +1,113 @@
 #!/usr/bin/env node
-// PreToolUse guard for Bash: refuse Maven commands that skip tests.
-//
-// Skipping tests to get a green build is the single most common way an agent
-// reports success on work that does not actually pass. Exits 2 to block, 0 to allow.
+// ROA PreToolUse guard for Maven commands that bypass or hide test failures.
 
+import fs from "node:fs";
 import process from "node:process";
-import { readPayload, block } from "./maven-hook-utils.mjs";
 
-// Matches `mvn`, `./mvnw`, `.\mvnw.cmd`, and an `&`-call-operator invocation, so
-// the guard covers PowerShell as well as POSIX shells.
-const isMavenCommand = (command) =>
-  /(^|[\s;&|(])(?:[.][\\/])?mvnw?(?:\.cmd)?(?=\s|$)/i.test(command);
-
-const skipsTests = (command) =>
-  /(^|[\s"'])(-DskipTests(?:=true)?|-Dmaven\.test\.skip(?:=true)?|-DskipITs(?:=true)?)(?=[\s"']|$)/i.test(command);
-
-const GUARDED_TOOLS = new Set(["Bash", "PowerShell"]);
-
-function main() {
-  const payload = readPayload();
-  if (!GUARDED_TOOLS.has(String(payload?.tool_name ?? ""))) {
-    process.exit(0);
-  }
-  const command = payload?.tool_input?.command;
-  if (typeof command !== "string" || !command.trim()) {
-    process.exit(0);
-  }
-  if (!isMavenCommand(command) || !skipsTests(command)) {
-    process.exit(0);
-  }
-
-  block(
-    [
-      "maven-command-guard: blocked a Maven command that skips tests.",
-      "",
-      "Skipping tests hides the failure rather than fixing it, and any result reported",
-      "from such a build is not evidence that the change works.",
-      "",
-      "Run the build without -DskipTests / -Dmaven.test.skip. If a test is genuinely",
-      "broken for an unrelated reason, say so and fix the cause.",
-    ].join("\n")
-  );
+function readInput() {
+    try {
+        return fs.readFileSync(0, "utf8").replace(/^\uFEFF/, "");
+    } catch {
+        return "";
+    }
 }
 
-main();
+function parseInput(text) {
+    try {
+        return text.trim() ? JSON.parse(text) : {};
+    } catch {
+        return {};
+    }
+}
+
+function isMavenCommand(command) {
+    return /(^|[\s;&|()])(?:(?:\.?[\\/])?mvnw(?:\.cmd)?|mvn(?:\.cmd)?)(?=\s|$)/i.test(
+        command,
+    );
+}
+
+function escapeRegExp(value) {
+    return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Match Maven -D properties that are enabled either explicitly with =true
+ * or implicitly by providing the property without a value.
+ *
+ * Examples:
+ *   -DskipTests
+ *   -DskipTests=true
+ *
+ * Does not match:
+ *   -DskipTests=false
+ */
+function hasEnabledProperty(command, property) {
+    const escapedProperty = escapeRegExp(property);
+
+    return new RegExp(
+        `(^|\\s)["']?-D${escapedProperty}(?:=true)?["']?(?=\\s|$)`,
+        "i",
+    ).test(command);
+}
+
+function findViolation(command) {
+    if (
+        hasEnabledProperty(command, "skipTests") ||
+        hasEnabledProperty(command, "maven.test.skip")
+    ) {
+        return "Maven tests must not be skipped by default";
+    }
+
+    if (hasEnabledProperty(command, "maven.test.failure.ignore")) {
+        return "Maven test failures must not be ignored";
+    }
+
+    if (
+        /(^|\s)["']?(?:-fn|--fail-never)["']?(?=\s|$)/i.test(
+            command,
+        )
+    ) {
+        return "Maven --fail-never must not hide build or test failures";
+    }
+
+    return null;
+}
+
+function deny(reason) {
+    console.log(
+        JSON.stringify({
+            hookSpecificOutput: {
+                hookEventName: "PreToolUse",
+                permissionDecision: "deny",
+                permissionDecisionReason:
+                    `ROA Maven policy: ${reason}. ` +
+                    "Run the relevant validation normally instead of bypassing or hiding failures.",
+            },
+        }),
+    );
+}
+
+const payload = parseInput(readInput());
+const command = String(payload.tool_input?.command ?? "");
+
+const toolName =
+    String(
+        payload.tool_name ?? "",
+    );
+
+if (
+    ![
+        "Bash",
+        "PowerShell",
+    ].includes(toolName) ||
+    command.trim() === "" ||
+    !isMavenCommand(command)
+) {
+    process.exit(0);
+}
+
+const violation = findViolation(command);
+
+if (violation) {
+    deny(violation);
+}

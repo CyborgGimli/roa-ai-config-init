@@ -67,7 +67,7 @@ the file and pass it in — `-Ddb.default.password=…` from the CI secret store
 system properties merge over the file.
 
 Per-environment files (`config-dev`, `config-staging`) are selected by a Maven
-profile; `framework-config.md` has the layout.
+profile; the archetype-generated `pom.xml` and `system.properties` define the layout.
 
 ## MCP-facing configuration
 

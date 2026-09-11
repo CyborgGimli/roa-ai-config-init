@@ -1,202 +1,317 @@
-# ROA UI — Tables: Model and Reading
+# UI Tables
 
-Tables are the one UI area that uses `Assertion.builder()`, because a table assertion
-needs a target, a type and an expected value rather than a single comparison.
+ROA UI automation should represent structured tabular content through the project's established table abstractions rather than treating rows, cells, and actions as unrelated raw elements.
 
-Filtering, sorting, editing and clicking inside cells are in
-`ui-tables-operations.md`.
+This document defines UI-specific guidance for table modeling, field mapping, row selection, filtering, sorting, pagination, and validation.
 
-## Row model
+## Mental Model
 
-A class describing one row, annotated with the table's structural locators:
-
-```java
-@TableInfo(
-    tableContainerLocator = @FindBy(id = "filtered_transactions_for_account"),
-    rowsLocator           = @FindBy(css = "tbody tr"),
-    headerRowLocator      = @FindBy(css = "thead tr"))
-public class FilteredTransactionEntry {
-
-    @TableCellLocator(
-        cellLocator       = @FindBy(css = "td:nth-of-type(1)"),
-        headerCellLocator = @FindBy(css = "th:nth-of-type(1)"))
-    private TableCell date;
-
-    @TableCellLocator(
-        cellLocator       = @FindBy(css = "td.description"),
-        headerCellLocator = @FindBy(css = "th.description"))
-    private TableCell description;
-
-    // getters and setters — the setters are what TableField binds to
-}
+```text
+application table
+      ↓
+typed table abstraction
+      ↓
+field definitions
+      ↓
+row / cell operations
+      ↓
+validation or action
 ```
 
-| Annotation attribute | What ROA uses it for |
-| --- | --- |
-| `tableContainerLocator` | scopes every operation to this table, so a second table on the page is never touched |
-| `rowsLocator` | enumerates rows for `readTable` / `readRow` |
-| `headerRowLocator` | resolves column headers for field mapping, filtering and sorting |
-| `cellLocator` / `headerCellLocator` | resolves one column's cell and its header |
+A table abstraction should make structured data interaction clearer while preserving the actual application behavior.
 
-Each mapped column is a `TableCell` field. Fields without `@TableCellLocator` are not
-resolved from the page.
+## When to Use a Table Abstraction
 
-## Table element enum
+Use a table-specific abstraction when the UI presents meaningful structured rows and columns that tests need to interact with repeatedly.
 
-`TableElement` registers the table and binds it to its row model:
+Typical scenarios may include:
 
-```java
-public enum Tables implements TableElement<Tables> {
+* locating a row by business data;
+* reading a cell;
+* clicking a row action;
+* validating table content;
+* filtering;
+* sorting;
+* pagination;
+* selecting a row for a later operation.
 
-    FILTERED_TRANSACTIONS(FilteredTransactionEntry.class),
-    ALL_TRANSACTIONS(AllTransactionEntry.class);
+Do not introduce a table abstraction for a trivial layout that is not semantically tabular.
 
-    private final Class<?> rowRepresentationClass;
+## Application Discovery
 
-    <T> Tables(final Class<T> rowRepresentationClass) {
-        this.rowRepresentationClass = rowRepresentationClass;
-    }
+Table modeling must be grounded in the actual rendered application.
 
-    @Override
-    public <T> Class<T> rowsRepresentationClass() {
-        return (Class<T>) rowRepresentationClass;
-    }
+Inspect:
 
-    @Override
-    public Tables enumImpl() {
-        return this;
-    }
-}
+* table container;
+* header structure;
+* row structure;
+* cell structure;
+* unique row identifiers;
+* action controls;
+* sorting behavior;
+* filtering behavior;
+* pagination;
+* lazy or dynamic loading;
+* component-library-specific behavior.
+
+Do not infer table structure from screenshots or visual layout alone.
+
+For discovery guidance, see:
+
+`ui-application-discovery.md`
+
+## Typed Table Fields
+
+Projects may represent table columns or fields through typed definitions such as `TableField` or equivalent project abstractions.
+
+Conceptually:
+
+```text
+table column
+→ typed field definition
+→ row/cell lookup
 ```
 
-The service takes the enum constant directly, so no nested `Data` class of string
-constants is needed here — unlike the element enums, no annotation references it.
+Use the repository and Pandora metadata to establish the exact supported table model.
 
-`TableElement` is on the Pandora regeneration list — run `mvn pandora:navigation -U` after
-adding one.
+Do not invent field interfaces, constructors, methods, or registration behavior.
 
-## TableField — projecting columns
+## Row Identification
 
-`TableField.of(Row::setColumn)` binds a column to a setter on the row model. Passing
-fields reads only those columns:
+Select rows using stable business-relevant data where possible.
 
-```java
-quest.use(RING_OF_UI)
-     .table().readTable(
-         Tables.FILTERED_TRANSACTIONS,
-         TableField.of(FilteredTransactionEntry::setDescription),
-         TableField.of(FilteredTransactionEntry::setWithdrawal))
-     .drop().complete();
+Conceptually:
+
+```text
+target customer
+→ locate row by customer identifier or other stable value
+→ perform action on that row
 ```
 
-## Reading
+Avoid relying on row position when the position can change due to:
 
-| Call | Reads |
-| --- | --- |
-| `readTable(table)` | every row, every mapped column |
-| `readTable(table, fields…)` | every row, only the named columns |
-| `readTable(table, from, to)` | a row range, every mapped column |
-| `readTable(table, from, to, fields…)` | a row range, only the named columns |
-| `readRow(table, index)` | one row by index |
-| `readRow(table, index, fields…)` | one row by index, only the named columns |
-| `readRow(table, List.of(…))` | the first row containing all the given values |
-| `readRow(table, List.of(…), fields…)` | the same, only the named columns |
+* sorting;
+* filtering;
+* pagination;
+* new data;
+* asynchronous loading.
 
-There is no overload taking the row class — it comes from the enum's
-`rowsRepresentationClass()`, which is the point of registering the table there.
+Use positional access only when row order itself is part of the scenario.
 
-Narrow the read to what the assertion needs. Column projection and row ranges are
-not just performance: a read that pulls only what the test is about will not break
-when an unrelated column changes.
+## Cell Access
 
-Reads land in storage; `ui-storage.md` covers getting a row back out.
+Access cells through the established table abstraction rather than constructing fragile row-and-column selectors repeatedly.
 
-## Validating
+The table model should preserve the relationship between:
 
-```java
-quest.use(RING_OF_UI)
-     .table().readTable(Tables.ALL_TRANSACTIONS)
-     .table().validate(
-         Tables.ALL_TRANSACTIONS,
-         Assertion.builder().target(TABLE_VALUES).type(ROW_CONTAINS_VALUES)
-                  .expected(List.of("TELECOM")).soft(true).build())
-     .drop().complete();
+```text
+row
++
+field
+=
+target cell
 ```
 
-| Part | Meaning | Where the values come from |
-| --- | --- | --- |
-| `target` | which part of the table is validated | `UiTablesAssertionTarget` |
-| `type` | how it is validated | `TableAssertionTypes` |
-| `expected` | the expected value | your test |
-| `soft` | `true` collects until `complete()`; `false` fails immediately | your test |
+Keep reusable column knowledge centralized according to project conventions.
 
-`validate` is varargs — pass several assertions in one call. Read the table first;
-`validate` asserts over what is in storage, not over the page.
+## Row Actions
 
-### Targets — `UiTablesAssertionTarget`
+Tables often contain controls associated with a specific row, such as:
 
-`TABLE_VALUES`, `TABLE_ELEMENTS`, `ROW_VALUES`, `ROW_ELEMENTS`.
+* edit;
+* delete;
+* open;
+* select;
+* expand;
+* contextual menu actions.
 
-The `*_VALUES` targets assert on cell text; the `*_ELEMENTS` targets assert on the
-state of the controls in the cells. `ROW_*` needs a preceding `readRow(...)`.
+A row action must target the intended row based on verified table structure.
 
-### Types — `TableAssertionTypes`
+Do not locate a generic action button without proving that it belongs to the expected row.
 
-The enum has exactly these twelve. Nothing else is valid.
+## Filtering
 
-| Type | Usual target | `expected` |
-| --- | --- | --- |
-| `TABLE_NOT_EMPTY` | `TABLE_VALUES` | `true` |
-| `TABLE_ROW_COUNT` | `TABLE_VALUES` | the row count |
-| `EVERY_ROW_CONTAINS_VALUES` | `TABLE_VALUES` | `List` of values every row must carry |
-| `TABLE_DOES_NOT_CONTAIN_ROW` | `TABLE_VALUES` | the row that must be absent |
-| `ALL_ROWS_ARE_UNIQUE` | `TABLE_VALUES` | `true` |
-| `NO_EMPTY_CELLS` | `TABLE_VALUES` | `true` to forbid empty cells, `false` to allow them |
-| `COLUMN_VALUES_ARE_UNIQUE` | `TABLE_VALUES` | the column index to check |
-| `TABLE_DATA_MATCHES_EXPECTED` | `TABLE_VALUES` | the whole expected table |
-| `ALL_CELLS_ENABLED` | `TABLE_ELEMENTS` | `true` |
-| `ALL_CELLS_CLICKABLE` | `TABLE_ELEMENTS` | `true` |
-| `ROW_NOT_EMPTY` | `ROW_VALUES` | `true` |
-| `ROW_CONTAINS_VALUES` | `ROW_VALUES` | `List` of values the row must carry |
+When testing or using table filters, distinguish between:
 
-Every constant declares `List` as its supported type, so `expected` is coerced —
-a wrong-shaped `expected` fails at assertion time, not at compile time. Check the
-column index for `COLUMN_VALUES_ARE_UNIQUE` and the direction of `NO_EMPTY_CELLS`
-against what you actually mean.
+```text
+filter as setup
+→ narrow the table so another behavior can be exercised
 
-### Grouping assertions
-
-Table assertions are the case soft mode was made for: one run then reports every
-structural problem instead of stopping at the first.
-
-```java
-.table().validate(
-    Tables.FILTERED_TRANSACTIONS,
-    Assertion.builder().target(TABLE_VALUES).type(TABLE_NOT_EMPTY).expected(true).soft(true).build(),
-    Assertion.builder().target(TABLE_VALUES).type(TABLE_ROW_COUNT).expected(2).soft(true).build(),
-    Assertion.builder().target(TABLE_VALUES).type(ALL_ROWS_ARE_UNIQUE).expected(true).soft(true).build(),
-    Assertion.builder().target(TABLE_ELEMENTS).type(ALL_CELLS_ENABLED).expected(true).soft(true).build())
-.table().readRow(Tables.FILTERED_TRANSACTIONS, 1)
-.table().validate(
-    Tables.FILTERED_TRANSACTIONS,
-    Assertion.builder().target(ROW_VALUES).type(ROW_NOT_EMPTY).expected(true).soft(true).build())
+filter as behavior under test
+→ validate that filtering itself works correctly
 ```
 
-## Traps
+If filtering is only setup, use the simplest valid project abstraction.
 
-- **Validating without reading.** `validate` looks up the table constant in the UI
-  namespace and throws `IllegalArgumentException: No table data found for key: …` when
-  nothing is there. That message means a missing `readTable` / `readRow`, not a
-  broken assertion.
-- **Read order decides what you assert.** Both reads store under the same table
-  constant, and the lookup takes the latest. So `readTable` → table-level assertions
-  → `readRow` → row-level assertions works, and reversing it silently asserts the
-  table-level types against a single row.
-- **Asserting the row count alone.** A count of 1 is satisfied by the wrong row.
-  Assert the values.
-- **Reading before the table has rendered.** Read after the action that populates it,
-  and let `loader().waitToBeShownAndRemoved(...)` or an element hook handle the wait.
-- **Ordering assumptions.** Unless the product guarantees an order, assert
-  containment rather than position — or sort first, then read by index.
-- **Editing without re-reading.** A cell write changes the page, not the rows already
-  in storage.
+If filtering is under test, validate the resulting table state explicitly.
+
+## Sorting
+
+When sorting matters, verify the actual application behavior.
+
+Do not assume:
+
+* default sort direction;
+* sort stability;
+* lexical vs numeric ordering;
+* server-side vs client-side sorting.
+
+If sorting is the behavior under test, assert the resulting order using meaningful table data.
+
+## Pagination
+
+When a target row may exist outside the current page, use the project's established pagination behavior.
+
+Do not assume the first page contains the required row.
+
+If pagination itself is under test, validate:
+
+* navigation behavior;
+* page transitions;
+* item boundaries;
+* resulting content.
+
+The exact pagination approach should follow actual application behavior and project conventions.
+
+## Dynamic Tables
+
+Some tables load or update asynchronously.
+
+Examples include:
+
+* server-side pagination;
+* lazy loading;
+* live refresh;
+* asynchronous filtering;
+* row replacement after actions.
+
+Observe the actual runtime condition that indicates readiness.
+
+Do not use arbitrary sleeps to wait for table updates.
+
+For synchronization guidance, see:
+
+`ui-elements-and-synchronization.md`
+
+## Validation
+
+Table interaction and table validation are separate responsibilities.
+
+Conceptually:
+
+```text
+table lookup
+→ finds row or cell
+
+assertion
+→ proves expected application state
+```
+
+Examples of meaningful validation may include:
+
+* expected row exists;
+* expected row does not exist;
+* a cell contains the required value;
+* a row reflects a completed action;
+* filtering returns the correct data;
+* sorting produces the expected order.
+
+Do not treat successful row lookup as proof of every table-related requirement.
+
+## Reuse Existing Table Models
+
+Before creating new table definitions:
+
+1. inspect the repository for an existing table abstraction;
+2. inspect existing field definitions;
+3. verify the current application table;
+4. reuse or extend the existing model when appropriate;
+5. create new table structures only when necessary.
+
+Avoid multiple competing representations of the same table.
+
+## Tables and Typed Elements
+
+Table-specific abstractions may use typed element definitions internally.
+
+Keep table structure within the table model rather than duplicating the same cells, headers, or actions as unrelated global elements.
+
+Use normal typed element abstractions for controls that genuinely exist outside the table model.
+
+## Tables and Domain Services
+
+A reusable domain service may encapsulate meaningful table behavior when several tests repeatedly perform the same business operation.
+
+For example:
+
+```text
+CustomerService
+→ find customer row
+→ open customer details
+```
+
+Do not create domain services merely to hide one simple table lookup.
+
+## Repository, Application, and Pandora
+
+Use each source for its responsibility:
+
+```text
+Actual application / DevTools
+→ real table DOM, runtime behavior, filtering, sorting, pagination
+
+Existing repository
+→ current table abstractions, fields, and conventions
+
+Pandora
+→ exact ROA table types, methods, options, and usages
+```
+
+Do not use Pandora to infer application table structure.
+
+Do not use DOM inspection to invent unsupported ROA table APIs.
+
+## AI Teacher
+
+When new Java table definitions, fields, or related implementation classes must be created, use the `ai-teacher` skill before generating code.
+
+AI Teacher provides project-approved Java patterns.
+
+Pandora remains responsible for exact ROA framework contracts.
+
+## Core Principles
+
+* Use typed table abstractions for meaningful structured tabular interaction.
+* Ground table modeling in actual application inspection.
+* Reuse existing table definitions and fields before creating new ones.
+* Identify rows through stable business-relevant data where possible.
+* Avoid positional assumptions unless ordering is part of the scenario.
+* Keep row actions associated with the intended row.
+* Treat filtering, sorting, and pagination according to whether they are setup or behavior under test.
+* Synchronize against real table readiness conditions rather than arbitrary delays.
+* Keep table lookup separate from business validation.
+* Use AI Teacher before generating new Java table implementation code.
+* Use Pandora rather than guessing exact ROA table behavior.
+
+## Further Reference
+
+For the overall ROA UI architecture:
+
+`ui-architecture.md`
+
+For application and table discovery:
+
+`ui-application-discovery.md`
+
+For typed elements and synchronization:
+
+`ui-elements-and-synchronization.md`
+
+For component types and implementations:
+
+`ui-component-model.md`
+
+For UI scenario design and validation:
+
+`ui-test-design.md`

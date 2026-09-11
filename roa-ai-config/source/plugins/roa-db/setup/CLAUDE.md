@@ -9,11 +9,11 @@ This block is generated. Put repository-specific guidance outside the markers so
 
 ### Workflows
 
-`/${plugin_name}:plan-task` to plan, `/${plugin_name}:implement-task` to build,
+`/${plugin_name}:plan-test-automation` to plan, `/${plugin_name}:implement-test-automation` to build,
 `/${plugin_name}:run-tests` to execute the narrowest sufficient scope,
-`/${plugin_name}:validate-code` before claiming done, and
-`/${plugin_name}:review-change` for an independent pass on anything substantial.
-On a failure: `/${plugin_name}:debug` to find the cause, then
+`/${plugin_name}:validate-test-automation` before claiming done, and
+`/${plugin_name}:review-test-automation` for an independent pass on anything substantial.
+On a failure: `/${plugin_name}:debug-test-automation` to find the cause, then
 `/${plugin_name}:fix-tests` to repair it.
 
 Use `/${plugin_name}:roa-db-architect` when a task needs new database coverage

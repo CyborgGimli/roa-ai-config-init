@@ -1,14 +1,15 @@
 {
   "name": "roa-api",
-  "displayName": "ROA API Testing",
+  "displayName": "ROA API",
   "version": "0.1.1",
-  "description": "REST API testing with fluent request patterns and response assertions",
-  "category": "testing",
+  "description": "ROA API test automation plugin with API architecture, contract investigation, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
+  "category": "test-automation",
   "tags": [
     "roa",
     "api",
-    "rest",
-    "testing"
+    "java",
+    "test-automation",
+    "claude-code"
   ],
   "defaultEnabled": true,
   "dependencies": [
@@ -16,12 +17,8 @@
   ],
   "copy": [
     {
-      "from": "${shared_dir}/agents",
-      "to": "agents"
-    },
-    {
-      "from": "${plugin_dir}/agents",
-      "to": "agents"
+      "from": "${plugin_dir}/README.md",
+      "to": "README.md"
     },
     {
       "from": "${shared_dir}/skills",
@@ -32,20 +29,12 @@
       "to": "skills"
     },
     {
-      "from": "${shared_dir}/scripts",
-      "to": "scripts"
+      "from": "${shared_dir}/agents",
+      "to": "agents"
     },
     {
-      "from": "${shared_dir}/monitors",
-      "to": "monitors"
-    },
-    {
-      "from": "${shared_dir}/output-styles",
-      "to": "output-styles"
-    },
-    {
-      "from": "${shared_dir}/mcp/ai-config.example.yaml",
-      "to": "mcp/ai-config.example.yaml"
+      "from": "${plugin_dir}/agents",
+      "to": "agents"
     },
     {
       "from": "${shared_dir}/docs",
@@ -56,16 +45,20 @@
       "to": "docs"
     },
     {
-      "from": "${plugin_dir}/README.md",
-      "to": "README.md"
+      "from": "${shared_dir}/output-styles",
+      "to": "output-styles"
+    },
+    {
+      "from": "${shared_dir}/themes",
+      "to": "themes"
     },
     {
       "from": "${shared_dir}/hooks/scripts",
       "to": "hooks/scripts"
     },
     {
-      "from": "${shared_dir}/themes",
-      "to": "themes"
+      "from": "${shared_dir}/scripts",
+      "to": "scripts"
     },
     {
       "from": "${shared_dir}/lsp/lsp.json",
@@ -74,7 +67,7 @@
   ],
   "render": [
     {
-      "from": "${shared_dir}/templates/plugin-standard.json",
+      "from": "${shared_dir}/templates/plugin-complete.json",
       "to": ".claude-plugin/plugin.json"
     }
   ],
@@ -84,18 +77,15 @@
         "${shared_dir}/hooks/hooks.json"
       ],
       "to": "hooks/hooks.json",
-      "description": "ROA API Testing hooks."
+      "description": "ROA API hooks."
     }
   ],
   "executable": [
-    "scripts/tail-logs.mjs",
     "hooks/scripts/dangerous-command-guard.mjs",
     "hooks/scripts/maven-command-guard.mjs",
-    "hooks/scripts/validate-java-edit.mjs",
-    "hooks/scripts/stop-test-gate.mjs",
     "hooks/scripts/generated-artifact-guard.mjs",
-    "scripts/jdtls-launcher.mjs",
-    "scripts/check-doc-currency.mjs"
+    "hooks/scripts/stop-validation-gate.mjs",
+    "scripts/jdtls-launcher.mjs"
   ],
   "setup": {
     "enabled": true,
@@ -107,7 +97,7 @@
     "ruleFile": ".claude/rules/${plugin_name}.md",
     "ruleTemplate": "generated/templates/${plugin_name}/rules.md",
     "claudeTemplate": "generated/templates/${plugin_name}/CLAUDE.md",
-    "ruleTemplateSource": "${shared_dir}/setup/rules.md",
+    "ruleTemplateSource": "${plugin_dir}/setup/rules.md",
     "claudeTemplateSource": "${plugin_dir}/setup/CLAUDE.md",
     "settingsFragments": [
       {
@@ -129,34 +119,16 @@
         "to": "generated/mcp/shared/project-shared.json"
       },
       {
-        "from": "${plugin_dir}/mcp/project-mcp.json",
+        "from": "${plugin_dir}/mcp/project-api.json",
         "to": "generated/mcp/${plugin_name}/project-mcp.json"
       }
     ],
     "rules": [
       {
-        "from": "${shared_dir}/rules/ethics.md",
-        "to": "generated/rules/shared/ethics.md",
-        "target": ".claude/rules/ethics.md",
-        "marker": "shared/ethics"
-      },
-      {
-        "from": "${shared_dir}/rules/engineering.md",
-        "to": "generated/rules/shared/engineering.md",
-        "target": ".claude/rules/engineering.md",
-        "marker": "shared/engineering"
-      },
-      {
-        "from": "${shared_dir}/rules/git-pr.md",
-        "to": "generated/rules/shared/git-pr.md",
-        "target": ".claude/rules/git-pr.md",
-        "marker": "shared/git-pr"
-      },
-      {
-        "from": "${shared_dir}/rules/validation.md",
-        "to": "generated/rules/shared/validation.md",
-        "target": ".claude/rules/validation.md",
-        "marker": "shared/validation"
+        "from": "${shared_dir}/rules/roa-engineering.md",
+        "to": "generated/rules/shared/roa-engineering.md",
+        "target": ".claude/rules/roa-engineering.md",
+        "marker": "shared/roa-engineering"
       },
       {
         "from": "${shared_dir}/rules/test-automation.md",
@@ -165,35 +137,45 @@
         "marker": "shared/test-automation"
       },
       {
+        "from": "${shared_dir}/rules/validation.md",
+        "to": "generated/rules/shared/validation.md",
+        "target": ".claude/rules/validation.md",
+        "marker": "shared/validation"
+      },
+      {
         "from": "${shared_dir}/rules/repository-safety.md",
         "to": "generated/rules/shared/repository-safety.md",
         "target": ".claude/rules/repository-safety.md",
         "marker": "shared/repository-safety"
       },
       {
-        "from": "${plugin_dir}/setup/rules/contracts.md",
-        "to": "generated/rules/${plugin_name}/contracts.md",
-        "target": ".claude/rules/contracts.md",
-        "marker": "${plugin_name}/contracts"
+        "from": "${plugin_dir}/setup/rules/api-architecture.md",
+        "to": "generated/rules/${plugin_name}/api-architecture.md",
+        "target": ".claude/rules/api-architecture.md",
+        "marker": "${plugin_name}/api-architecture"
       },
       {
-        "from": "${plugin_dir}/setup/rules/assertions.md",
-        "to": "generated/rules/${plugin_name}/assertions.md",
-        "target": ".claude/rules/assertions.md",
-        "marker": "${plugin_name}/assertions"
+        "from": "${plugin_dir}/setup/rules/api-contracts.md",
+        "to": "generated/rules/${plugin_name}/api-contracts.md",
+        "target": ".claude/rules/api-contracts.md",
+        "marker": "${plugin_name}/api-contracts"
       },
       {
-        "from": "${plugin_dir}/setup/rules/testing.md",
-        "to": "generated/rules/${plugin_name}/testing.md",
-        "target": ".claude/rules/testing.md",
-        "marker": "${plugin_name}/testing"
+        "from": "${plugin_dir}/setup/rules/api-modeling.md",
+        "to": "generated/rules/${plugin_name}/api-modeling.md",
+        "target": ".claude/rules/api-modeling.md",
+        "marker": "${plugin_name}/api-modeling"
+      },
+      {
+        "from": "${plugin_dir}/setup/rules/api-testing.md",
+        "to": "generated/rules/${plugin_name}/api-testing.md",
+        "target": ".claude/rules/api-testing.md",
+        "marker": "${plugin_name}/api-testing"
       }
     ],
     "extraDirectories": [
       ".claude",
-      ".claude/rules",
-      "src/test/java",
-      "src/test/resources"
+      ".claude/rules"
     ]
   }
 }

@@ -9,7 +9,7 @@ Actionable Database guidance, layered on top of:
 - `${CLAUDE_PLUGIN_ROOT}/docs/db-architecture.md`
 - the always-on repo rules in `.claude/rules/queries.md`, `.claude/rules/test-data.md`, `.claude/rules/testing.md`
 
-Pairs with the `implementation-engineer` and `adversarial-reviewer` agents.
+Pairs with the `implementation-engineer` and `adversarial-test-reviewer` agents.
 Read the repo rules first; this skill covers how to apply them, not what they say.
 
 1. Identify the invariant the change is supposed to enforce or exercise.

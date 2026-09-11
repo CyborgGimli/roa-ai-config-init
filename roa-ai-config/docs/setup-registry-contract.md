@@ -36,9 +36,9 @@ to the **target repository** and are rejected if they escape it.
 
       "rules": [
         {
-          "to": "generated/rules/roa-ui/three-layer.md",
-          "target": ".claude/rules/three-layer.md",
-          "marker": "roa-ui-three-layer"
+          "to": "generated/rules/roa-ui/ui-architecture.md",
+          "target": ".claude/rules/ui-architecture.md",
+          "marker": "roa-ui/ui-architecture"
         }
       ],
 
@@ -180,6 +180,6 @@ mcp:
           dsnEnv: APP_POSTGRES_DSN
 ```
 
-`logs.file` becomes `env.ROA_LOG_FILE` in `.claude/settings.json`. Keys matching
+Keys matching
 `password|secret|token|apikey|api_key|privatekey|private_key` are rejected when
 they hold an inline value; names ending in `Env` are references and are allowed.

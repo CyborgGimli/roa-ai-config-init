@@ -1,0 +1,24 @@
+{
+  "description": "ROA API MCP defaults. Target repositories customize these through ai-config.yaml.",
+  "servers": {
+    "swagger": {
+      "enabledByDefault": true,
+      "required": [
+        "apiBaseUrl",
+        "apiDocsUrl"
+      ],
+      "config": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "swagger-mcp@latest"
+        ]
+      },
+      "envFromConfig": {
+        "API_BASE_URL": "${apiBaseUrl}",
+        "API_DOCS_URL": "${apiDocsUrl}"
+      }
+    }
+  }
+}

@@ -7,12 +7,11 @@ hook can be checked against them.
 
 | Event | Matcher | Hook | Purpose |
 | --- | --- | --- | --- |
-| `SessionStart` | `startup\|resume\|clear` | `check-doc-currency.mjs` | Warn when the project's ROA version has moved away from the one the bundled docs describe |
-| `PreToolUse` | `Bash\|PowerShell` | `dangerous-command-guard.mjs` | Block destructive shell commands |
+| `PreToolUse` | `Bash\|PowerShell` | `dangerous-command-guard.mjs` | Block high-confidence destructive shell commands |
 | `PreToolUse` | `Bash\|PowerShell` | `maven-command-guard.mjs` | Block Maven runs that skip tests |
-| `PreToolUse` | `Write\|Edit\|MultiEdit\|NotebookEdit` | `generated-artifact-guard.mjs` | Refuse hand edits to generated Pandora output |
-| `PostToolUse` | `Write\|Edit\|MultiEdit` | `validate-java-edit.mjs` | Compile the changed modules, and mark the session as having touched Java |
-| `Stop` | — | `stop-test-gate.mjs` | Run the suite before the session ends, but only if Java changed |
+| `PreToolUse` | `Write\|Edit\|MultiEdit` | `generated-artifact-guard.mjs` | Refuse hand edits to generated Pandora output |
+| `PostToolUse` | `Write\|Edit\|MultiEdit` | `stop-validation-gate.mjs` | Record touched `.java` / `pom.xml` files in session state |
+| `Stop` | — | `stop-validation-gate.mjs` | `test-compile` the recorded changes before the session ends; block with the compiler output on failure |
 
 Both shell guards must match `PowerShell` as well as `Bash`. Matching only
 `Bash` leaves every PowerShell call ungated on Windows, which is where most of
@@ -30,11 +29,12 @@ block, with an explanation the model can act on.
 
 ## Functional requirements
 
-- **F1** — A `Stop` hook MUST check `stop_hook_active` and exit `0` when it is set.
-  Without this the hook re-enters itself forever.
+- **F1** — A `Stop` hook MUST honour `stop_hook_active`: when it is set and no
+  relevant file changed since the last failed attempt, exit `0`. Without this the
+  hook re-enters itself forever.
 - **F2** — A hook MUST exit `0` quickly when the change is irrelevant to it.
-  `validate-java-edit` exits before doing any work when no `.java` or `pom.xml`
-  file was touched.
+  `stop-validation-gate` records nothing when no `.java` or `pom.xml` file was
+  touched, and its `Stop` branch returns immediately when the state is empty.
 - **F3** — A hook MUST fail safe. If its own logic throws, or the payload cannot be
   parsed, it exits `0` rather than blocking ordinary work.
 - **F4** — A hook MUST NOT push, deploy, alter migrations, change secrets, or touch
@@ -50,20 +50,22 @@ block, with an explanation the model can act on.
 - **X3** — Concurrency safe: two `PostToolUse` handlers can overlap. Maven work is
   serialised through `withWorkspaceLock`, which reclaims a stale lock rather than
   deadlocking.
-- **X4** — Bounded runtime: every spawned command carries a timeout, and a timeout
-  is treated as "cannot determine", not as failure.
-- **X5** — Cheapest check first. `validate-java-edit` runs `compile`, and reaches
-  for `test-compile` only when a test source changed; the Stop gate runs the
-  tests only after Java was touched.
+- **X4** — Bounded runtime: every spawned command carries a timeout. The Stop gate
+  reports a timeout explicitly ("timed out while running …") and blocks, so a hung
+  Maven run is never mistaken for a passing one.
+- **X5** — Cheapest check first. The Stop gate runs `test-compile` once per
+  reactor (or per touched module when the session runs below the reactor root),
+  and only after Java or a POM was touched. Test execution stays with the
+  `run-tests` / `validate-test-automation` workflows, not with hooks.
 
 ## Platform notes
 
 - On Windows the Maven entry point is `mvn.cmd` / `mvnw.cmd`, which Node refuses to
-  spawn directly (CVE-2024-27980 mitigation). `runCommand` goes through the shell as
-  a single command string, quoting only when the command is a path — quoting a bare
-  name loses all output.
-- `-q` suppresses the compiler and test errors these hooks exist to surface. Run
-  without it and filter the output instead.
+  spawn directly (CVE-2024-27980 mitigation). `runCommand` in `java-hook-utils.mjs`
+  switches to `shell: true` for `.cmd`/`.bat` wrappers and for a bare `mvn`, and
+  `findMavenCommand` prefers `mvnw.cmd` there.
+- The Stop gate runs Maven with `-q`; compiler `[ERROR]` lines still reach stderr
+  and are forwarded in the block reason through `formatCommandFailure`.
 
 ## Testing a hook
 
