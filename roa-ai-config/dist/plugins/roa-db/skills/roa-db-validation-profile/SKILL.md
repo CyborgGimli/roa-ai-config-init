@@ -10,16 +10,18 @@ validation workflow so that workflow is not duplicated per stack.
 
 ## Verify
 
-1. **Parameterised queries** — every value reaches SQL as a bound parameter.
-   String concatenation or interpolation into a statement is a blocker, in test
-   code as much as anywhere else.
-2. **Query placement** — SQL lives in the query abstraction with its nested `Data`
-   class, not inline in a test method.
+1. **Parameterised queries** — every value reaches SQL through `withParam` from
+   controlled test data. String concatenation at a call site is a blocker.
+   `withParam` substitutes text, so a string placeholder must be quoted in the
+   template and the value must not contain a quote.
+2. **Query placement** — SQL lives in the `DbQuery` enum, not inline in a test
+   method.
 3. **Bounded reads** — queries that could scan a whole table are constrained.
    A result-set assertion that silently depends on total row count will break the
    first time someone else adds data.
-4. **Mapper safety** — result mappers handle null and absent columns rather than
-   throwing on the first unexpected row.
+4. **Result access** — rows come from `QueryResponse.getRows()` or a JSONPath
+   extraction; a JSONPath that matches nothing throws, so the path must match the
+   selected columns.
 5. **No destructive statements outside cleanup** — `DELETE`, `TRUNCATE`, `DROP`,
    and unqualified `UPDATE` belong in a registered `DataCleaner`, scoped to rows
    this test created. An unscoped destructive statement is a blocker.

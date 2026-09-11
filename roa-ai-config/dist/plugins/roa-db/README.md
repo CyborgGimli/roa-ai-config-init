@@ -24,18 +24,18 @@ Guides database test creation through ROA's query abstractions:
 
 - **Queries as enums** — SQL lives in the registry, never as a string at a call site
 - **`{name}` placeholders** — every value goes through `withParam`; quote the
-  placeholder in the SQL for strings, leave it unquoted for numerics
-- **Result mappers** — tolerate null and absent columns rather than throwing on
-  the first unexpected row
+  placeholder in the SQL for strings, leave it unquoted for numerics. It is text
+  substitution, not a bound parameter, so only controlled test data goes in
+- **Results** — `QueryResponse.getRows()` or a typed JSONPath extraction via
+  `query(q, jsonPath, Type.class)`; there is no mapper layer
 - **Explicit column lists** — `SELECT *` couples the test to column order
 - **Data cleanup** — `@Ripper` scoped to the rows this test created
 
 ## Key constraints
 
-- ✓ Every value bound through `withParam` — no SQL assembled by concatenation,
-  even inside a helper. It is an injection bug, and it breaks on any value
-  containing a quote, which is exactly the input a test should exercise
-- ✓ Queries defined in enums with a nested `Data` class
+- ✓ Every value passed through `withParam` — no SQL assembled by concatenation
+  at a call site, so the registry stays the single place to fix
+- ✓ Queries defined in `DbQuery` enums
 - ✓ Explicit column lists rather than `SELECT *`
 - ✓ Rows created uniquely per run, so reruns and parallel execution do not collide
 - ✓ `DELETE` / `TRUNCATE` / unqualified `UPDATE` only inside a registered cleaner

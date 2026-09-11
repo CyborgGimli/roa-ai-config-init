@@ -1,6 +1,6 @@
 ---
 name: roa-db-architect
-description: Design and generate ROA database tests - DbQuery enums with {name} placeholders, result types, and fluent assertions. Use when a task needs new database test coverage rather than a change to an existing test.
+description: Design and generate ROA database tests - DbQuery enums with {name} placeholders, QueryResponse/JSONPath reads, and Assertion.builder() validation. Use when a task needs new database test coverage rather than a change to an existing test.
 allowed-tools: Read, Glob, Grep, Bash, Write, Edit, Task, Skill
 ---
 
@@ -49,13 +49,6 @@ public enum UserQueries implements DbQuery<UserQueries> {
     GET_BY_ID("SELECT id, username, email FROM users WHERE id = {id}"),
     INSERT_USER("INSERT INTO users (username, email) VALUES ('{username}', '{email}')");
 
-    public static final class Data {
-        public static final String GET_BY_ID = "GET_BY_ID";
-
-        private Data() {
-        }
-    }
-
     private final String query;
 
     UserQueries(final String query) {
@@ -67,16 +60,22 @@ public enum UserQueries implements DbQuery<UserQueries> {
 }
 ```
 
-Placeholders are `{name}`, filled at runtime with `withParam`. Quote the
-placeholder in the SQL for string values and leave it unquoted for numerics:
+Placeholders are `{name}`, filled at runtime with `withParam`:
 
 ```java
 DbQuery<UserQueries> byId = UserQueries.GET_BY_ID.withParam("id", 42);
 ```
 
-Never assemble SQL by concatenation, even inside a helper. It is an injection
-bug, and it breaks on any value containing a quote — exactly the input a test
-should be exercising.
+`withParam` is textual substitution, not a bound parameter: `ParametrizedQuery`
+replaces `{name}` with `value.toString()` before the SQL is sent. It centralises the
+SQL and keeps call sites readable, but it does not escape anything — so quote string
+placeholders in the template, keep numerics unquoted, and only ever pass controlled
+test data. A value containing a quote breaks the statement exactly as concatenation
+would; if a scenario needs such a value, that is a framework limitation to report,
+not something to work around with concatenation.
+
+Never assemble SQL by concatenation at a call site: it bypasses the registry,
+so nothing tells you what to fix when the schema changes.
 
 `DbQuery` implementations are on the Pandora regeneration list, so run
 `mvn pandora:navigation -U` after changing the enum.
@@ -86,11 +85,13 @@ should be exercising.
 Generated code must:
 
 - ✓ Compile — `mvn test-compile` succeeds
-- ✓ Pass every value through `withParam`, with no concatenated SQL anywhere
+- ✓ Pass every value through `withParam` from controlled test data, with no
+  concatenated SQL anywhere
 - ✓ Declare explicit column lists rather than `SELECT *`, which couples the test
   to column order
 - ✓ Keep SQL in the query enum, never inline in a test method
-- ✓ Map results through a mapper that tolerates null and absent columns
+- ✓ Read results through `QueryResponse.getRows()` or a JSONPath extraction
+  (`query(q, "$[0].column", Type.class)`); there is no mapper layer to write
 - ✓ Create rows uniquely per run so parallel execution and reruns do not collide
 - ✓ Register cleanup for every row it creates, and scope any `DELETE`/`UPDATE` to
   those rows

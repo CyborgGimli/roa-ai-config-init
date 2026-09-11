@@ -16,7 +16,8 @@ assertThat(rows).hasSize(1);
 
 | Anti-pattern | Why it hurts | Instead |
 | --- | --- | --- |
-| Concatenated SQL | injection, and breaks on any quoted value | `withParam("id", id)` |
+| Concatenated SQL | bypasses the registry; nothing points at what to fix | `withParam("id", id)` |
+| Uncontrolled value in `withParam` | it is text substitution — a quote in the value breaks the statement | controlled test data; quoted string placeholders |
 | Inline SQL in a test | nothing tells you what to fix when the schema changes | `DbQuery` enum |
 | `SELECT *` | couples the test to column order | explicit column list |
 | Count-only assertion | satisfied by the wrong row | assert the values too |
@@ -24,8 +25,7 @@ assertThat(rows).hasSize(1);
 | No matching cleaner | the suite degrades run by run | `@Ripper` for every creator |
 | Cleanup only on success | leaves rows exactly when debugging | `@Ripper` runs on failure too |
 | `TRUNCATE` on shared | destroys other people's work | H2 in-memory or a disposable instance |
-| Own JDBC connection | bypasses pooling and slow-query detection | the ring |
-| Transaction left open | unrelated timeouts elsewhere in the suite | keep it small and scoped |
+| Own JDBC connection | bypasses client caching and slow-query logging | the ring |
 | Committed DSN | a leak | `dsnEnv` reference in `ai-config.yaml` |
 
 ## Performance traps

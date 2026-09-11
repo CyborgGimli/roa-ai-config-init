@@ -21,11 +21,11 @@ rather than a change to an existing test.
 
 ### Non-negotiables
 
-- **Every value bound.** SQL is never assembled by concatenation, not even in a
-  helper. It is an injection bug, and it breaks on any value containing a quote —
-  exactly the input a test should be exercising.
-- **SQL lives in the query enum**, with its nested `Data` class. Never inline at
-  a call site. Explicit column lists, never `SELECT *`.
+- **Every value through `withParam`.** SQL is never assembled by concatenation at
+  a call site. `withParam` is text substitution, not a bound parameter, so only
+  controlled test data goes in and string placeholders are quoted in the template.
+- **SQL lives in the `DbQuery` enum.** Never inline at a call site. Explicit column
+  lists, never `SELECT *`.
 - **Framework truth.** When an `io.cyborgcode.roa.*` signature, annotation or
   option is unclear, load `ai-compass` and read `target/pandora/metadata/`.
   Never guess a ROA API.
