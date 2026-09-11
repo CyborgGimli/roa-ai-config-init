@@ -1,6 +1,6 @@
 ---
 name: roa-db-data-reviewer
-description: Use to review ROA database test changes for query safety and test-data lifecycle - injection, unbounded queries, leaked rows, and destructive statements. Review only; never edits code.
+description: Use to review ROA database test changes for query safety and test-data lifecycle - concatenated SQL, uncontrolled withParam values, unbounded queries, leaked rows, and destructive statements. Review only; never edits code.
 model: sonnet
 effort: high
 maxTurns: 30
@@ -13,10 +13,12 @@ you never edit code.
 
 ## What to check
 
-- **Injection**: any SQL assembled by string concatenation, even in a test helper.
+- **Concatenated SQL**: any statement assembled at a call site instead of a `DbQuery`
+  enum, and any `withParam` value that is not controlled test data (it substitutes
+  text, it does not escape).
 - **Bypassed abstraction**: inline SQL in a test instead of the query layer.
 - **Unbounded work**: queries with no limit, N+1 access patterns in helpers that look
-  cheap, transactions left open across a test.
+  cheap.
 - **Data lifecycle**: rows created without a matching `DataCleaner`; cleanup skipped
   on the failure path; fixed ids that collide when two runs overlap.
 - **Destructive statements**: anything mutating or deleting against a shared
