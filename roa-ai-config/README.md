@@ -12,7 +12,7 @@ This repository generates and maintains four plugins:
 | **roa-base** | Bootstrap only: `/roa-base:setup` and `/roa-base:update`, plus the `repo-memory-architect` agent. Carries no shared payload. |
 | **roa-ui** | UI test automation — application investigation, component/element model, synchronisation, insertion, tables, interception |
 | **roa-api** | API test automation — Swagger/OpenAPI contract investigation, typed endpoints and models, request/response validation |
-| **roa-db** | Database testing — `DbQuery` enums, bound parameters, `DataCleaner`-owned cleanup |
+| **roa-db** | Database testing — `DbQuery` enums, `withParam` placeholders, `DataCleaner`-owned cleanup |
 
 ## Architecture
 

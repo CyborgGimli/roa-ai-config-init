@@ -4,7 +4,7 @@
 | --- | --- |
 | **ROA ring only** | `quest.use(RING_OF_DB)` — no hand-rolled JDBC in a test |
 | **Typed queries only** | all SQL lives in a `DbQuery` enum, never at a call site |
-| **Parameterise everything** | `withParam`, never concatenation — injection, and it breaks on quotes |
+| **Parameterise everything** | `withParam` with controlled test data, never concatenation; `withParam` substitutes text, it does not escape |
 | **No committed connection strings** | credentials come from config/env |
 | **Explicit columns** | `SELECT *` couples the test to column order |
 | **Every creator has a cleaner** | `@Ripper` runs on the failure path, which is the case that matters |
@@ -21,8 +21,7 @@
 | `assertThat(rows).hasSize(1)` alone | also assert the values |
 | Fixed fixture id | generate per run |
 | `TRUNCATE` on a shared database | H2 in-memory, or a disposable instance |
-| Transaction left open across a test | keep it small and explicitly scoped |
-| Own JDBC connection | the ring — it pools and detects slow queries |
+| Own JDBC connection | the ring — it caches clients per configuration and logs slow queries |
 
 ## Performance traps
 

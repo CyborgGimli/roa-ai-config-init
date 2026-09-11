@@ -21,14 +21,6 @@ public enum UserQueries implements DbQuery<UserQueries> {
     GET_BY_ID("SELECT id, username, email FROM users WHERE id = {id}"),
     INSERT_USER("INSERT INTO users (username, email) VALUES ('{username}', '{email}')");
 
-    public static final class Data {
-        public static final String COUNT_ALL = "COUNT_ALL";
-        public static final String GET_BY_ID = "GET_BY_ID";
-
-        private Data() {
-        }
-    }
-
     private final String query;
 
     UserQueries(final String query) {
@@ -59,10 +51,18 @@ DbQuery<UserQueries> insert = UserQueries.INSERT_USER
 
 Quote the placeholder in the SQL for string values; leave it unquoted for numerics.
 
+`withParam` is textual substitution, not a bound parameter: `ParametrizedQuery`
+replaces `{name}` with `value.toString()` before the SQL is sent. It centralises the
+SQL and keeps call sites readable, but it does not escape anything — so quote string
+placeholders in the template, keep numerics unquoted, and only ever pass controlled
+test data. A value containing a quote breaks the statement exactly as concatenation
+would; if a scenario needs such a value, that is a framework limitation to report,
+not something to work around with concatenation.
+
 ## Rules
 
-- No SQL assembled by concatenation, even in a helper. It is an injection bug and it
-  breaks on any value containing a quote — exactly the input a test should exercise.
+- No SQL assembled by concatenation at a call site; it bypasses the registry, so
+  nothing tells you what to fix when the schema changes.
 - Explicit column lists rather than `SELECT *`; `*` couples the test to column order.
 - `DbQuery` implementations are on the Pandora regeneration list — run
   `mvn pandora:navigation -U` after changing the enum.
