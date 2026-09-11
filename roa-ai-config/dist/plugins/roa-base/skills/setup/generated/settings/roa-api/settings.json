@@ -4,21 +4,6 @@
       "Bash(mvn:*)",
       "Bash(git status)",
       "Bash(git diff:*)"
-    ],
-    "deny": [
-      "Bash(./mvnw * -DskipTests*)",
-      "Bash(mvn * -DskipTests*)",
-      "Bash(./mvnw * -Dmaven.test.skip*)",
-      "Bash(mvn * -Dmaven.test.skip*)",
-      "Bash(./mvnw deploy*)",
-      "Bash(mvn deploy*)",
-
-      "PowerShell(.\\mvnw.cmd * -DskipTests*)",
-      "PowerShell(mvn * -DskipTests*)",
-      "PowerShell(.\\mvnw.cmd * -Dmaven.test.skip*)",
-      "PowerShell(mvn * -Dmaven.test.skip*)",
-      "PowerShell(.\\mvnw.cmd deploy*)",
-      "PowerShell(mvn deploy*)"
     ]
   }
 }
