@@ -1,470 +1,948 @@
 #!/usr/bin/env node
-// PreToolUse guard for Bash and PowerShell: block destructive commands before
-// they run.
-//
-// Reads the hook payload on stdin and returns a PreToolUse permission decision.
-// Node.js built-ins only.
-//
-// The guard lexes the command rather than pattern-matching the raw string, so
-// `rm  -rf  /`, `rm --recursive --force /`, and `rm -r -f /` are all caught,
-// and a match inside a quoted argument is not mistaken for a real flag.
-//
-// This is a safety net for obvious footguns, not a sandbox. It deliberately
-// errs toward allowing: a narrow, well-scoped destructive command is permitted,
-// because blocking ordinary work trains people to disable the guard.
+// ROA PreToolUse guard for high-confidence destructive shell commands.
 
 import fs from "node:fs";
 import process from "node:process";
 
-const GUARDED_TOOLS = new Set(["Bash", "PowerShell"]);
-const MAX_NESTING_DEPTH = 4;
-
-const BROAD_TARGETS = new Set([
-  "/", "/*", ".", "./", "./*", "..", "../", "../*", "*",
-  "~", "~/", "~/*",
-  "$HOME", "${HOME}", "$home", "${home}",
-  "$PWD", "${PWD}", "$pwd", "${pwd}",
-  "$env:home", "$env:userprofile", "%userprofile%", "%homepath%",
-  "/home", "/Users", "C:\\", "C:/",
-  // Deleting .git destroys history that is often not pushed anywhere yet.
-  ".git", "./.git", ".git/",
-]);
-
-const REMOTE_FETCHERS = new Set(["curl", "wget", "iwr", "irm", "invoke-webrequest"]);
-const SHELL_EXECUTORS = new Set(["sh", "bash", "zsh", "dash", "ksh", "fish", "powershell", "pwsh", "cmd"]);
-
-function isBroadTarget(value) {
-  const trimmed = String(value).trim().replace(/^["']|["']$/g, "");
-  if (BROAD_TARGETS.has(trimmed)) return true;
-  // A bare drive root (C:/, D:\\) or a run of slashes is always too broad.
-  return /^[a-z]:[\\\/]+$/i.test(trimmed) || /^[\\\/]+$/.test(trimmed);
+function readInput() {
+    try {
+        return fs.readFileSync(0, "utf8").replace(/^\uFEFF/, "");
+    } catch {
+        return "";
+    }
 }
 
-function commandName(word) {
-  if (!word) return "";
-  const base = String(word).split(/[\\/]/).pop() ?? "";
-  return base.replace(/\.(exe|cmd|bat|ps1)$/i, "").toLowerCase();
+function parseInput(text) {
+    try {
+        return text.trim() ? JSON.parse(text) : {};
+    } catch {
+        return {};
+    }
 }
 
 function word(value) {
-  return { type: "word", value };
+    return { type: "word", value };
 }
 
 function op(value) {
-  return { type: "op", value };
+    return { type: "op", value };
 }
 
-// Split a command line into words and operators, honouring quotes and escapes.
-//
-// PowerShell escapes with a backtick and treats a backslash as an ordinary path
-// character, so lexing `C:\Users` with POSIX rules would silently yield
-// `C:Users` and defeat every path comparison below.
-function lexShell(command, dialect) {
-  const escapeChar = dialect === "powershell" ? "`" : "\\";
-  const tokens = [];
-  let current = "";
-  let quote = "";
-  let escaped = false;
+function lexShell(command) {
+    const tokens = [];
+    let current = "";
+    let quote = "";
+    let escaped = false;
 
-  function pushWord() {
-    if (current.length > 0) {
-      tokens.push(word(current));
-      current = "";
-    }
-  }
-
-  for (let index = 0; index < command.length; index += 1) {
-    const char = command[index];
-    const next = command[index + 1] ?? "";
-
-    if (escaped) {
-      current += char;
-      escaped = false;
-      continue;
+    function pushWord() {
+        if (current.length > 0) {
+            tokens.push(word(current));
+            current = "";
+        }
     }
 
-    if (quote === "'") {
-      if (char === "'") {
-        quote = "";
-      } else {
+    for (let index = 0; index < command.length; index += 1) {
+        const char = command[index];
+        const next = command[index + 1] ?? "";
+
+        if (escaped) {
+            current += char;
+            escaped = false;
+            continue;
+        }
+
+        if (quote === "'") {
+            if (char === "'") {
+                quote = "";
+            } else {
+                current += char;
+            }
+            continue;
+        }
+
+        if (quote === '"') {
+            if (char === '"') {
+                quote = "";
+            } else if (char === "\\") {
+                escaped = true;
+            } else {
+                current += char;
+            }
+            continue;
+        }
+
+        if (char === "\\" || char === "`") {
+            escaped = true;
+            continue;
+        }
+
+        if (char === "'" || char === '"') {
+            quote = char;
+            continue;
+        }
+
+        if (char === "#" && current.length === 0) {
+            while (index < command.length && command[index] !== "\n") {
+                index += 1;
+            }
+            pushWord();
+            tokens.push(op(";"));
+            continue;
+        }
+
+        if (/\s/.test(char)) {
+            pushWord();
+            if (char === "\n" || char === "\r") {
+                tokens.push(op(";"));
+            }
+            continue;
+        }
+
+        if (
+            (char === "&" && next === "&") ||
+            (char === "|" && next === "|")
+        ) {
+            pushWord();
+            tokens.push(op(char + next));
+            index += 1;
+            continue;
+        }
+
+        if (
+            char === "|" ||
+            char === "&" ||
+            char === ";" ||
+            char === "(" ||
+            char === ")"
+        ) {
+            pushWord();
+            tokens.push(op(char));
+            continue;
+        }
+
         current += char;
-      }
-      continue;
     }
 
-    if (quote === '"') {
-      if (char === escapeChar && (next === '"' || next === escapeChar)) {
-        escaped = true;
-        continue;
-      }
-      if (char === '"') {
-        quote = "";
-      } else {
-        current += char;
-      }
-      continue;
-    }
-
-    if (char === escapeChar) {
-      escaped = true;
-      continue;
-    }
-    if (char === "'" || char === '"') {
-      quote = char;
-      continue;
-    }
-    if (/\s/.test(char)) {
-      pushWord();
-      continue;
-    }
-    if (char === "|" && next === "|") {
-      pushWord();
-      tokens.push(op("||"));
-      index += 1;
-      continue;
-    }
-    if (char === "&" && next === "&") {
-      pushWord();
-      tokens.push(op("&&"));
-      index += 1;
-      continue;
-    }
-    if (char === "|" || char === ";" || char === "&" || char === "\n") {
-      pushWord();
-      tokens.push(op(char));
-      continue;
-    }
-    current += char;
-  }
-
-  pushWord();
-  return tokens;
+    pushWord();
+    return tokens;
 }
 
-// Group the token stream into individual commands, remembering the operator
-// that preceded each so `curl ... | sh` can be recognised as one pipeline.
-function shellSegments(command, dialect) {
-  const segments = [];
-  let words = [];
-  let separatorBefore = null;
+function shellSegments(command) {
+    const segments = [];
+    let words = [];
+    let separatorBefore = "";
 
-  for (const token of lexShell(command, dialect)) {
-    if (token.type === "op") {
-      segments.push({ words, separatorBefore });
-      separatorBefore = token.value;
-      words = [];
-      continue;
+    function pushSegment() {
+        if (words.length > 0) {
+            segments.push({ separatorBefore, words });
+            words = [];
+        }
     }
-    words.push(token.value);
-  }
-  segments.push({ words, separatorBefore });
-  return segments.filter((segment) => segment.words.length > 0);
+
+    for (const token of lexShell(command)) {
+        if (token.type === "word") {
+            words.push(token.value);
+            continue;
+        }
+
+        pushSegment();
+        separatorBefore = token.value;
+    }
+
+    pushSegment();
+    return segments;
 }
 
-// Strip env assignments and wrappers so the real command is at index 0.
+function commandName(token) {
+    const normalized = String(token ?? "")
+        .replace(/^['"]|['"]$/g, "")
+        .split(/[\\/]/)
+        .pop()
+        .toLowerCase();
+
+    return normalized.replace(/\.(exe|cmd|bat|ps1)$/i, "");
+}
+
+function isAssignment(token) {
+    return /^[A-Za-z_][A-Za-z0-9_]*=.*/.test(token);
+}
+
 function stripCommandPrefixes(words) {
-  const result = [...words];
-  while (result.length > 0) {
-    const name = commandName(result[0]);
-    if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(result[0])) {
-      result.shift();
-      continue;
+    let index = 0;
+
+    while (index < words.length && isAssignment(words[index])) {
+        index += 1;
     }
-    if (name === "sudo" || name === "doas" || name === "env" || name === "nohup" || name === "time") {
-      result.shift();
-      continue;
+
+    for (;;) {
+        const name = commandName(words[index]);
+
+        if (name === "sudo") {
+            index += 1;
+
+            while (
+                index < words.length &&
+                words[index].startsWith("-")
+                ) {
+                const option = words[index];
+                index += 1;
+
+                if (
+                    [
+                        "-u",
+                        "--user",
+                        "-g",
+                        "--group",
+                        "-h",
+                        "--host",
+                        "-p",
+                        "--prompt",
+                    ].includes(option)
+                ) {
+                    index += 1;
+                }
+            }
+
+            continue;
+        }
+
+        if (name === "env") {
+            index += 1;
+
+            while (
+                index < words.length &&
+                (
+                    words[index].startsWith("-") ||
+                    isAssignment(words[index])
+                )
+                ) {
+                index += 1;
+            }
+
+            continue;
+        }
+
+        if (
+            name === "command" ||
+            name === "builtin" ||
+            name === "exec"
+        ) {
+            index += 1;
+            continue;
+        }
+
+        return words.slice(index);
     }
-    break;
-  }
-  return result;
 }
 
-function hasShortFlag(args, letter) {
-  return args.some((arg) => /^-[A-Za-z]+$/.test(arg) && arg.slice(1).includes(letter));
+function normalizeTarget(target) {
+    return String(target ?? "")
+        .trim()
+        .replace(/^['"]|['"]$/g, "")
+        .replace(/\\/g, "/")
+        .replace(/\/+$/g, "/")
+        .toLowerCase();
 }
 
-function hasLongFlag(args, name) {
-  return args.includes(name);
+function isBroadTarget(target) {
+    const value = normalizeTarget(target);
+
+    if (!value) {
+        return false;
+    }
+
+    return (
+        [
+            "/",
+            "/*",
+            ".",
+            "./",
+            "./*",
+            "..",
+            "../",
+            "../*",
+            "*",
+            "~",
+            "~/",
+            "~/*",
+            "$home",
+            "$home/*",
+            "${home}",
+            "${home}/*",
+            "$pwd",
+            "$pwd/*",
+            "${pwd}",
+            "${pwd}/*",
+            "$env:home",
+            "$env:home/*",
+            "$env:userprofile",
+            "$env:userprofile/*",
+            "%userprofile%",
+            "%userprofile%/*",
+            ".git",
+            "./.git",
+            ".git/",
+        ].includes(value) ||
+        /^[a-z]:\/(\*)?$/i.test(value) ||
+        /^\/\*+$/.test(value)
+    );
+}
+
+function hasShortFlag(args, flag) {
+    return args.some(
+        (arg) =>
+            /^-[A-Za-z]+$/.test(arg) &&
+            arg.includes(flag),
+    );
+}
+
+function hasLongFlag(args, flag) {
+    return args.some(
+        (arg) =>
+            arg === flag ||
+            arg.startsWith(`${flag}=`),
+    );
 }
 
 function positionalArgs(args) {
-  return args.filter((arg) => !arg.startsWith("-"));
+    const values = [];
+    let afterDoubleDash = false;
+
+    for (let index = 0; index < args.length; index += 1) {
+        const arg = args[index];
+
+        if (afterDoubleDash) {
+            values.push(arg);
+            continue;
+        }
+
+        if (arg === "--") {
+            afterDoubleDash = true;
+            continue;
+        }
+
+        if (arg.startsWith("-")) {
+            continue;
+        }
+
+        values.push(arg);
+    }
+
+    return values;
 }
 
 function checkRm(words) {
-  const args = words.slice(1);
-  const recursive = hasShortFlag(args, "r") || hasShortFlag(args, "R") || hasLongFlag(args, "--recursive");
-  const force = hasShortFlag(args, "f") || hasLongFlag(args, "--force");
-  const targets = positionalArgs(args);
+    const args = words.slice(1);
 
-  if ((recursive || force) && targets.some(isBroadTarget)) {
-    return "blocked broad rm target; use a narrower path or remove files interactively";
-  }
+    const recursive =
+        hasShortFlag(args, "r") ||
+        hasShortFlag(args, "R") ||
+        hasLongFlag(args, "--recursive") ||
+        args.some(
+            (arg) =>
+                /^-r(ec(urse)?)?$/i.test(arg),
+        );
 
-  if (args.some((arg) => arg === "--no-preserve-root")) {
-    return "blocked rm --no-preserve-root";
-  }
+    const force =
+        hasShortFlag(args, "f") ||
+        hasLongFlag(args, "--force") ||
+        args.some(
+            (arg) =>
+                /^-f(orce)?$/i.test(arg),
+        );
 
-  return null;
+    const targets = positionalArgs(args);
+
+    if (
+        (recursive || force) &&
+        targets.some(isBroadTarget)
+    ) {
+        return "blocked broad rm target; use a narrower path or remove files interactively";
+    }
+
+    if (
+        args.some(
+            (arg) =>
+                arg === "--no-preserve-root",
+        )
+    ) {
+        return "blocked rm --no-preserve-root";
+    }
+
+    return null;
 }
 
 function checkWindowsDelete(words) {
-  const name = commandName(words[0]);
-  const args = words.slice(1);
+    const name = commandName(words[0]);
+    const args = words.slice(1);
 
-  if (name === "remove-item") {
-    const recursive = args.some((arg) => /^-r(ec(urse)?)?$/i.test(arg));
-    const force = args.some((arg) => /^-f(orce)?$/i.test(arg));
-    const targets = positionalArgs(args);
-    if ((recursive || force) && targets.some(isBroadTarget)) {
-      return "blocked broad Remove-Item target";
+    if (name === "remove-item") {
+        const recursive = args.some(
+            (arg) =>
+                /^-r(ec(urse)?)?$/i.test(arg),
+        );
+
+        const force = args.some(
+            (arg) =>
+                /^-f(orce)?$/i.test(arg),
+        );
+
+        const targets = [];
+
+        for (
+            let index = 0;
+            index < args.length;
+            index += 1
+        ) {
+            const arg = args[index];
+
+            if (
+                /^-literalpath$/i.test(arg) ||
+                /^-path$/i.test(arg)
+            ) {
+                if (args[index + 1]) {
+                    targets.push(args[index + 1]);
+                    index += 1;
+                }
+
+                continue;
+            }
+
+            if (!arg.startsWith("-")) {
+                targets.push(arg);
+            }
+        }
+
+        if (
+            (recursive || force) &&
+            targets.some(isBroadTarget)
+        ) {
+            return "blocked broad Remove-Item target";
+        }
     }
+
+    if (
+        ["del", "erase", "rd", "rmdir"].includes(name)
+    ) {
+        const recursive = args.some(
+            (arg) =>
+                /^\/s$/i.test(arg) ||
+                /^-r(ec(urse)?)?$/i.test(arg),
+        );
+
+        const targets = args.filter(
+            (arg) =>
+                !arg.startsWith("/") &&
+                !arg.startsWith("-"),
+        );
+
+        if (
+            recursive &&
+            targets.some(isBroadTarget)
+        ) {
+            return `blocked broad ${name} target`;
+        }
+    }
+
     return null;
-  }
+}
 
-  if (name === "del" || name === "erase" || name === "rd" || name === "rmdir") {
-    const targets = positionalArgs(args);
-    if (targets.some(isBroadTarget)) {
-      return "blocked broad delete target";
+function gitSubcommand(words) {
+    let index = 1;
+
+    while (index < words.length) {
+        const arg = words[index];
+
+        if (
+            [
+                "-C",
+                "-c",
+                "--git-dir",
+                "--work-tree",
+                "--namespace",
+            ].includes(arg)
+        ) {
+            index += 2;
+            continue;
+        }
+
+        if (
+            arg.startsWith("--git-dir=") ||
+            arg.startsWith("--work-tree=") ||
+            arg.startsWith("--namespace=")
+        ) {
+            index += 1;
+            continue;
+        }
+
+        if (arg.startsWith("-")) {
+            index += 1;
+            continue;
+        }
+
+        return {
+            name: commandName(arg),
+            args: words.slice(index + 1),
+        };
     }
-  }
 
-  return null;
+    return {
+        name: "",
+        args: [],
+    };
 }
 
 function checkGit(words) {
-  const args = words.slice(1).filter((arg) => !arg.startsWith("-"));
-  const subcommand = { name: args[0], args: words.slice(1) };
+    const subcommand = gitSubcommand(words);
 
-  if (subcommand.name === "clean") {
-    const flags = subcommand.args.filter((arg) => arg.startsWith("-"));
-    const forced = flags.some((arg) => /^-[a-zA-Z]*f/.test(arg));
-    const includesIgnored = flags.some((arg) => /^-[a-zA-Z]*x/.test(arg));
-    if (forced && includesIgnored) {
-      return "blocked git clean -fx; it deletes ignored files including local config";
+    if (
+        subcommand.name === "reset" &&
+        subcommand.args.some(
+            (arg) =>
+                arg === "--hard",
+        )
+    ) {
+        return "blocked git reset --hard because it discards local work";
     }
-  }
 
-  if (subcommand.name === "reset") {
-    if (subcommand.args.includes("--hard") && positionalArgs(subcommand.args).length <= 1) {
-      return "blocked bare git reset --hard; stash or name an explicit ref instead";
+    if (subcommand.name === "clean") {
+        const dryRun = subcommand.args.some(
+            (arg) =>
+                arg === "-n" ||
+                arg === "--dry-run",
+        );
+
+        const force =
+            hasShortFlag(
+                subcommand.args,
+                "f",
+            ) ||
+            hasLongFlag(
+                subcommand.args,
+                "--force",
+            );
+
+        if (
+            force &&
+            !dryRun
+        ) {
+            return "blocked git clean --force because it deletes untracked files";
+        }
     }
-  }
 
-  if (subcommand.name === "push") {
-    const forced = subcommand.args.some((arg) => arg === "--force" || /^-[a-zA-Z]*f$/.test(arg));
-    if (forced && !subcommand.args.includes("--force-with-lease")) {
-      return "blocked git push --force; use --force-with-lease";
+    if (subcommand.name === "checkout") {
+        const force =
+            hasShortFlag(
+                subcommand.args,
+                "f",
+            ) ||
+            hasLongFlag(
+                subcommand.args,
+                "--force",
+            );
+
+        const separator =
+            subcommand.args.indexOf("--");
+
+        const targets =
+            separator >= 0
+                ? subcommand.args.slice(
+                    separator + 1,
+                )
+                : [];
+
+        if (
+            force ||
+            targets.some(isBroadTarget)
+        ) {
+            return "blocked destructive git checkout";
+        }
     }
-  }
 
-  if (subcommand.name === "restore") {
-    const targets = positionalArgs(subcommand.args);
-    if (targets.some(isBroadTarget)) {
-      return "blocked broad git restore target";
+    if (subcommand.name === "restore") {
+        const targets =
+            positionalArgs(
+                subcommand.args,
+            );
+
+        if (
+            targets.some(isBroadTarget)
+        ) {
+            return "blocked broad git restore target";
+        }
     }
-  }
 
-  return null;
+    return null;
 }
 
 function checkFind(words) {
-  const args = words.slice(1);
-  const hasDelete = args.includes("-delete");
-  const execIndex = args.indexOf("-exec");
-  const roots = [];
+    const args = words.slice(1);
 
-  for (const arg of args) {
-    if (arg.startsWith("-") || arg === "!" || arg === "(" || arg === ")") {
-      break;
+    const hasDelete =
+        args.includes("-delete");
+
+    const execIndex =
+        args.indexOf("-exec");
+
+    const roots = [];
+
+    for (const arg of args) {
+        if (
+            arg.startsWith("-") ||
+            arg === "!" ||
+            arg === "(" ||
+            arg === ")"
+        ) {
+            break;
+        }
+
+        roots.push(arg);
     }
-    roots.push(arg);
-  }
 
-  const searchRoots = roots.length > 0 ? roots : ["."];
+    const searchRoots =
+        roots.length > 0
+            ? roots
+            : ["."];
 
-  if (hasDelete && searchRoots.some(isBroadTarget)) {
-    return "blocked broad find -delete";
-  }
-
-  if (execIndex >= 0) {
-    const execCommand = commandName(args[execIndex + 1]);
-    if (execCommand === "rm" && searchRoots.some(isBroadTarget)) {
-      return "blocked broad find -exec rm";
+    if (
+        hasDelete &&
+        searchRoots.some(isBroadTarget)
+    ) {
+        return "blocked broad find -delete";
     }
-  }
 
-  return null;
+    if (execIndex >= 0) {
+        const execWords =
+            stripCommandPrefixes(
+                args
+                    .slice(execIndex + 1)
+                    .filter(
+                        (arg) =>
+                            arg !== "{}" &&
+                            arg !== "\\;",
+                    ),
+            );
+
+        if (
+            commandName(execWords[0]) === "rm" &&
+            checkRm(execWords)
+        ) {
+            return "blocked find -exec rm with destructive options";
+        }
+    }
+
+    return null;
 }
 
 function checkFormatting(words) {
-  const name = commandName(words[0]);
-  if (name === "mkfs" || name.startsWith("mkfs.")) {
-    return "blocked filesystem format command";
-  }
-  if (name === "fdisk" || name === "parted" || name === "diskpart") {
-    return "blocked disk partitioning command";
-  }
-  if (name === "dd") {
-    const of = words.find((arg) => arg.startsWith("of="));
-    if (of && /^of=\/dev\//.test(of)) {
-      return "blocked dd writing directly to a device";
+    const name = commandName(words[0]);
+
+    if (
+        /^mkfs($|\.)/.test(name) ||
+        [
+            "fdisk",
+            "diskpart",
+            "newfs",
+        ].includes(name)
+    ) {
+        return `blocked direct filesystem operation: ${name}`;
     }
-  }
-  return null;
+
+    if (name === "format") {
+        return "blocked direct filesystem format command";
+    }
+
+    if (
+        name === "dd" &&
+        words
+            .slice(1)
+            .some(
+                (arg) =>
+                    /^of=(\/dev\/|\\\\\.\\physicaldrive)/i.test(
+                        arg,
+                    ),
+            )
+    ) {
+        return "blocked dd writing directly to a device";
+    }
+
+    return null;
 }
 
 function checkSystemPower(words) {
-  const name = commandName(words[0]);
-  if (["shutdown", "reboot", "halt", "poweroff"].includes(name)) {
-    return "blocked system power command";
-  }
-  if (name === "kill" && words.includes("-9") && words.includes("1")) {
-    return "blocked kill -9 1";
-  }
-  return null;
-}
+    const name = commandName(words[0]);
 
-function checkPermissions(words) {
-  const name = commandName(words[0]);
-  if (name === "chmod" || name === "chown") {
-    const args = words.slice(1);
-    const recursive = hasShortFlag(args, "R") || hasLongFlag(args, "--recursive");
-    if (recursive && positionalArgs(args).some(isBroadTarget)) {
-      return `blocked recursive ${name} on a broad target`;
+    if (
+        [
+            "shutdown",
+            "reboot",
+            "halt",
+            "poweroff",
+        ].includes(name)
+    ) {
+        return `blocked system power command: ${name}`;
     }
-  }
-  return null;
-}
 
-// A destructive command hidden behind `bash -c`, `pwsh -Command`, or `cmd /c`
-// is still destructive, so unwrap it and run the same checks on the payload.
-function checkNestedShell(words, depth) {
-  const name = commandName(words[0]);
-  if (!SHELL_EXECUTORS.has(name)) return null;
-
-  const isPowerShell = name === "powershell" || name === "pwsh";
-
-  if (isPowerShell && words.some((arg) => /^-(e|ec|enc|encodedcommand)$/i.test(arg))) {
-    return "blocked base64-encoded PowerShell command; pass the command in clear text";
-  }
-
-  const flagIndex = words.findIndex((arg) => {
-    const lower = arg.toLowerCase();
-    if (name === "cmd") return lower === "/c" || lower === "/k";
-    if (isPowerShell) return lower === "-c" || lower === "-command";
-    return lower === "-c";
-  });
-
-  const payload = words.slice(flagIndex + 1).join(" ");
-  if (flagIndex < 0 || !payload.trim()) return null;
-
-  const nested = analyzeCommand(payload, isPowerShell ? "powershell" : "posix", depth + 1);
-  return nested ? `blocked nested shell command: ${nested.reason}` : null;
+    return null;
 }
 
 function isRemoteFetcher(words) {
-  return REMOTE_FETCHERS.has(commandName(words[0]));
+    return [
+        "curl",
+        "wget",
+        "wget2",
+        "fetch",
+        "iwr",
+        "irm",
+        "invoke-webrequest",
+        "invoke-restmethod",
+    ].includes(
+        commandName(words[0]),
+    );
 }
 
 function isShellExecutor(words) {
-  return SHELL_EXECUTORS.has(commandName(words[0]));
+    return [
+        "sh",
+        "bash",
+        "dash",
+        "zsh",
+        "ksh",
+        "fish",
+        "pwsh",
+        "powershell",
+        "iex",
+        "invoke-expression",
+    ].includes(
+        commandName(words[0]),
+    );
 }
 
-function checkSegment(words, depth) {
-  const normalizedWords = stripCommandPrefixes(words);
-  const name = commandName(normalizedWords[0]);
-  if (!name) return null;
-
-  if (name === "rm") return checkRm(normalizedWords);
-  if (["remove-item", "del", "erase", "rd", "rmdir"].includes(name)) return checkWindowsDelete(normalizedWords);
-  if (name === "git") return checkGit(normalizedWords);
-  if (name === "find") return checkFind(normalizedWords);
-
-  return (
-    checkFormatting(normalizedWords) ||
-    checkSystemPower(normalizedWords) ||
-    checkPermissions(normalizedWords) ||
-    checkNestedShell(normalizedWords, depth)
-  );
-}
-
-function analyzeCommand(command, dialect, depth = 0) {
-  if (depth > MAX_NESTING_DEPTH) return null;
-
-  const segments = shellSegments(command, dialect);
-  let previousWords = null;
-
-  for (const segment of segments) {
-    const words = stripCommandPrefixes(segment.words);
+function checkNestedShell(words) {
+    const name = commandName(words[0]);
 
     if (
-      segment.separatorBefore === "|" &&
-      previousWords &&
-      isRemoteFetcher(stripCommandPrefixes(previousWords)) &&
-      isShellExecutor(words)
+        ![
+            "sh",
+            "bash",
+            "dash",
+            "zsh",
+            "ksh",
+            "fish",
+            "pwsh",
+            "powershell",
+            "cmd",
+        ].includes(name)
     ) {
-      return { reason: "blocked remote download piped into a shell" };
+        return null;
     }
 
-    const reason = checkSegment(segment.words, depth);
-    if (reason) {
-      return { reason };
+    if (
+        [
+            "pwsh",
+            "powershell",
+        ].includes(name) &&
+        words.some(
+            (arg) =>
+                /^-(e|enc|encodedcommand)$/i.test(
+                    arg,
+                ),
+        )
+    ) {
+        return "blocked encoded PowerShell command";
     }
 
-    previousWords = segment.words;
-  }
+    const optionIndex =
+        words.findIndex(
+            (arg) => {
+                const lower =
+                    arg.toLowerCase();
 
-  return null;
+                if (name === "cmd") {
+                    return lower === "/c";
+                }
+
+                if (
+                    [
+                        "pwsh",
+                        "powershell",
+                    ].includes(name)
+                ) {
+                    return (
+                        lower === "-c" ||
+                        lower === "-command"
+                    );
+                }
+
+                return lower === "-c";
+            },
+        );
+
+    if (
+        optionIndex < 0 ||
+        !words[optionIndex + 1]
+    ) {
+        return null;
+    }
+
+    const nested =
+        analyzeCommand(
+            words
+                .slice(optionIndex + 1)
+                .join(" "),
+        );
+
+    return nested
+        ? `blocked nested shell command: ${nested.reason}`
+        : null;
 }
 
-function readStdin() {
-  try {
-    return fs.readFileSync(0, "utf8");
-  } catch {
-    return "";
-  }
+function checkSegment(words) {
+    const normalizedWords =
+        stripCommandPrefixes(words);
+
+    const name =
+        commandName(
+            normalizedWords[0],
+        );
+
+    if (!name) {
+        return null;
+    }
+
+    if (name === "rm") {
+        return checkRm(
+            normalizedWords,
+        );
+    }
+
+    if (
+        [
+            "remove-item",
+            "del",
+            "erase",
+            "rd",
+            "rmdir",
+        ].includes(name)
+    ) {
+        return checkWindowsDelete(
+            normalizedWords,
+        );
+    }
+
+    if (name === "git") {
+        return checkGit(
+            normalizedWords,
+        );
+    }
+
+    if (name === "find") {
+        return checkFind(
+            normalizedWords,
+        );
+    }
+
+    return (
+        checkFormatting(
+            normalizedWords,
+        ) ||
+        checkSystemPower(
+            normalizedWords,
+        ) ||
+        checkNestedShell(
+            normalizedWords,
+        )
+    );
+}
+
+function analyzeCommand(command) {
+    const segments =
+        shellSegments(command);
+
+    let previousWords = null;
+
+    for (const segment of segments) {
+        const words =
+            stripCommandPrefixes(
+                segment.words,
+            );
+
+        if (
+            segment.separatorBefore === "|" &&
+            previousWords &&
+            isRemoteFetcher(
+                stripCommandPrefixes(
+                    previousWords,
+                ),
+            ) &&
+            isShellExecutor(words)
+        ) {
+            return {
+                reason:
+                    "blocked remote download piped into a shell",
+            };
+        }
+
+        const reason =
+            checkSegment(
+                segment.words,
+            );
+
+        if (reason) {
+            return { reason };
+        }
+
+        previousWords =
+            segment.words;
+    }
+
+    return null;
 }
 
 function deny(reason) {
-  console.log(
-    JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: "PreToolUse",
-        permissionDecision: "deny",
-        permissionDecisionReason:
-          `ROA safety policy: ${reason}. If this is genuinely intended, run it ` +
-          "yourself or narrow the command.",
-      },
-    })
-  );
+    console.log(
+        JSON.stringify({
+            hookSpecificOutput: {
+                hookEventName:
+                    "PreToolUse",
+                permissionDecision:
+                    "deny",
+                permissionDecisionReason:
+                    `ROA safety policy: ${reason}.`,
+            },
+        }),
+    );
 }
 
-function main() {
-  let payload;
-  try {
-    payload = JSON.parse(readStdin() || "{}");
-  } catch {
-    process.exit(0); // Unreadable payload: do not block ordinary work.
-  }
+const payload =
+    parseInput(
+        readInput(),
+    );
 
-  if (!GUARDED_TOOLS.has(String(payload?.tool_name ?? ""))) {
+const command =
+    String(
+        payload.tool_input
+            ?.command ?? "",
+    );
+
+const toolName =
+    String(
+        payload.tool_name ?? "",
+    );
+
+if (
+    ![
+        "Bash",
+        "PowerShell",
+    ].includes(toolName) ||
+    command.trim() === ""
+) {
     process.exit(0);
-  }
-
-  const command = payload?.tool_input?.command;
-  if (typeof command !== "string" || !command.trim()) {
-    process.exit(0);
-  }
-
-  const dialect = payload.tool_name === "PowerShell" ? "powershell" : "posix";
-  const verdict = analyzeCommand(command, dialect);
-  if (!verdict) {
-    process.exit(0);
-  }
-
-  deny(verdict.reason);
-  process.exit(0);
 }
 
-main();
+const result =
+    analyzeCommand(command);
+
+if (result) {
+    deny(result.reason);
+}

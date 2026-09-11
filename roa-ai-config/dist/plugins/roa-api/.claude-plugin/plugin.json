@@ -1,8 +1,8 @@
 {
   "name": "roa-api",
-  "displayName": "ROA API Testing",
+  "displayName": "ROA API",
   "version": "0.1.1",
-  "description": "REST API testing with fluent request patterns and response assertions",
+  "description": "ROA API test automation plugin with API architecture, contract investigation, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
   "author": {
     "name": "ROA Platform Team",
     "email": "roa-platform@example.com"
@@ -10,14 +10,13 @@
   "homepage": "https://github.com/CyborgGimli/roa-ai-config-init",
   "repository": "https://github.com/CyborgGimli/roa-ai-config-init",
   "license": "Proprietary",
-  "keywords": ["roa","api","rest","testing"],
+  "keywords": ["roa","api","java","test-automation","claude-code"],
   "dependencies": ["roa-base"],
   "defaultEnabled": true,
   "hooks": "./hooks/hooks.json",
   "outputStyles": "./output-styles/",
   "lspServers": "./.lsp.json",
   "experimental": {
-    "themes": "./themes/",
-    "monitors": "./monitors/monitors.json"
+    "themes": "./themes/"
   }
 }

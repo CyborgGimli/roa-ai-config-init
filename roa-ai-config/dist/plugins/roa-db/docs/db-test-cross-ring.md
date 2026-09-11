@@ -51,7 +51,7 @@ Storage keeps every write, so running the same query twice lets you compare:
 // getByIndex(key, 2, ...) reaches the earlier response
 ```
 
-See `db-storage.md` and `framework-storage.md`.
+See `db-storage.md` and `roa-data-and-storage.md`.
 
 ## Rules
 

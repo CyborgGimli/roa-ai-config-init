@@ -1,50 +1,165 @@
-# ROA API Plugin
+# ROA API
 
-AI-assisted REST API test development for the ROA framework.
+Claude Code capability plugin for API test automation projects built with ROA.
 
-## What it does
+ROA API provides the ROA-specific knowledge, workflows, tooling, and project configuration needed to work effectively in an existing Java API automation repository.
 
-Guides API test creation through ROA's API ring:
+## What it provides
 
-1. **Typed endpoints** — one `AppEndpoints` enum implementing `Endpoint<T>`
-2. **DTOs** — Lombok request models, extra-field-tolerant response models
-3. **The ring** — `quest.use(RING_OF_API)`, which is `RestServiceFluent`
-4. **Assertions** — `Assertion.builder()` over `STATUS`, `BODY`, `HEADER`
+The plugin includes support for:
 
-## Using this plugin
+- ROA API architecture and conventions
+- API contract investigation
+- endpoint and model design
+- request and response validation
+- test implementation workflows
+- test execution and debugging
+- review and definition-of-done checks
+- Pandora framework metadata
+- AI Teacher project-pattern guidance
+- repository and Maven safety guardrails
+- Swagger/OpenAPI MCP integration
 
-1. `/roa-base:setup roa-api`, then `/reload-plugins --force`
-2. `/roa-api:roa-api-architect <what to cover>` to design and generate tests
-3. Read the single-topic chunks in `docs/` — start at `api-architecture.md`
-4. Load `ai-compass` for any signature that is unclear
+Shared ROA engineering capabilities are bundled together with the API-specific functionality so the installed plugin is self-contained.
 
-## Core concepts
+## Requirements
 
-- **Endpoints as enum constants** — HTTP method + relative URL, parameterised per
-  call with `withPathParam` / `withQueryParam` / `withHeader`
-- **Automatic response storage** — every ring call stores its `Response` under
-  `StorageKeysApi.API`, keyed by the endpoint constant
-- **`retrieve(...)` for chaining** — read a stored response, map it to a DTO, feed
-  it into the next call or into a cross-ring check
-- **Declarative auth** — `@AuthenticateViaApi(credentials = ..., type = ...)` over a
-  `Credentials` implementation and a `BaseAuthenticationClient` subclass
-- **Class-level hooks** — `@ApiHook(when = BEFORE/AFTER, type = ...)` running
-  `ApiHookFlow` flows through `RestService`
+The target repository should have:
 
-## Key constraints
+- Claude Code
+- Node.js 20 or newer
+- Git
+- Java 17 or newer
+- Maven Wrapper or a globally available Maven installation
 
-- ✓ `quest.use(RING_OF_API)` only — no RestAssured in a test
-- ✓ Typed endpoints only — no raw method or URL at a call site
-- ✓ JSONPaths live in `ApiResponsesJsonPaths`; params, ids and headers in `api/constants/`
-- ✓ No hardcoded credentials, base URLs, or API keys
-- ✓ Mandatory headers go in `defaultConfiguration()`, not per call
-- ✓ Every chain ends with `.complete()`
+The project is expected to use ROA through its Maven configuration.
 
-The nested `Data` class of string keys belongs to `DataCreator`, `DataCleaner`,
-`Preconditions`, and `ApiHookFlows` — the registries annotations reference by
-name. `AppEndpoints` is referenced as a constant and has none.
+## Setup
 
----
+ROA API is configured through the `roa-base` bootstrap plugin.
 
-Reference docs ship in `docs/`; skills in `skills/`; the contract reviewer in
-`agents/roa-api-contract-reviewer.md`.
+From the target API automation repository, run:
+
+```text
+/roa-base:setup roa-api
+```
+
+The setup process installs and enables `roa-api` at project scope and creates or updates the ROA-managed Claude Code configuration for the repository.
+
+## Files created or updated
+
+Setup may create or update:
+
+```text
+CLAUDE.md
+.claude/settings.json
+.claude/rules/
+ai-config.yaml
+.mcp.json
+```
+
+These files connect the repository with the ROA API capability and its project-specific configuration.
+
+## Project configuration
+
+`ai-config.yaml` is the human-editable configuration used by ROA setup.
+
+For API projects, it can contain repository-specific values such as:
+
+* API base URL
+* Swagger/OpenAPI document URL
+* MCP enablement
+* environment-variable names used for authentication
+
+Secrets should not be stored directly in `ai-config.yaml`.
+
+Use environment variables or the authentication mechanism supported by the relevant service.
+
+After changing `ai-config.yaml`, rerun:
+
+```text
+/roa-base:setup roa-api
+```
+
+to regenerate the project-level MCP configuration when needed.
+
+## Swagger/OpenAPI integration
+
+ROA API includes Swagger/OpenAPI MCP support.
+
+This allows Claude Code to inspect the actual API contract associated with the repository rather than relying only on manually provided endpoint information.
+
+The API base URL and API documentation URL are configured per consumer repository through `ai-config.yaml`.
+
+The generated MCP configuration is written to:
+
+```text
+.mcp.json
+```
+
+## Pandora
+
+ROA can expose machine-readable framework metadata under:
+
+```text
+target/pandora/metadata/
+```
+
+Metadata can be generated or refreshed with:
+
+```bash
+mvn pandora:navigation -U
+```
+
+Older Pandora releases name this goal `pandora:open`; the `ai-compass` skill carries the fallback.
+
+Pandora provides exact information about available ROA framework types, methods, creation patterns, options, and usages.
+
+## AI Teacher
+
+Project-specific implementation examples and approved patterns can be generated with:
+
+```bash
+mvn pandora:teach
+```
+
+Generated lessons are normally available under:
+
+```text
+target/pandora/ai-teacher/
+```
+
+These lessons provide examples from the actual project that can be used together with the existing repository code and ROA metadata.
+
+## Typical usage
+
+After setup, the plugin can support work such as:
+
+* investigating an API contract
+* designing new API test coverage
+* creating or updating endpoint definitions
+* creating request and response models
+* implementing ROA API tests
+* adding validation
+* debugging failed tests
+* reviewing existing automation
+* validating changes before completion
+
+The existing repository structure and project conventions remain the primary source for project-specific organization.
+
+## Updating
+
+For an already configured repository, use:
+
+```text
+/roa-base:update
+```
+
+The update workflow refreshes ROA-managed configuration from the installed marketplace version while preserving supported user-owned content.
+
+## Scope
+
+ROA V1 supports one capability plugin per consumer repository.
+
+Use `roa-api` for API-focused ROA automation projects and `roa-ui` for UI-focused ROA automation projects.
+

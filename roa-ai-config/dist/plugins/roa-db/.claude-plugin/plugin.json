@@ -17,7 +17,6 @@
   "outputStyles": "./output-styles/",
   "lspServers": "./.lsp.json",
   "experimental": {
-    "themes": "./themes/",
-    "monitors": "./monitors/monitors.json"
+    "themes": "./themes/"
   }
 }

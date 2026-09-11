@@ -99,7 +99,7 @@ Generated code must:
 
 Then execute the new tests through `run-tests` against a real database — a
 compile does not prove the SQL is valid for the target dialect. Confirm the
-change against `roa-db-definition-of-done` with `validate-code` before reporting
+change against `roa-db-definition-of-done` with `validate-test-automation` before reporting
 it complete.
 
 Deep reference: `${CLAUDE_PLUGIN_ROOT}/docs/` — start at `db-architecture.md`.

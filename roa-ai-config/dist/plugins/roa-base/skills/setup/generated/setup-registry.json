@@ -15,9 +15,7 @@
       "claudeTemplate": "generated/templates/roa-api/CLAUDE.md",
       "extraDirectories": [
         ".claude",
-        ".claude/rules",
-        "src/test/java",
-        "src/test/resources"
+        ".claude/rules"
       ],
       "settingsFragments": [
         "generated/settings/shared/project-settings.json",
@@ -30,24 +28,9 @@
       ],
       "rules": [
         {
-          "to": "generated/rules/shared/ethics.md",
-          "target": ".claude/rules/ethics.md",
-          "marker": "shared/ethics"
-        },
-        {
-          "to": "generated/rules/shared/engineering.md",
-          "target": ".claude/rules/engineering.md",
-          "marker": "shared/engineering"
-        },
-        {
-          "to": "generated/rules/shared/git-pr.md",
-          "target": ".claude/rules/git-pr.md",
-          "marker": "shared/git-pr"
-        },
-        {
-          "to": "generated/rules/shared/validation.md",
-          "target": ".claude/rules/validation.md",
-          "marker": "shared/validation"
+          "to": "generated/rules/shared/roa-engineering.md",
+          "target": ".claude/rules/roa-engineering.md",
+          "marker": "shared/roa-engineering"
         },
         {
           "to": "generated/rules/shared/test-automation.md",
@@ -55,29 +38,39 @@
           "marker": "shared/test-automation"
         },
         {
+          "to": "generated/rules/shared/validation.md",
+          "target": ".claude/rules/validation.md",
+          "marker": "shared/validation"
+        },
+        {
           "to": "generated/rules/shared/repository-safety.md",
           "target": ".claude/rules/repository-safety.md",
           "marker": "shared/repository-safety"
         },
         {
-          "to": "generated/rules/roa-api/contracts.md",
-          "target": ".claude/rules/contracts.md",
-          "marker": "roa-api/contracts"
+          "to": "generated/rules/roa-api/api-architecture.md",
+          "target": ".claude/rules/api-architecture.md",
+          "marker": "roa-api/api-architecture"
         },
         {
-          "to": "generated/rules/roa-api/assertions.md",
-          "target": ".claude/rules/assertions.md",
-          "marker": "roa-api/assertions"
+          "to": "generated/rules/roa-api/api-contracts.md",
+          "target": ".claude/rules/api-contracts.md",
+          "marker": "roa-api/api-contracts"
         },
         {
-          "to": "generated/rules/roa-api/testing.md",
-          "target": ".claude/rules/testing.md",
-          "marker": "roa-api/testing"
+          "to": "generated/rules/roa-api/api-modeling.md",
+          "target": ".claude/rules/api-modeling.md",
+          "marker": "roa-api/api-modeling"
+        },
+        {
+          "to": "generated/rules/roa-api/api-testing.md",
+          "target": ".claude/rules/api-testing.md",
+          "marker": "roa-api/api-testing"
         }
       ],
       "templateValues": {
         "plugin_name": "roa-api",
-        "plugin_display_name": "ROA API Testing",
+        "plugin_display_name": "ROA API",
         "marketplace_name": "roa-ai",
         "marketplace_repo": "CyborgGimli/roa-ai-config-init",
         "marketplace_ref": "v0.1.1",
@@ -114,29 +107,19 @@
       ],
       "rules": [
         {
-          "to": "generated/rules/shared/ethics.md",
-          "target": ".claude/rules/ethics.md",
-          "marker": "shared/ethics"
-        },
-        {
-          "to": "generated/rules/shared/engineering.md",
-          "target": ".claude/rules/engineering.md",
-          "marker": "shared/engineering"
-        },
-        {
-          "to": "generated/rules/shared/git-pr.md",
-          "target": ".claude/rules/git-pr.md",
-          "marker": "shared/git-pr"
-        },
-        {
-          "to": "generated/rules/shared/validation.md",
-          "target": ".claude/rules/validation.md",
-          "marker": "shared/validation"
+          "to": "generated/rules/shared/roa-engineering.md",
+          "target": ".claude/rules/roa-engineering.md",
+          "marker": "shared/roa-engineering"
         },
         {
           "to": "generated/rules/shared/test-automation.md",
           "target": ".claude/rules/test-automation.md",
           "marker": "shared/test-automation"
+        },
+        {
+          "to": "generated/rules/shared/validation.md",
+          "target": ".claude/rules/validation.md",
+          "marker": "shared/validation"
         },
         {
           "to": "generated/rules/shared/repository-safety.md",
@@ -183,9 +166,7 @@
       "claudeTemplate": "generated/templates/roa-ui/CLAUDE.md",
       "extraDirectories": [
         ".claude",
-        ".claude/rules",
-        "src/test/java",
-        "src/test/resources"
+        ".claude/rules"
       ],
       "settingsFragments": [
         "generated/settings/shared/project-settings.json",
@@ -198,24 +179,9 @@
       ],
       "rules": [
         {
-          "to": "generated/rules/shared/ethics.md",
-          "target": ".claude/rules/ethics.md",
-          "marker": "shared/ethics"
-        },
-        {
-          "to": "generated/rules/shared/engineering.md",
-          "target": ".claude/rules/engineering.md",
-          "marker": "shared/engineering"
-        },
-        {
-          "to": "generated/rules/shared/git-pr.md",
-          "target": ".claude/rules/git-pr.md",
-          "marker": "shared/git-pr"
-        },
-        {
-          "to": "generated/rules/shared/validation.md",
-          "target": ".claude/rules/validation.md",
-          "marker": "shared/validation"
+          "to": "generated/rules/shared/roa-engineering.md",
+          "target": ".claude/rules/roa-engineering.md",
+          "marker": "shared/roa-engineering"
         },
         {
           "to": "generated/rules/shared/test-automation.md",
@@ -223,34 +189,39 @@
           "marker": "shared/test-automation"
         },
         {
+          "to": "generated/rules/shared/validation.md",
+          "target": ".claude/rules/validation.md",
+          "marker": "shared/validation"
+        },
+        {
           "to": "generated/rules/shared/repository-safety.md",
           "target": ".claude/rules/repository-safety.md",
           "marker": "shared/repository-safety"
         },
         {
-          "to": "generated/rules/roa-ui/three-layer.md",
-          "target": ".claude/rules/three-layer.md",
-          "marker": "roa-ui/three-layer"
+          "to": "generated/rules/roa-ui/ui-architecture.md",
+          "target": ".claude/rules/ui-architecture.md",
+          "marker": "roa-ui/ui-architecture"
         },
         {
-          "to": "generated/rules/roa-ui/locators.md",
-          "target": ".claude/rules/locators.md",
-          "marker": "roa-ui/locators"
+          "to": "generated/rules/roa-ui/ui-elements.md",
+          "target": ".claude/rules/ui-elements.md",
+          "marker": "roa-ui/ui-elements"
         },
         {
-          "to": "generated/rules/roa-ui/waits.md",
-          "target": ".claude/rules/waits.md",
-          "marker": "roa-ui/waits"
+          "to": "generated/rules/roa-ui/ui-synchronization.md",
+          "target": ".claude/rules/ui-synchronization.md",
+          "marker": "roa-ui/ui-synchronization"
         },
         {
-          "to": "generated/rules/roa-ui/testing.md",
-          "target": ".claude/rules/testing.md",
-          "marker": "roa-ui/testing"
+          "to": "generated/rules/roa-ui/ui-testing.md",
+          "target": ".claude/rules/ui-testing.md",
+          "marker": "roa-ui/ui-testing"
         }
       ],
       "templateValues": {
         "plugin_name": "roa-ui",
-        "plugin_display_name": "ROA UI Testing",
+        "plugin_display_name": "ROA UI",
         "marketplace_name": "roa-ai",
         "marketplace_repo": "CyborgGimli/roa-ai-config-init",
         "marketplace_ref": "v0.1.1",

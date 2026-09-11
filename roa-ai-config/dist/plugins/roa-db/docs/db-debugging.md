@@ -1,6 +1,6 @@
 # ROA Database Testing — Debugging
 
-Reference for the generic `debug` skill. Diagnose before changing anything.
+Reference for the generic `debug-test-automation` skill. Diagnose before changing anything.
 
 ## Order of work
 
@@ -8,8 +8,8 @@ Reference for the generic `debug` skill. Diagnose before changing anything.
 2. **Re-run** — a test that passes on re-run with no code change is flaky. Say so
    rather than "fixing" it.
 3. **Localise** — test, component, locator, data, or environment?
-4. **Read the log** — `logs/roa.log`, surfaced through `ROA_LOG_FILE`. The
-   `app-log` monitor tails it automatically when the `debug` skill runs.
+4. **Read the log** — the application log the project's `system.properties`
+   `logFileName` points at (`logs/log.log` in archetype-generated projects).
 5. **State the cause with evidence** before proposing a fix.
 
 ## Leaked rows
@@ -46,8 +46,7 @@ Do not run destructive or data-mutating statements against a shared environment 
 
 ## Raising log verbosity
 
-The log path comes from `ai-config.yaml` (`logs.file`), which `/roa-base:setup`
-writes to `ROA_LOG_FILE` in `.claude/settings.json`.
+The log path comes from `logFileName` in `src/main/resources/system.properties`.
 
 ```bash
 mvn -X test -Dtest=YourTest      # Maven debug output

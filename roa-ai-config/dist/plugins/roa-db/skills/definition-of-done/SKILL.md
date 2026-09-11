@@ -1,19 +1,57 @@
 ---
 name: definition-of-done
-description: The completion checklist for an ROA change. Reference before reporting any task as finished.
+description: Determine whether an ROA automation task has sufficient implementation and validation evidence to be considered complete.
 user-invocable: false
-allowed-tools: Read
+allowed-tools: Read, Glob, Grep, Bash, Skill, Task
 ---
 
-Done means all of the following, not some:
+Evaluate whether the current automation task is genuinely complete.
 
-1. **Builds** - `mvn clean compile` succeeds.
-2. **Proven** - the relevant tests pass; commands and results reported.
-3. **Layered** - the module's architecture respected: no raw driver, HTTP client
-   or JDBC in a test, and nothing reaching past the abstraction that owns it.
-4. **Clean data** - everything created is removed by a `DataCleaner`, including
-   on failure paths.
-5. **No secrets** - no credentials, URLs, or environment specifics as literals.
-6. **Consistent** - the new code reads like the code around it.
-7. **Documented** - if behavior or setup changed, docs were updated.
-8. **Reported honestly** - what was done, what was skipped, what is uncertain.
+## Criteria
+
+A task is done only when all applicable conditions are satisfied:
+
+1. The requested behavior and acceptance criteria are implemented.
+
+2. The implementation follows the existing repository structure, ROA architecture, and established project abstractions.
+
+3. Required lifecycle concerns are handled where applicable:
+   - test data;
+   - preconditions;
+   - authentication;
+   - storage;
+   - execution;
+   - assertions;
+   - cleanup;
+   - configuration.
+
+4. Assertions meaningfully prove the intended behavior.
+
+5. Relevant Java changes compile successfully.
+
+6. The appropriate test scope has been executed successfully when runtime execution is required to prove the change.
+
+7. Failures have not been hidden through skipped tests, weakened assertions, deleted coverage, suppressed errors, or brittle workarounds.
+
+8. Any remaining application, environment, data, contract, configuration, or framework issue is explicitly identified and does not invalidate the claimed automation result.
+
+9. No known blocker, unresolved correctness issue, or required validation remains.
+
+## Result
+
+Return exactly one completion state:
+
+```text
+DONE
+→ all applicable completion criteria are satisfied
+
+NOT_DONE
+→ implementation or required validation is incomplete or incorrect
+
+BLOCKED
+→ completion cannot currently be established because of a verified external blocker
+```
+
+Include the smallest set of missing actions or evidence when the result is `NOT_DONE` or `BLOCKED`.
+
+Do not declare `DONE` based only on code inspection when compilation or test execution is required to prove the task.

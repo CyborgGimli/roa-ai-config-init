@@ -24,15 +24,16 @@
     },
     {
       "name": "roa-api",
-      "displayName": "ROA API Testing",
+      "displayName": "ROA API",
       "source": "./roa-ai-config/dist/plugins/roa-api",
-      "description": "REST API testing with fluent request patterns and response assertions",
-      "category": "testing",
+      "description": "ROA API test automation plugin with API architecture, contract investigation, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
+      "category": "test-automation",
       "tags": [
         "roa",
         "api",
-        "rest",
-        "testing"
+        "java",
+        "test-automation",
+        "claude-code"
       ],
       "defaultEnabled": true
     },
@@ -52,16 +53,17 @@
     },
     {
       "name": "roa-ui",
-      "displayName": "ROA UI Testing",
+      "displayName": "ROA UI",
       "source": "./roa-ai-config/dist/plugins/roa-ui",
-      "description": "UI automation with three-layer component architecture, Selenium SmartWebDriver, and fluent testing patterns",
-      "category": "testing",
+      "description": "ROA UI test automation plugin with application investigation, UI architecture, component and element modeling, synchronization, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
+      "category": "test-automation",
       "tags": [
         "roa",
         "ui",
+        "java",
         "selenium",
-        "automation",
-        "testing"
+        "test-automation",
+        "claude-code"
       ],
       "defaultEnabled": true
     }

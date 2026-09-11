@@ -1,6 +1,6 @@
 # ROA Database Testing — Quality Gate Examples
 
-Worked examples of the gate defined in `quality-gates.md`, as `roa-db-quality-gate`
+Worked examples of the validation gate (`validation-policy`), as `roa-db-quality-gate`
 runs it.
 
 ## A passing change

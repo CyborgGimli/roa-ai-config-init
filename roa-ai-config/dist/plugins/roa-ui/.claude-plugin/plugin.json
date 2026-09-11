@@ -1,8 +1,8 @@
 {
   "name": "roa-ui",
-  "displayName": "ROA UI Testing",
+  "displayName": "ROA UI",
   "version": "0.1.1",
-  "description": "UI automation with three-layer component architecture, Selenium SmartWebDriver, and fluent testing patterns",
+  "description": "ROA UI test automation plugin with application investigation, UI architecture, component and element modeling, synchronization, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
   "author": {
     "name": "ROA Platform Team",
     "email": "roa-platform@example.com"
@@ -10,14 +10,13 @@
   "homepage": "https://github.com/CyborgGimli/roa-ai-config-init",
   "repository": "https://github.com/CyborgGimli/roa-ai-config-init",
   "license": "Proprietary",
-  "keywords": ["roa","ui","selenium","automation","testing"],
+  "keywords": ["roa","ui","java","selenium","test-automation","claude-code"],
   "dependencies": ["roa-base"],
   "defaultEnabled": true,
   "hooks": "./hooks/hooks.json",
   "outputStyles": "./output-styles/",
   "lspServers": "./.lsp.json",
   "experimental": {
-    "themes": "./themes/",
-    "monitors": "./monitors/monitors.json"
+    "themes": "./themes/"
   }
 }

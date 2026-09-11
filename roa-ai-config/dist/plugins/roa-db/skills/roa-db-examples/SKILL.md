@@ -27,19 +27,12 @@ reviewing code. Each file covers one topic; open only what you need.
 | Anti-patterns to avoid | `db-test-antipatterns.md` |
 | Quality-gate commands & evidence | `db-quality-gate.md` |
 | Debugging a failure | `db-debugging.md` |
-| What ROA is; reading order; precedence | `framework-overview.md` |
-| Quest, base classes, `complete()` | `framework-quest.md` |
-| Rings, `drop()`, custom rings | `framework-rings.md` |
-| Storage, `retrieve`, extractors, indexes | `framework-storage.md` |
-| `@Journey` / `@Ripper` / `@Craft` / `Late`, hooks, tags | `framework-lifecycle.md` |
-| `DataCreator` / `Preconditions` / `DataCleaner` | `framework-registries.md` |
-| Hard vs soft, `Assertion.builder()`, types | `framework-validation.md` |
-| `retryUntil` and `RetryCondition` | `framework-retry.md` |
-| POM setup, property files, environments, layout | `framework-config.md` |
-| Code standards and the forbidden list | `code-standards.md` |
-| Test shape and validation patterns | `testing-standards.md` |
-| Gate commands and evidence format | `quality-gates.md` |
-| Reading the generated framework contract | `pandora-metadata.md` |
+| Quest, Rings, `drop()`, `complete()`, validation | `roa-core-architecture.md` |
+| `@Journey` / `@Ripper` / `@Craft` / `Late`, authentication | `roa-test-lifecycle.md` |
+| Storage, `DataCreator`, `Late<T>`, namespaces | `roa-data-and-storage.md` |
+| Custom services, custom Rings, registration | `roa-custom-services-and-rings.md` |
+| Reading the generated framework contract | `pandora-overview.md` |
+| Curated project patterns | `ai-teacher-overview.md` |
 
 Prefer the chunk that matches the change in front of you. These docs are reference,
 not law — never apply a pattern that contradicts working code already in the repo.
