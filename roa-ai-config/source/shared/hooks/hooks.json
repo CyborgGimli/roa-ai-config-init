@@ -1,19 +1,6 @@
 {
-  "description": "Shared ROA safety hooks.",
+  "description": "ROA shared hooks.",
   "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "startup|resume|clear",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/check-doc-currency.mjs"],
-            "timeout": 10
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
         "matcher": "Bash|PowerShell",
@@ -21,28 +8,31 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/scripts/dangerous-command-guard.mjs"],
-            "timeout": 10,
-            "statusMessage": "Checking shell command safety"
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/dangerous-command-guard.mjs"
+            ],
+            "timeout": 10
           },
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/scripts/maven-command-guard.mjs"],
-            "timeout": 10,
-            "statusMessage": "Checking Maven command policy"
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/maven-command-guard.mjs"
+            ],
+            "timeout": 10
           }
         ]
       },
       {
-        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+        "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/scripts/generated-artifact-guard.mjs"],
-            "timeout": 10,
-            "statusMessage": "Checking generated-artifact policy"
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/generated-artifact-guard.mjs"
+            ],
+            "timeout": 10
           }
         ]
       }
@@ -54,9 +44,10 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/scripts/validate-java-edit.mjs"],
-            "timeout": 130,
-            "statusMessage": "Compiling changed Java modules"
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/stop-validation-gate.mjs"
+            ],
+            "timeout": 10
           }
         ]
       }
@@ -67,9 +58,11 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/scripts/stop-test-gate.mjs"],
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/stop-validation-gate.mjs"
+            ],
             "timeout": 620,
-            "statusMessage": "Running ROA tests"
+            "statusMessage": "Validating ROA Java changes"
           }
         ]
       }

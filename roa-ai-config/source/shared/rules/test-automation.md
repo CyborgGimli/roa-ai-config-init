@@ -1,33 +1,16 @@
 <!-- BEGIN ROA AI CONFIG: shared/test-automation -->
+
 # Test Automation Rules
 
-How a test is designed, as distinct from how ROA is used (`engineering.md`) and
-what counts as proof it works (`validation.md`).
+- Automate the behavior required by the task and assert outcomes that meaningfully prove that behavior.
+- Do not make a test pass by weakening assertions, deleting coverage, skipping tests, masking failures, or changing expected behavior without evidence.
+- Keep tests deterministic and independently executable unless sequential/shared-state behavior is an intentional part of the scenario.
+- Use controlled test data and explicit preconditions; avoid hidden dependencies on execution order, leftover state, or unrelated tests.
+- Design cleanup for state-changing scenarios and reuse established Journeys, Rippers, `DataCleaner` implementations, and other lifecycle abstractions where appropriate.
+- Preserve the behavior under test: supporting Rings or setup mechanisms may prepare prerequisites or perform independent verification, but must not replace the action the test exists to prove.
+- Reuse existing project abstractions and domain flows instead of duplicating setup, interactions, assertions, or cleanup across tests.
+- Avoid arbitrary sleeps, brittle hardcoded values, uncontrolled shared mutable state, and other workarounds that hide synchronization, data, or isolation problems.
+- Consider parallel execution when introducing shared data, storage, authentication state, or cleanup behavior.
+- Treat a failing test as evidence to investigate, not automatically as an automation defect or a reason to relax the test.
 
-- Assert the outcome the requirement names. A passing status code, a present
-  element, a non-zero row count, or the absence of an exception is not evidence
-  when the requirement is about what the system actually did.
-- A test that cannot fail is worse than no test, because it reports safety that
-  does not exist. Before accepting one, ask what would have to break for it to go
-  red — if there is no clear answer, the assertion is wrong.
-- Setup prepares prerequisites; it never performs the behaviour under test. A UI
-  test whose entity is created over the API and then only checked in the UI has
-  stopped testing creation.
-- Never make a test pass by weakening an assertion, deleting coverage, disabling
-  or skipping the test, or changing a correct expectation. If that is the only
-  way to green, the cause has not been found yet.
-- Keep tests independently executable. No dependence on execution order, on data
-  another test created, or on state left behind by a previous run. The one
-  exception is a class that deliberately extends `BaseQuestSequential` because the
-  scenario genuinely requires shared state; that choice is part of the design and
-  must be stated, not a way to paper over missing setup.
-- Create data uniquely per run so reruns and parallel execution do not collide,
-  and design the cleanup at the same time as the setup rather than afterwards.
-- Cleanup must be safe when the expected state is already missing — a test that
-  failed halfway still has to clean up after itself.
-- Treat a failing test as evidence to investigate, not as an automation defect by
-  default. It may have found a real product bug, which is the system working.
-- Keep negative scenarios deliberate. One invalid condition per test, grounded in
-  a contract or an explicit requirement, not in an assumption about what the
-  application probably rejects.
 <!-- END ROA AI CONFIG: shared/test-automation -->

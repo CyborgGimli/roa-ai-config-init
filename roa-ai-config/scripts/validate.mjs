@@ -4,8 +4,7 @@
 // Runs the build first, so validation always inspects freshly generated output
 // rather than whatever happened to be left in dist/. Then checks, in order:
 //   1. every generated JSON file parses
-//   2. structural rules — skill/agent frontmatter, monitor targets,
-//      setup managed-block markers, and placeholder leaks
+//   2. structural rules — skill/agent frontmatter, setup managed-block markers, and placeholder leaks
 //   3. `claude plugin validate .` when the Claude CLI is available
 //
 // Structural problems are aggregated and reported together, so one run tells
@@ -191,18 +190,6 @@ function checkPluginStructure(pluginDir, pluginName, problems) {
       }
     }
   }
-
-  // Monitors: on-skill-invoke targets must exist in this plugin.
-  const monitorsPath = path.join(pluginDir, "monitors", "monitors.json");
-  if (fs.existsSync(monitorsPath)) {
-    const monitors = JSON.parse(readText(monitorsPath));
-    for (const monitor of Array.isArray(monitors) ? monitors : []) {
-      const match = /^on-skill-invoke:(.+)$/.exec(String(monitor.when ?? ""));
-      if (match && !skillNames.has(match[1])) {
-        problems.push(`${pluginName}: monitor ${JSON.stringify(monitor.name)} triggers on skill ${JSON.stringify(match[1])} which does not exist`);
-      }
-    }
-  }
 }
 
 function renderPlaceholders(text, values) {
@@ -289,7 +276,7 @@ function runStructuralChecks() {
     }
     throw new Error("structural validation failed");
   }
-  console.log("Structural checks passed (agents, skills, monitors, setup markers, placeholders).");
+  console.log("Structural checks passed (agents, skills, setup markers, placeholders).");
 }
 
 run(process.execPath, ["scripts/build.mjs"]);

@@ -7,28 +7,28 @@ and `source/plugins/<name>/agents/` into that plugin only.
 ## Shared (`source/shared/agents/`)
 
 Ship into roa-ui, roa-api and roa-db. All are stack-agnostic; module specifics come
-from the plugin's hidden profile skills, not from forking an agent.
+from the plugin's hidden profile skills and its own architect agent, not from forking a shared agent.
 
 | Agent | Role | Edits code |
 | --- | --- | --- |
-| `codebase-investigator` | Find what already exists and where; report `file_path:line` | no |
-| `planner` | Short executable plan: affected layers, ordered steps, validation, risks | no |
-| `implementation-engineer` | Implement an approved change bottom-up, matching surrounding code | yes |
-| `validator` | Run the build and relevant tests; classify every failure | no |
-| `test-debugger` | Root-cause a failing or flaky test; classify before concluding | no |
-| `adversarial-reviewer` | Attack the change: false positives, flakiness, leaked data, layer violations | no |
-| `security-reviewer` | Secrets in code or `ai-config.yaml`, unsafe fixtures, logged credentials | no |
-| `researcher` | Sourced answers about framework or dependency behaviour | no |
+| `codebase-investigator` | Map the task-relevant structure, conventions and reusable abstractions | no |
+| `test-automation-planner` | Ordered implementation and validation plan from investigated requirements | no |
+| `implementation-engineer` | Implement the approved change using existing abstractions and `ai-teacher` patterns | yes |
+| `validator` | Verify the change is complete, correct and backed by execution evidence | no |
+| `test-debugger` | Root-cause a failing test; classify automation vs application/environment/data | no |
+| `adversarial-test-reviewer` | Attack the change: weak assertions, hidden coupling, false positives | no |
 
 ## Plugin-specific (`source/plugins/<name>/agents/`)
 
 | Plugin | Agent | Role |
 | --- | --- | --- |
 | roa-base | `repo-memory-architect` | Create or refresh the repository's `CLAUDE.md` memory after setup/update |
-| roa-api | `roa-api-contract-investigator` | Establish the authoritative Swagger/OpenAPI contract for the operations a task touches |
-| roa-api | `roa-api-contract-reviewer` | Review API tests against the contract they claim to exercise |
-| roa-ui | `roa-ui-application-investigator` | Verify DOM, locators, readiness and network facts from the running application |
-| roa-ui | `roa-ui-flakiness-reviewer` | Review UI changes for waits, locators and state that will fail intermittently |
+| roa-api | `api-contract-investigator` | Establish the authoritative Swagger/OpenAPI contract for the operations a task touches |
+| roa-api | `api-contract-reviewer` | Review API automation against the contract it claims to exercise |
+| roa-api | `api-test-architect` | Design the API automation solution from verified contract and repository facts |
+| roa-ui | `ui-application-investigator` | Verify DOM, locators, readiness and network facts from the running application |
+| roa-ui | `ui-architecture-reviewer` | Review UI automation for architectural correctness and application fidelity |
+| roa-ui | `ui-test-architect` | Design the UI automation solution from verified application and repository facts |
 | roa-db | `roa-db-data-reviewer` | Review DB changes for unbound SQL, unowned rows and missing cleanup |
 
 ## Conventions

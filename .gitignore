@@ -8,6 +8,7 @@
 /demo-video-i1/
 /ai-api-ninth/
 /roa-example-projects/
+/roa-claude-marketplace-main/
 
 # IDE
 .idea/
@@ -15,3 +16,4 @@
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini

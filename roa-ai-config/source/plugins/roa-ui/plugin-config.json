@@ -1,15 +1,16 @@
 {
   "name": "roa-ui",
-  "displayName": "ROA UI Testing",
+  "displayName": "ROA UI",
   "version": "0.1.1",
-  "description": "UI automation with three-layer component architecture, Selenium SmartWebDriver, and fluent testing patterns",
-  "category": "testing",
+  "description": "ROA UI test automation plugin with application investigation, UI architecture, component and element modeling, synchronization, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
+  "category": "test-automation",
   "tags": [
     "roa",
     "ui",
+    "java",
     "selenium",
-    "automation",
-    "testing"
+    "test-automation",
+    "claude-code"
   ],
   "defaultEnabled": true,
   "dependencies": [
@@ -17,12 +18,8 @@
   ],
   "copy": [
     {
-      "from": "${shared_dir}/agents",
-      "to": "agents"
-    },
-    {
-      "from": "${plugin_dir}/agents",
-      "to": "agents"
+      "from": "${plugin_dir}/README.md",
+      "to": "README.md"
     },
     {
       "from": "${shared_dir}/skills",
@@ -33,20 +30,12 @@
       "to": "skills"
     },
     {
-      "from": "${shared_dir}/scripts",
-      "to": "scripts"
+      "from": "${shared_dir}/agents",
+      "to": "agents"
     },
     {
-      "from": "${shared_dir}/monitors",
-      "to": "monitors"
-    },
-    {
-      "from": "${shared_dir}/output-styles",
-      "to": "output-styles"
-    },
-    {
-      "from": "${shared_dir}/mcp/ai-config.example.yaml",
-      "to": "mcp/ai-config.example.yaml"
+      "from": "${plugin_dir}/agents",
+      "to": "agents"
     },
     {
       "from": "${shared_dir}/docs",
@@ -57,16 +46,20 @@
       "to": "docs"
     },
     {
-      "from": "${plugin_dir}/README.md",
-      "to": "README.md"
+      "from": "${shared_dir}/output-styles",
+      "to": "output-styles"
+    },
+    {
+      "from": "${shared_dir}/themes",
+      "to": "themes"
     },
     {
       "from": "${shared_dir}/hooks/scripts",
       "to": "hooks/scripts"
     },
     {
-      "from": "${shared_dir}/themes",
-      "to": "themes"
+      "from": "${shared_dir}/scripts",
+      "to": "scripts"
     },
     {
       "from": "${shared_dir}/lsp/lsp.json",
@@ -75,7 +68,7 @@
   ],
   "render": [
     {
-      "from": "${shared_dir}/templates/plugin-standard.json",
+      "from": "${shared_dir}/templates/plugin-complete.json",
       "to": ".claude-plugin/plugin.json"
     }
   ],
@@ -85,18 +78,15 @@
         "${shared_dir}/hooks/hooks.json"
       ],
       "to": "hooks/hooks.json",
-      "description": "ROA UI Testing hooks."
+      "description": "ROA UI hooks."
     }
   ],
   "executable": [
-    "scripts/tail-logs.mjs",
     "hooks/scripts/dangerous-command-guard.mjs",
     "hooks/scripts/maven-command-guard.mjs",
-    "hooks/scripts/validate-java-edit.mjs",
-    "hooks/scripts/stop-test-gate.mjs",
     "hooks/scripts/generated-artifact-guard.mjs",
-    "scripts/jdtls-launcher.mjs",
-    "scripts/check-doc-currency.mjs"
+    "hooks/scripts/stop-validation-gate.mjs",
+    "scripts/jdtls-launcher.mjs"
   ],
   "setup": {
     "enabled": true,
@@ -108,7 +98,7 @@
     "ruleFile": ".claude/rules/${plugin_name}.md",
     "ruleTemplate": "generated/templates/${plugin_name}/rules.md",
     "claudeTemplate": "generated/templates/${plugin_name}/CLAUDE.md",
-    "ruleTemplateSource": "${shared_dir}/setup/rules.md",
+    "ruleTemplateSource": "${plugin_dir}/setup/rules.md",
     "claudeTemplateSource": "${plugin_dir}/setup/CLAUDE.md",
     "settingsFragments": [
       {
@@ -130,34 +120,16 @@
         "to": "generated/mcp/shared/project-shared.json"
       },
       {
-        "from": "${plugin_dir}/mcp/project-mcp.json",
+        "from": "${plugin_dir}/mcp/project-ui.json",
         "to": "generated/mcp/${plugin_name}/project-mcp.json"
       }
     ],
     "rules": [
       {
-        "from": "${shared_dir}/rules/ethics.md",
-        "to": "generated/rules/shared/ethics.md",
-        "target": ".claude/rules/ethics.md",
-        "marker": "shared/ethics"
-      },
-      {
-        "from": "${shared_dir}/rules/engineering.md",
-        "to": "generated/rules/shared/engineering.md",
-        "target": ".claude/rules/engineering.md",
-        "marker": "shared/engineering"
-      },
-      {
-        "from": "${shared_dir}/rules/git-pr.md",
-        "to": "generated/rules/shared/git-pr.md",
-        "target": ".claude/rules/git-pr.md",
-        "marker": "shared/git-pr"
-      },
-      {
-        "from": "${shared_dir}/rules/validation.md",
-        "to": "generated/rules/shared/validation.md",
-        "target": ".claude/rules/validation.md",
-        "marker": "shared/validation"
+        "from": "${shared_dir}/rules/roa-engineering.md",
+        "to": "generated/rules/shared/roa-engineering.md",
+        "target": ".claude/rules/roa-engineering.md",
+        "marker": "shared/roa-engineering"
       },
       {
         "from": "${shared_dir}/rules/test-automation.md",
@@ -166,41 +138,45 @@
         "marker": "shared/test-automation"
       },
       {
+        "from": "${shared_dir}/rules/validation.md",
+        "to": "generated/rules/shared/validation.md",
+        "target": ".claude/rules/validation.md",
+        "marker": "shared/validation"
+      },
+      {
         "from": "${shared_dir}/rules/repository-safety.md",
         "to": "generated/rules/shared/repository-safety.md",
         "target": ".claude/rules/repository-safety.md",
         "marker": "shared/repository-safety"
       },
       {
-        "from": "${plugin_dir}/setup/rules/three-layer.md",
-        "to": "generated/rules/${plugin_name}/three-layer.md",
-        "target": ".claude/rules/three-layer.md",
-        "marker": "${plugin_name}/three-layer"
+        "from": "${plugin_dir}/setup/rules/ui-architecture.md",
+        "to": "generated/rules/${plugin_name}/ui-architecture.md",
+        "target": ".claude/rules/ui-architecture.md",
+        "marker": "${plugin_name}/ui-architecture"
       },
       {
-        "from": "${plugin_dir}/setup/rules/locators.md",
-        "to": "generated/rules/${plugin_name}/locators.md",
-        "target": ".claude/rules/locators.md",
-        "marker": "${plugin_name}/locators"
+        "from": "${plugin_dir}/setup/rules/ui-elements.md",
+        "to": "generated/rules/${plugin_name}/ui-elements.md",
+        "target": ".claude/rules/ui-elements.md",
+        "marker": "${plugin_name}/ui-elements"
       },
       {
-        "from": "${plugin_dir}/setup/rules/waits.md",
-        "to": "generated/rules/${plugin_name}/waits.md",
-        "target": ".claude/rules/waits.md",
-        "marker": "${plugin_name}/waits"
+        "from": "${plugin_dir}/setup/rules/ui-synchronization.md",
+        "to": "generated/rules/${plugin_name}/ui-synchronization.md",
+        "target": ".claude/rules/ui-synchronization.md",
+        "marker": "${plugin_name}/ui-synchronization"
       },
       {
-        "from": "${plugin_dir}/setup/rules/testing.md",
-        "to": "generated/rules/${plugin_name}/testing.md",
-        "target": ".claude/rules/testing.md",
-        "marker": "${plugin_name}/testing"
+        "from": "${plugin_dir}/setup/rules/ui-testing.md",
+        "to": "generated/rules/${plugin_name}/ui-testing.md",
+        "target": ".claude/rules/ui-testing.md",
+        "marker": "${plugin_name}/ui-testing"
       }
     ],
     "extraDirectories": [
       ".claude",
-      ".claude/rules",
-      "src/test/java",
-      "src/test/resources"
+      ".claude/rules"
     ]
   }
 }

@@ -1,35 +1,21 @@
 {
+  "description": "Shared MCP defaults for every ROA repository. Target repositories customize these through ai-config.yaml.",
   "servers": {
-    "postgresql": {
-      "enabledByDefault": false,
-      "instancePath": "databases",
-      "serverNameTemplate": "postgresql-${name}",
-      "required": ["name", "dsnEnv"],
-      "config": {
-        "type": "stdio",
-        "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-postgres", "${env:dsnEnv}"]
-      }
-    },
-    "playwright": {
-      "enabledByDefault": false,
-      "config": {
-        "type": "stdio",
-        "command": "npx",
-        "args": ["-y", "@playwright/mcp@latest"]
-      }
-    },
     "github": {
-      "enabledByDefault": false,
-      "required": ["repositories"],
-      "envFromConfig": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:tokenEnv}",
-        "ROA_MCP_GITHUB_REPOSITORIES": "${repositories|csv}"
-      },
+      "enabledByDefault": true,
+      "required": [
+        "tokenEnv"
+      ],
       "config": {
         "type": "stdio",
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-github"]
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-github"
+        ]
+      },
+      "envFromConfig": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:tokenEnv}"
       }
     }
   }

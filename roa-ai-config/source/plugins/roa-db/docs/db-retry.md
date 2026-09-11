@@ -13,7 +13,7 @@ quest.use(RING_OF_DB)
 Build conditions with `RetryConditionDb` (`io.cyborgcode.roa.db.retry`).
 
 The mechanism itself is `FluentService`-level and is the same in every ring:
-`framework-retry.md` covers `RetryCondition`, `RetryConditionImpl`, and the
+The `ai-compass` metadata for `RetryCondition` and `RetryConditionImpl` covers the
 protected four-argument form for custom rings.
 
 ## When retry is right

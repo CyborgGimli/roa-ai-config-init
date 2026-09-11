@@ -1,5 +1,5 @@
 {
-  "name": "ROA Dark",
+  "name": "ROA Dark Extended",
   "base": "dark",
   "overrides": {
     "claude": "#7dd3fc",

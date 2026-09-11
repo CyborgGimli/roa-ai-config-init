@@ -7,8 +7,8 @@ Private Claude Code plugin marketplace for the **ROA** (Ring of Automation) test
 This repository builds Claude Code plugins that provide AI assistance for writing ROA tests:
 
 - **roa-base** — Setup and update machinery
-- **roa-ui** — UI testing with three-layer component architecture
-- **roa-api** — API testing with fluent patterns
+- **roa-ui** — UI test automation (application investigation, component/element model, synchronisation)
+- **roa-api** — API test automation (Swagger/OpenAPI contract, typed endpoints and models)
 - **roa-db** — Database testing with query abstractions
 
 **This is a build system**, not a target repository. Don't write tests here.

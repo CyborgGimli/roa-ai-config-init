@@ -10,8 +10,8 @@ This repository generates and maintains four plugins:
 | Plugin | Purpose |
 |--------|---------|
 | **roa-base** | Bootstrap only: `/roa-base:setup` and `/roa-base:update`, plus the `repo-memory-architect` agent. Carries no shared payload. |
-| **roa-ui** | UI testing — three-layer component architecture, typed elements, synchronisation, tables, insertion, interception |
-| **roa-api** | REST API testing — typed endpoints, DTOs, `RING_OF_API` chains, `Assertion.builder()` validation |
+| **roa-ui** | UI test automation — application investigation, component/element model, synchronisation, insertion, tables, interception |
+| **roa-api** | API test automation — Swagger/OpenAPI contract investigation, typed endpoints and models, request/response validation |
 | **roa-db** | Database testing — `DbQuery` enums, bound parameters, `DataCleaner`-owned cleanup |
 
 ## Architecture
@@ -24,22 +24,22 @@ complete; module-specific material lives in that plugin's own folder.
 
 | Folder | Contents |
 | --- | --- |
-| `agents/` | `codebase-investigator`, `planner`, `implementation-engineer`, `validator`, `test-debugger`, `adversarial-reviewer`, `security-reviewer`, `researcher` |
-| `skills/` | Stack-agnostic workflows (`plan-task`, `implement-task`, `run-tests`, `validate-code`, `review-change`, `debug`, `fix-tests`, `flaky-triage`, …) and the hidden policy skills (`ai-compass`, `ai-teacher`, `java-standards`, `definition-of-done`, `validation-policy`, `git-pr-lifecycle-policy`). See `source/shared/skills/README.md`. |
-| `docs/` | Single-topic framework reference chunks (`framework-*.md`, `code-standards.md`, `testing-standards.md`, `quality-gates.md`, `pandora-metadata.md`, …) |
+| `agents/` | `codebase-investigator`, `test-automation-planner`, `implementation-engineer`, `validator`, `test-debugger`, `adversarial-test-reviewer` |
+| `skills/` | Stack-agnostic workflows (`plan-test-automation`, `implement-test-automation`, `run-tests`, `debug-test-automation`, `fix-tests`, `validate-test-automation`, `review-test-automation`) and the hidden policy skills (`ai-compass`, `ai-teacher`, `definition-of-done`, `validation-policy`) |
+| `docs/` | Framework reference (`roa-core-architecture.md`, `roa-test-lifecycle.md`, `roa-data-and-storage.md`, `roa-custom-services-and-rings.md`, `pandora-overview.md`, `ai-teacher-overview.md`) |
 | `rules/` | Always-on repository rules delivered to the target's `.claude/rules/` |
 | `hooks/` | `hooks.json` plus the guard and validation scripts |
-| `settings/`, `mcp/`, `monitors/`, `output-styles/`, `themes/`, `lsp/`, `scripts/`, `templates/` | Remaining plugin payload and build templates |
+| `settings/`, `mcp/`, `output-styles/`, `themes/`, `lsp/`, `scripts/`, `templates/` | Remaining plugin payload (`scripts/` holds only the LSP launcher) and build templates |
 
 ### Plugin sources (`source/plugins/<name>/`)
 
 | Item | Purpose |
 | --- | --- |
 | `plugin-config.json` | Metadata, `copy`/`render`/`mergeHooks` rules, and the `setup` block that drives `/roa-base:setup` |
-| `agents/` | Module-specific agents, e.g. `roa-api-contract-investigator`, `roa-ui-flakiness-reviewer`, `roa-db-data-reviewer` |
-| `skills/` | `roa-<module>-architect` plus the hidden profile skills the shared workflows load by name (`-task-profile`, `-validation-profile`, `-quality-gate`, `-definition-of-done`, `-guidance`, `-examples`) |
+| `agents/` | Module-specific agents, e.g. `api-contract-investigator`, `api-test-architect`, `ui-application-investigator`, `ui-test-architect`, `roa-db-data-reviewer` |
+| `skills/` | `architect-<module>-tests` plus the hidden profile skills the shared workflows apply (`<module>-task-profile`, `<module>-validation-profile`) |
 | `docs/` | Module reference chunks |
-| `setup/` | The `CLAUDE.md` managed-block template, per-module rules, and settings fragment |
+| `setup/` | The `CLAUDE.md` and `rules.md` managed-block templates, per-module rules, and settings fragment |
 | `mcp/` | Module MCP catalog |
 
 ### Generated plugins (`dist/plugins/<name>/`)
@@ -48,7 +48,7 @@ Each generated plugin is self-contained and laid out at the plugin root:
 
 ```text
 .claude-plugin/plugin.json   agents/   skills/   docs/   hooks/   mcp/
-monitors/   output-styles/   scripts/   themes/   .lsp.json   README.md
+output-styles/   scripts/   themes/   .lsp.json   README.md
 ```
 
 Shared sources are copied into every domain plugin, so installed plugins never

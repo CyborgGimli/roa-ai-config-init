@@ -1,6 +1,6 @@
 ---
 name: roa-db-validation-profile
-description: The Database "flavour" for the generic ROA validation workflow - what must be verified in a database change and how failures are classified. Loaded by validate-code and review-change.
+description: The Database "flavour" for the generic ROA validation workflow - what must be verified in a database change and how failures are classified. Loaded by validate-test-automation and review-test-automation.
 user-invocable: false
 allowed-tools: Read, Grep, Glob, Bash
 ---

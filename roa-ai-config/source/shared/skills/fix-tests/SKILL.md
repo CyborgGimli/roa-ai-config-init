@@ -1,20 +1,58 @@
 ---
 name: fix-tests
-description: Repair failing ROA tests once the cause is known. Use after debug has identified the failure.
-allowed-tools: Read, Glob, Grep, Bash, Edit, Write
+description: Diagnose and fix failing ROA automation tests, then rerun the relevant scope until the automation passes or a justified external blocker is established.
+allowed-tools: Read, Glob, Grep, Edit, Write, Bash, Skill, Task
 ---
 
-Fix the cause you identified, not the symptom.
+Fix the failing automation for:
 
-- A wrong assertion gets a correct assertion, not a relaxed one.
-- A race gets a wait on the real condition, never a sleep. Where the delay is
-  genuine eventual consistency, that is `retryUntil` with the smallest window
-  the behaviour needs.
-- A data collision gets isolated test data, not a retry.
-- A genuinely changed requirement gets an updated test - say that the
-  requirement changed.
+```text
+$ARGUMENTS
+```
 
-If a test is failing because the product is broken, say so and stop. Do not
-adjust the test to make a real defect disappear.
+## Procedure
 
-Re-run and report evidence when finished.
+1. Run or inspect the failing test and capture the actual failure evidence.
+
+2. Use `debug-test-automation` to establish the root cause before modifying code.
+
+3. If the failure is an automation defect, implement the smallest justified correction.
+
+4. Reuse existing project abstractions and conventions. Do not introduce unnecessary workarounds or unrelated refactoring.
+
+5. Before creating new Java code, use the `ai-teacher` skill for relevant project-approved implementation patterns.
+
+6. When exact `io.cyborgcode.roa.*` behavior affects the fix, use the `ai-compass` skill rather than guessing.
+
+7. Do not fix a test by:
+
+    * weakening assertions;
+    * deleting meaningful coverage;
+    * skipping or disabling tests;
+    * changing correct expected behavior;
+    * adding arbitrary waits;
+    * hardcoding unstable values;
+    * masking application, environment, data, or contract failures.
+
+8. Compile after meaningful Java changes and resolve compilation failures caused by the fix.
+
+9. Rerun the relevant test scope using `run-tests`.
+
+10. Repeat diagnosis, correction, and rerun only while evidence supports an automation defect.
+
+11. If the remaining failure belongs to the application, environment, data, contract, configuration, or another external dependency, stop and report it rather than modifying correct automation.
+
+## Return
+
+Provide:
+
+* original failure;
+* established root cause;
+* files and symbols changed;
+* correction applied;
+* compilation result;
+* tests rerun and result;
+* final PASS, FAIL, or BLOCKED status;
+* any remaining external issue or uncertainty.
+
+Do not claim the issue is fixed until the relevant tests pass or a justified blocker has been established.

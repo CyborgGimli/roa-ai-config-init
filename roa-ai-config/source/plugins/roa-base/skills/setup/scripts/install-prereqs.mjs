@@ -3,7 +3,7 @@
 // Node.js built-ins only. Idempotent: it checks first and only installs what is missing.
 //
 // Requirements:
-//   - Node.js >= 20   runs ROA setup, hooks, and monitor scripts (hard prerequisite)
+//   - Node.js >= 20   runs ROA setup and hook scripts (hard prerequisite)
 //   - git             version control (hard prerequisite)
 //   - JDK >= 17       compiles and runs ROA tests
 //   - Maven >= 3.8    builds the project and runs `mvn pandora:navigation -U`
@@ -31,7 +31,7 @@ const isMac = process.platform === "darwin";
 const MANUAL = {
   node: {
     label: "Node.js >= 20",
-    purpose: "runs ROA setup, hooks, and monitor scripts",
+    purpose: "runs ROA setup and hook scripts",
     win: "winget install OpenJS.NodeJS.LTS   (or https://nodejs.org)",
     unix: "nvm install --lts   (or brew install node / https://nodejs.org)",
   },

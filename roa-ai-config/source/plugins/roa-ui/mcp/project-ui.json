@@ -1,0 +1,46 @@
+{
+  "description": "ROA UI MCP defaults. Target repositories customize these through ai-config.yaml.",
+  "servers": {
+    "selenium": {
+      "enabledByDefault": true,
+      "config": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@angiejones/mcp-selenium"
+        ]
+      }
+    },
+    "browser": {
+      "enabledByDefault": true,
+      "config": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-puppeteer"
+        ],
+        "env": {
+          "PUPPETEER_HEADLESS": "true",
+          "PUPPETEER_IGNORE_HTTPS_ERRORS": "true",
+          "PUPPETEER_TIMEOUT": "30000",
+          "PUPPETEER_VIEWPORT_HEIGHT": "1080",
+          "PUPPETEER_VIEWPORT_WIDTH": "1920"
+        }
+      }
+    },
+    "chrome-devtools": {
+      "enabledByDefault": true,
+      "config": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "chrome-devtools-mcp@latest",
+          "--headless=true"
+        ]
+      }
+    }
+  }
+}
