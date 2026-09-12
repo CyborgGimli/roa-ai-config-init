@@ -2,7 +2,7 @@
   "marketplace": {
     "name": "roa-ai",
     "description": "Private Claude Code plugin marketplace for the ROA test automation framework",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "repository": "CyborgGimli/roa-ai-config-init",
     "owner": {
       "name": "ROA Platform Team",

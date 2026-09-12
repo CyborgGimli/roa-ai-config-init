@@ -1,7 +1,7 @@
 {
   "name": "roa-db",
   "displayName": "ROA Database Testing",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Database testing with query abstractions and managed test data lifecycle",
   "author": {
     "name": "ROA Platform Team",

@@ -1,7 +1,7 @@
 {
   "name": "roa-api",
   "displayName": "ROA API",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "ROA API test automation plugin with API architecture, contract investigation, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
   "category": "test-automation",
   "tags": [

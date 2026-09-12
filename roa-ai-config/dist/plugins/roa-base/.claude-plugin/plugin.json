@@ -1,7 +1,7 @@
 {
   "name": "roa-base",
   "displayName": "ROA Base",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Bootstrap plugin providing setup and update machinery for ROA Claude Code plugins",
   "author": {
     "name": "ROA Platform Team",
