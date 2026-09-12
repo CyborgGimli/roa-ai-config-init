@@ -1,6 +1,6 @@
 {
   "name": "roa-ai-config",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Internal Claude Code plugin marketplace build tooling for the ROA test automation framework.",
   "type": "module",

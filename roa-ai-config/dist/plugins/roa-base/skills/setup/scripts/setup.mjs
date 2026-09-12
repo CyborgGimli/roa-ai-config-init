@@ -1226,7 +1226,7 @@ function loadOrCreateAiConfig(targetRoot, spec) {
   return [parsed, null, false];
 }
 
-function updateProjectMcp(targetRoot, spec) {
+function updateProjectMcp(targetRoot, spec, pluginName) {
   const catalogs = loadMcpCatalogs(spec);
   if (Object.keys(catalogs).length === 0) {
     return { changed: [], warnings: [] };
@@ -1256,7 +1256,7 @@ function updateProjectMcp(targetRoot, spec) {
     return { changed, warnings };
   }
 
-  changed.push(...writeProjectMcp(targetRoot, mcpServers));
+  changed.push(...writeProjectMcp(targetRoot, mcpServers, pluginName));
   if (Object.keys(mcpServers).length === 0) {
     warnings.push("No MCP servers were generated. Fill ai-config.yaml and rerun setup.");
   }
@@ -1265,11 +1265,50 @@ function updateProjectMcp(targetRoot, spec) {
 }
 
 // `.mcp.json` is a shared project file: a repository may already declare MCP
-// servers that have nothing to do with ROA. Overwriting it wholesale destroys
-// them silently, so merge, and only drop entries this script wrote on an earlier
-// run. That ownership list is what makes disabling a server in ai-config.yaml
-// actually remove it without also removing somebody else's.
-function writeProjectMcp(targetRoot, mcpServers) {
+// servers that have nothing to do with ROA, and a repository with both an API
+// and a UI module runs setup once per plugin. Ownership is therefore recorded
+// per plugin: a run may drop only the entries that same plugin wrote earlier,
+// so disabling a server in ai-config.yaml still removes it without deleting the
+// servers a sibling ROA plugin or the repository itself declared.
+function readOwnedServers(ownedPath, pluginName, emitted) {
+  const empty = { byPlugin: {}, mine: [] };
+  if (!fs.existsSync(ownedPath)) {
+    return empty;
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(readText(ownedPath));
+  } catch {
+    // An unreadable ownership list means we cannot prove what was ours, so keep
+    // every existing entry rather than risk deleting a server we did not write.
+    return empty;
+  }
+
+  if (isPlainObject(parsed.plugins)) {
+    const byPlugin = {};
+    for (const [name, servers] of Object.entries(parsed.plugins)) {
+      if (Array.isArray(servers)) {
+        byPlugin[name] = servers.filter((server) => typeof server === "string");
+      }
+    }
+    return { byPlugin, mine: byPlugin[pluginName] ?? [] };
+  }
+
+  // Pre-0.1.3 repositories recorded one flat list with no plugin attached. Claim
+  // only the entries this plugin still generates, so upgrading a repository that
+  // already ran two ROA setups never deletes the sibling's servers on the way in.
+  if (Array.isArray(parsed.servers)) {
+    const legacy = parsed.servers.filter(
+      (server) => typeof server === "string" && emitted.includes(server)
+    );
+    return { byPlugin: {}, mine: legacy };
+  }
+
+  return empty;
+}
+
+function writeProjectMcp(targetRoot, mcpServers, pluginName) {
   const mcpPath = resolveTargetPath(targetRoot, ".mcp.json");
   const ownedPath = resolveTargetPath(targetRoot, ".claude/roa-mcp-owned.json");
 
@@ -1288,22 +1327,10 @@ function writeProjectMcp(targetRoot, mcpServers) {
     }
   }
 
-  let previouslyOwned = [];
-  if (fs.existsSync(ownedPath)) {
-    try {
-      const parsed = JSON.parse(readText(ownedPath));
-      if (Array.isArray(parsed.servers)) {
-        previouslyOwned = parsed.servers.filter((name) => typeof name === "string");
-      }
-    } catch {
-      // An unreadable ownership list means we cannot prove what was ours, so keep
-      // every existing entry rather than risk deleting a server we did not write.
-    }
-  }
-
+  const ownership = readOwnedServers(ownedPath, pluginName, Object.keys(mcpServers));
   const existing = isPlainObject(document.mcpServers) ? document.mcpServers : {};
   const retained = Object.fromEntries(
-    Object.entries(existing).filter(([name]) => !previouslyOwned.includes(name))
+    Object.entries(existing).filter(([name]) => !ownership.mine.includes(name))
   );
 
   const merged = { ...retained, ...mcpServers };
@@ -1314,12 +1341,19 @@ function writeProjectMcp(targetRoot, mcpServers) {
     changed.push([writeIfChanged(mcpPath, JSON.stringify(next, null, 2) + "\n"), mcpPath]);
   }
 
+  const owned = { ...ownership.byPlugin, [pluginName]: Object.keys(mcpServers).sort() };
+  const plugins = {};
+  for (const name of Object.keys(owned).sort()) {
+    if (owned[name].length > 0) {
+      plugins[name] = owned[name];
+    }
+  }
+
   // Most repositories never enable an MCP server. Writing an ownership file that
   // records nothing would put an unexplained file in every one of them, so only
   // keep it once there is something to own or something previously owned to track.
-  const owned = Object.keys(mcpServers).sort();
-  if (owned.length > 0 || fs.existsSync(ownedPath)) {
-    const ownedStatus = writeIfChanged(ownedPath, JSON.stringify({ servers: owned }, null, 2) + "\n");
+  if (Object.keys(plugins).length > 0 || fs.existsSync(ownedPath)) {
+    const ownedStatus = writeIfChanged(ownedPath, JSON.stringify({ plugins }, null, 2) + "\n");
     if (ownedStatus !== "unchanged") {
       changed.push([ownedStatus, ownedPath]);
     }
@@ -1486,7 +1520,7 @@ function run(options) {
 
   const settingsNotes = [];
   changed.push([updateSettings(settingsPath, spec, settingsNotes), settingsPath]);
-  const mcpResult = updateProjectMcp(targetRoot, spec);
+  const mcpResult = updateProjectMcp(targetRoot, spec, pluginName);
   changed.push(...mcpResult.changed);
 
   const enabledResult = enablePlugin(spec, targetRoot);

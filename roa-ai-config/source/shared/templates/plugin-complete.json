@@ -13,7 +13,6 @@
   "keywords": ${plugin_tags_json},
   "dependencies": ${plugin_dependencies_json},
   "defaultEnabled": ${plugin_default_enabled_json},
-  "hooks": "./hooks/hooks.json",
   "outputStyles": "./output-styles/",
   "lspServers": "./.lsp.json",
   "experimental": {

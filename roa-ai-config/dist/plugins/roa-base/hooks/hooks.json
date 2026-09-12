@@ -1,5 +1,5 @@
 {
-  "description": "ROA API hooks.",
+  "description": "ROA shared hooks.",
   "hooks": {
     "PreToolUse": [
       {

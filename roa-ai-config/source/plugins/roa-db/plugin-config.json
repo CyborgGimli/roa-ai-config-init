@@ -1,7 +1,7 @@
 {
   "name": "roa-db",
   "displayName": "ROA Database Testing",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Database testing with query abstractions and managed test data lifecycle",
   "category": "testing",
   "tags": [
@@ -56,10 +56,6 @@
       "to": "README.md"
     },
     {
-      "from": "${shared_dir}/hooks/scripts",
-      "to": "hooks/scripts"
-    },
-    {
       "from": "${shared_dir}/themes",
       "to": "themes"
     },
@@ -74,20 +70,7 @@
       "to": ".claude-plugin/plugin.json"
     }
   ],
-  "mergeHooks": [
-    {
-      "from": [
-        "${shared_dir}/hooks/hooks.json"
-      ],
-      "to": "hooks/hooks.json",
-      "description": "ROA Database Testing hooks."
-    }
-  ],
   "executable": [
-    "hooks/scripts/dangerous-command-guard.mjs",
-    "hooks/scripts/maven-command-guard.mjs",
-    "hooks/scripts/generated-artifact-guard.mjs",
-    "hooks/scripts/stop-validation-gate.mjs",
     "scripts/jdtls-launcher.mjs"
   ],
   "setup": {

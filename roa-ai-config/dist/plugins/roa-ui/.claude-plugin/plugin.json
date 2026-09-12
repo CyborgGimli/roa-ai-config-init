@@ -1,7 +1,7 @@
 {
   "name": "roa-ui",
   "displayName": "ROA UI",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "ROA UI test automation plugin with application investigation, UI architecture, component and element modeling, synchronization, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
   "author": {
     "name": "ROA Platform Team",
@@ -13,7 +13,6 @@
   "keywords": ["roa","ui","java","selenium","test-automation","claude-code"],
   "dependencies": ["roa-base"],
   "defaultEnabled": true,
-  "hooks": "./hooks/hooks.json",
   "outputStyles": "./output-styles/",
   "lspServers": "./.lsp.json",
   "experimental": {

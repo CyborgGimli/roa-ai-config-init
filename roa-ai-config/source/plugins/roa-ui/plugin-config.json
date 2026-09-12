@@ -1,7 +1,7 @@
 {
   "name": "roa-ui",
   "displayName": "ROA UI",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "ROA UI test automation plugin with application investigation, UI architecture, component and element modeling, synchronization, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
   "category": "test-automation",
   "tags": [
@@ -54,10 +54,6 @@
       "to": "themes"
     },
     {
-      "from": "${shared_dir}/hooks/scripts",
-      "to": "hooks/scripts"
-    },
-    {
       "from": "${shared_dir}/scripts",
       "to": "scripts"
     },
@@ -72,20 +68,7 @@
       "to": ".claude-plugin/plugin.json"
     }
   ],
-  "mergeHooks": [
-    {
-      "from": [
-        "${shared_dir}/hooks/hooks.json"
-      ],
-      "to": "hooks/hooks.json",
-      "description": "ROA UI hooks."
-    }
-  ],
   "executable": [
-    "hooks/scripts/dangerous-command-guard.mjs",
-    "hooks/scripts/maven-command-guard.mjs",
-    "hooks/scripts/generated-artifact-guard.mjs",
-    "hooks/scripts/stop-validation-gate.mjs",
     "scripts/jdtls-launcher.mjs"
   ],
   "setup": {

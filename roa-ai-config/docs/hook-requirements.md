@@ -42,6 +42,18 @@ block, with an explanation the model can act on.
 - **F5** — A blocking message MUST say what was blocked and what to do instead.
   "Blocked" with no reason trains people to disable the hook.
 
+## Where the hooks ship
+
+`roa-base` carries `hooks/hooks.json` and the scripts; `roa-api`, `roa-ui` and
+`roa-db` carry none. Claude Code runs the hooks of every enabled plugin, so a
+repository configured for two ROA modules would run each guard once per module.
+`roa-base` is the one plugin guaranteed to be installed exactly once — every
+domain plugin declares it as a dependency, and the installer enables it — so it is
+where a hook belongs.
+
+- **W1** — A hook MUST be reachable from its own plugin root only. Nothing under
+  `hooks/scripts/` may read another plugin's files, or moving the hooks breaks it.
+
 ## Cross-cutting requirements
 
 - **X1** — Deterministic: the same input produces the same verdict.
@@ -72,6 +84,7 @@ block, with an explanation the model can act on.
 Feed it a payload on stdin and check the exit code:
 
 ```bash
+cd dist/plugins/roa-base
 printf '{"tool_input":{"command":"mvn install -DskipTests"}}' \
   | node hooks/scripts/maven-command-guard.mjs; echo "exit=$?"
 ```

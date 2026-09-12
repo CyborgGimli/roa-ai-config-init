@@ -9,7 +9,7 @@ This repository generates and maintains four plugins:
 
 | Plugin | Purpose |
 |--------|---------|
-| **roa-base** | Bootstrap only: `/roa-base:setup` and `/roa-base:update`, plus the `repo-memory-architect` agent. Carries no shared payload. |
+| **roa-base** | Bootstrap and hooks: `/roa-base:setup`, `/roa-base:update`, the `repo-memory-architect` agent, and the shared guard and validation hooks. Carries no test-authoring payload. |
 | **roa-ui** | UI test automation — application investigation, component/element model, synchronisation, insertion, tables, interception |
 | **roa-api** | API test automation — Swagger/OpenAPI contract investigation, typed endpoints and models, request/response validation |
 | **roa-db** | Database testing — `DbQuery` enums, `withParam` placeholders, `DataCleaner`-owned cleanup |
@@ -28,7 +28,7 @@ complete; module-specific material lives in that plugin's own folder.
 | `skills/` | Stack-agnostic workflows (`plan-test-automation`, `implement-test-automation`, `run-tests`, `debug-test-automation`, `fix-tests`, `validate-test-automation`, `review-test-automation`) and the hidden policy skills (`ai-compass`, `ai-teacher`, `definition-of-done`, `validation-policy`) |
 | `docs/` | Framework reference (`roa-core-architecture.md`, `roa-test-lifecycle.md`, `roa-data-and-storage.md`, `roa-custom-services-and-rings.md`, `pandora-overview.md`, `ai-teacher-overview.md`) |
 | `rules/` | Always-on repository rules delivered to the target's `.claude/rules/` |
-| `hooks/` | `hooks.json` plus the guard and validation scripts |
+| `hooks/` | `hooks.json` plus the guard and validation scripts, shipped by `roa-base` alone |
 | `settings/`, `mcp/`, `output-styles/`, `themes/`, `lsp/`, `scripts/`, `templates/` | Remaining plugin payload (`scripts/` holds only the LSP launcher) and build templates |
 
 ### Plugin sources (`source/plugins/<name>/`)
@@ -47,12 +47,16 @@ complete; module-specific material lives in that plugin's own folder.
 Each generated plugin is self-contained and laid out at the plugin root:
 
 ```text
-.claude-plugin/plugin.json   agents/   skills/   docs/   hooks/   mcp/
+.claude-plugin/plugin.json   agents/   skills/   docs/   mcp/
 output-styles/   scripts/   themes/   .lsp.json   README.md
 ```
 
 Shared sources are copied into every domain plugin, so installed plugins never
-depend on a sibling `shared/` folder. The generated `.claude-plugin/marketplace.json`
+depend on a sibling `shared/` folder. **Hooks are the exception**: they ship in
+`roa-base` only. Claude Code runs every enabled plugin's hooks, so a repository
+with both `roa-api` and `roa-ui` would otherwise fire each guard twice per tool
+call. `roa-base` is installed and enabled as their declared dependency, so one
+copy is always present and never more than one. The generated `.claude-plugin/marketplace.json`
 is written to the repository root (one level above this directory).
 
 Rules are **not** plugin payload: they reach the target repository through each

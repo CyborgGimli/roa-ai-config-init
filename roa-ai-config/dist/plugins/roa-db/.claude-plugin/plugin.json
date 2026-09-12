@@ -1,7 +1,7 @@
 {
   "name": "roa-db",
   "displayName": "ROA Database Testing",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Database testing with query abstractions and managed test data lifecycle",
   "author": {
     "name": "ROA Platform Team",
@@ -13,7 +13,6 @@
   "keywords": ["roa","database","sql","testing"],
   "dependencies": ["roa-base"],
   "defaultEnabled": true,
-  "hooks": "./hooks/hooks.json",
   "outputStyles": "./output-styles/",
   "lspServers": "./.lsp.json",
   "experimental": {
