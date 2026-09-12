@@ -7,6 +7,5 @@
     "name": "${marketplace_owner}",
     "email": "${marketplace_owner_email}"
   },
-  "license": "Proprietary",
-  "hooks": "./hooks/hooks.json"
+  "license": "Proprietary"
 }
