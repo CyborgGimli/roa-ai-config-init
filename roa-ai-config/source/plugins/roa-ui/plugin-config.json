@@ -1,7 +1,7 @@
 {
   "name": "roa-ui",
   "displayName": "ROA UI",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "ROA UI test automation plugin with application investigation, UI architecture, component and element modeling, synchronization, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
   "category": "test-automation",
   "tags": [
@@ -52,14 +52,6 @@
     {
       "from": "${shared_dir}/themes",
       "to": "themes"
-    },
-    {
-      "from": "${shared_dir}/scripts",
-      "to": "scripts"
-    },
-    {
-      "from": "${shared_dir}/lsp/lsp.json",
-      "to": ".lsp.json"
     }
   ],
   "render": [
@@ -67,9 +59,6 @@
       "from": "${shared_dir}/templates/plugin-complete.json",
       "to": ".claude-plugin/plugin.json"
     }
-  ],
-  "executable": [
-    "scripts/jdtls-launcher.mjs"
   ],
   "setup": {
     "enabled": true,

@@ -1,7 +1,7 @@
 {
   "name": "roa-base",
   "displayName": "ROA Base",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Bootstrap plugin providing setup and update machinery for ROA Claude Code plugins",
   "category": "framework",
   "tags": [
@@ -29,6 +29,14 @@
     {
       "from": "${shared_dir}/hooks/scripts",
       "to": "hooks/scripts"
+    },
+    {
+      "from": "${shared_dir}/scripts",
+      "to": "scripts"
+    },
+    {
+      "from": "${shared_dir}/lsp/lsp.json",
+      "to": ".lsp.json"
     }
   ],
   "render": [
@@ -43,7 +51,8 @@
     "hooks/scripts/dangerous-command-guard.mjs",
     "hooks/scripts/maven-command-guard.mjs",
     "hooks/scripts/generated-artifact-guard.mjs",
-    "hooks/scripts/stop-validation-gate.mjs"
+    "hooks/scripts/stop-validation-gate.mjs",
+    "scripts/jdtls-launcher.mjs"
   ],
   "mergeHooks": [
     {

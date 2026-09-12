@@ -1,11 +1,12 @@
 {
   "name": "roa-base",
   "displayName": "ROA Base",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Bootstrap plugin providing setup and update machinery for ROA Claude Code plugins",
   "author": {
     "name": "ROA Platform Team",
     "email": "roa-platform@example.com"
   },
-  "license": "Proprietary"
+  "license": "Proprietary",
+  "lspServers": "./.lsp.json"
 }

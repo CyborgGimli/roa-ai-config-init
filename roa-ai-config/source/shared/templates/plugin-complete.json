@@ -14,7 +14,6 @@
   "dependencies": ${plugin_dependencies_json},
   "defaultEnabled": ${plugin_default_enabled_json},
   "outputStyles": "./output-styles/",
-  "lspServers": "./.lsp.json",
   "experimental": {
     "themes": "./themes/"
   }

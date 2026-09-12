@@ -26,10 +26,11 @@ the managed `CLAUDE.md` block, the generated files under `.claude/rules/`,
 `ai-config.yaml`, and `.mcp.json`.
 
 This plugin also carries the shared hooks — the destructive-command and Maven
-guards, the generated-artifact guard, and the Stop-time Java validation gate.
-They live here rather than in `roa-api` / `roa-ui` / `roa-db` so that a
-repository configured for more than one ROA module runs each guard once, not
-once per module.
+guards, the generated-artifact guard, and the Stop-time Java validation gate —
+and the Java language server (`jdtls`) declaration. They live here rather than in
+`roa-api` / `roa-ui` / `roa-db` so that a repository configured for more than one
+ROA module runs each guard once and registers one language server, not one per
+module.
 
 The `repo-memory-architect` agent runs afterwards on an established repository to
 write concise project memory into the managed `CLAUDE.md` block. On an empty or

@@ -1,7 +1,7 @@
 {
   "name": "roa-ui",
   "displayName": "ROA UI",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "ROA UI test automation plugin with application investigation, UI architecture, component and element modeling, synchronization, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
   "author": {
     "name": "ROA Platform Team",
@@ -14,7 +14,6 @@
   "dependencies": ["roa-base"],
   "defaultEnabled": true,
   "outputStyles": "./output-styles/",
-  "lspServers": "./.lsp.json",
   "experimental": {
     "themes": "./themes/"
   }

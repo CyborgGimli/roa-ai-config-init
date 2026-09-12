@@ -1,7 +1,7 @@
 {
   "name": "roa-db",
   "displayName": "ROA Database Testing",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Database testing with query abstractions and managed test data lifecycle",
   "category": "testing",
   "tags": [
@@ -32,10 +32,6 @@
       "to": "skills"
     },
     {
-      "from": "${shared_dir}/scripts",
-      "to": "scripts"
-    },
-    {
       "from": "${shared_dir}/output-styles",
       "to": "output-styles"
     },
@@ -58,10 +54,6 @@
     {
       "from": "${shared_dir}/themes",
       "to": "themes"
-    },
-    {
-      "from": "${shared_dir}/lsp/lsp.json",
-      "to": ".lsp.json"
     }
   ],
   "render": [
@@ -69,9 +61,6 @@
       "from": "${shared_dir}/templates/plugin-complete.json",
       "to": ".claude-plugin/plugin.json"
     }
-  ],
-  "executable": [
-    "scripts/jdtls-launcher.mjs"
   ],
   "setup": {
     "enabled": true,
