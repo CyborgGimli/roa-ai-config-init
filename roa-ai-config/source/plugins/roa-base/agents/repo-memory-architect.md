@@ -40,12 +40,17 @@ Root `CLAUDE.md`:
 
 Subdirectory `CLAUDE.md` files:
 
-- Create them only when they reduce noise in the root file.
-- Good candidates are Maven modules, service boundaries, or a large test tree.
-- Do not create many small files. Prefer none, one, or a small handful.
+- Create one only for a Maven module that has its own `pom.xml` in a multi-module
+  build, and only when the root file would otherwise have to explain that module.
+  A single-module repository gets no subdirectory files: a package inside one
+  module is described by its code, and a file placed there is read by nobody
+  until it is wrong.
 - Target fewer than 60 lines per subdirectory file.
 - Use the same `<!-- BEGIN ROA AI CONFIG: repo-memory -->` markers so future updates
   can replace generated content safely.
+- On an update, delete a subdirectory `CLAUDE.md` that consists only of a managed
+  `repo-memory` block and no longer meets the rule above, and remove any root
+  reference to it.
 
 ## Rules
 
@@ -60,8 +65,7 @@ Subdirectory `CLAUDE.md` files:
   present or missing, and no placeholder values quoted from config files. If a
   fact is only true until someone runs the next task, leave it out; the tree
   itself is the source of truth for what exists.
-- Do not point the root file at a subdirectory `CLAUDE.md` you did not create, and
-  do not create one whose content is a directory listing with commentary.
+- Do not point the root file at a subdirectory `CLAUDE.md` you did not create.
 - Do not create `CLAUDE.local.md`.
 - Do not modify `.claude/settings.json`; the setup script owns settings.
 - Do not duplicate long standards that already live in `.claude/rules/` or the
