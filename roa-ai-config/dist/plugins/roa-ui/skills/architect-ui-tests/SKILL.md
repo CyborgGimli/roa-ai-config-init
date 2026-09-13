@@ -28,6 +28,8 @@ Design the ROA UI automation solution for:
     - cleanup;
     - related tests.
 
+    Treat the tree as the source of truth for what exists; a `CLAUDE.md` statement about which packages, enums, or tests are present or missing may predate earlier tasks.
+
 3. When the design depends on actual application details, delegate focused discovery to `ui-application-investigator`.
 
    Require verified evidence for relevant:
@@ -89,7 +91,8 @@ Return an implementation-ready plan containing:
 - test scenarios and meaningful assertions;
 - required Pandora lookups;
 - validation steps;
-- risks, blockers, and unresolved facts.
+- risks, blockers, and unresolved facts;
+- when the design introduces a new top-level package or module, a note that `/roa-base:update` refreshes repository memory once it lands.
 
 Do not modify code.
 

@@ -14,7 +14,7 @@ $ARGUMENTS
 
 1. Establish the behavior to automate, scope, acceptance criteria, and known constraints.
 
-2. Ground the design in the actual repository. Use `codebase-investigator` when relevant endpoints, models, services, tests, authentication, lifecycle, data, storage, cleanup, or configuration are not already clear.
+2. Ground the design in the actual repository. Use `codebase-investigator` when relevant endpoints, models, services, tests, authentication, lifecycle, data, storage, cleanup, or configuration are not already clear. Treat the tree as the source of truth for what exists; a `CLAUDE.md` statement about which packages, enums, or tests are present or missing may predate earlier tasks.
 
 3. Establish the authoritative application contract for the affected operations. Use `api-contract-investigator` when endpoint paths, methods, parameters, schemas, status codes, authentication requirements, or response behavior need verification.
 
@@ -60,6 +60,7 @@ Provide:
 * intended test scenarios and meaningful assertions;
 * files or symbols likely to be created or modified;
 * validation requirements;
-* risks, blockers, inconsistencies, or unresolved decisions.
+* risks, blockers, inconsistencies, or unresolved decisions;
+* when the design introduces a new top-level package or module, a note that `/roa-base:update` refreshes repository memory once it lands.
 
 Do not implement code. Do not invent application contract details or ROA framework behavior.

@@ -33,6 +33,10 @@ Root `CLAUDE.md`:
 - Target fewer than 120 lines for the whole file.
 - Include verified build/test commands only if they are clearly present in repo files.
 - Include best-practice guidance, not "whatever this repo currently does".
+- Write conventions, never inventory. Memory is read long after it is written, and
+  nothing refreshes it when the tree changes; a statement about what exists today
+  is wrong as soon as the next task adds a package. Say what to do when adding to
+  a tree, not what is or is not in it.
 
 Subdirectory `CLAUDE.md` files:
 
@@ -51,6 +55,13 @@ Subdirectory `CLAUDE.md` files:
 - Do not invent commands, ports, services, credentials, owners, or architecture.
   If you cannot verify it, leave it out.
 - Do not add personal preferences.
+- Do not describe the current state of the tree. No "currently empty", "no `api/`
+  package yet", "no tests exist yet", no lists of which enums or directories are
+  present or missing, and no placeholder values quoted from config files. If a
+  fact is only true until someone runs the next task, leave it out; the tree
+  itself is the source of truth for what exists.
+- Do not point the root file at a subdirectory `CLAUDE.md` you did not create, and
+  do not create one whose content is a directory listing with commentary.
 - Do not create `CLAUDE.local.md`.
 - Do not modify `.claude/settings.json`; the setup script owns settings.
 - Do not duplicate long standards that already live in `.claude/rules/` or the
