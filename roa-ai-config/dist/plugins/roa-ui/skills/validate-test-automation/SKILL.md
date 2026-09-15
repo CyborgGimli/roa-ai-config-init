@@ -29,7 +29,7 @@ $ARGUMENTS
     * cleanup;
     * configuration.
 
-5. When exact `io.cyborgcode.roa.*` behavior affects validation and cannot be established from the repository, use the `ai-compass` skill rather than assuming the implementation is correct.
+5. Before planning, writing, changing, or reviewing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. Do not infer framework contracts from names or from other repository code.
 
 6. Confirm that relevant Java changes compile.
 

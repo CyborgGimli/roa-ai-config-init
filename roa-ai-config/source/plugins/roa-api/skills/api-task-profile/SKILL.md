@@ -47,8 +47,8 @@ Apply this profile to API automation tasks.
 
 11. Use Quest/API storage only when runtime data genuinely needs to cross request, lifecycle, cleanup, or Ring boundaries.
 
-12. Before generating new Java code, use the `ai-teacher` skill for relevant project-approved patterns.
+12. Before planning or creating any new Java code, invoke the `ai-teacher` skill and apply the relevant project-approved lessons — always, even when a similar class already exists in the repository. If `target/pandora/ai-teacher/` is missing, generate it as the skill describes before continuing.
 
-13. When exact `io.cyborgcode.roa.*` API framework behavior is uncertain, use the `ai-compass` skill rather than guessing.
+13. Before planning, writing, or changing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. If `target/pandora/metadata/` is missing, regenerate it as the skill describes before continuing. Never guess ROA APIs.
 
 14. Keep the implementation proportional to the task and avoid unrelated API refactoring or new abstractions.

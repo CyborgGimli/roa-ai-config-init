@@ -10,7 +10,7 @@
 - Use typed constants or enums for reusable contract values when the project already follows that convention; avoid repeated magic strings.
 - Keep reusable JSONPath expressions centralized according to project conventions and distinguish extraction from actual assertion logic.
 - Create response models only when they provide real reuse or domain value; focused JSONPath-based validation may be sufficient for simple responses.
-- Before generating new Java models or related classes, use the `ai-teacher` skill for relevant project-approved implementation patterns.
-- Use the `ai-compass` skill when exact ROA framework types, serialization behavior, or supported API abstractions must be verified.
+- Before generating any new Java models or related classes, always invoke the `ai-teacher` skill for the relevant project-approved implementation patterns, even when a similar model already exists.
+- Always invoke the `ai-compass` skill and read the metadata for every ROA framework type, serialization behavior, or API abstraction a model relies on before writing it.
 
 <!-- END ROA AI CONFIG: roa-api/api-modeling -->

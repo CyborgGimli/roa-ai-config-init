@@ -1,6 +1,6 @@
 ---
 name: ai-compass
-description: Authoritative generated metadata for ROA framework classes - signatures, parameter order, allowed option values, and worked usages. Load before writing or debugging any code that imports io.cyborgcode.roa, and whenever a framework contract is unclear or something does not compile.
+description: Authoritative generated metadata for ROA framework classes - signatures, parameter order, allowed option values, and worked usages. ALWAYS load before planning, writing, changing, or debugging any code that uses an io.cyborgcode.roa type - even when the repository already contains a similar example - and whenever something does not compile.
 user-invocable: false
 allowed-tools: Read, Grep, Glob, Bash
 ---

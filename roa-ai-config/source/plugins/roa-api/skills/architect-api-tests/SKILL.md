@@ -42,7 +42,7 @@ $ARGUMENTS
     * lifecycle mechanisms own setup and cleanup;
     * tests own the behavior and assertions being verified.
 
-8. When exact `io.cyborgcode.roa.*` behavior, construction, methods, annotations, or available options materially affect the design, use the `ai-compass` skill rather than guessing.
+8. For every `io.cyborgcode.roa.*` type the design relies on, invoke the `ai-compass` skill and read its metadata — always, even when the repository already shows a similar usage. Do not infer methods, annotations, options, or extension contracts from names.
 
 9. Preserve the behavior under test. Supporting setup may prepare prerequisites or perform independent verification, but must not perform the API behavior the test exists to prove.
 

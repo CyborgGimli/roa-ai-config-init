@@ -43,7 +43,7 @@ A request may require:
 
 Do not construct independent Rest Assured or low-level HTTP requests when the ROA API capability already supports the required behavior.
 
-When exact ROA request methods or options are uncertain, use Pandora rather than guessing.
+Always read the Pandora metadata for the ROA request and authentication types you use, even when the repository shows a similar usage.
 
 ## Contract-Driven Requests
 

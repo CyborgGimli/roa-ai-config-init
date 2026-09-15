@@ -13,6 +13,6 @@
 - Use network interception only when it materially supports the scenario; it must not replace required UI validation.
 - Reuse existing domain flows and abstractions when they improve clarity without hiding the behavior under test.
 - Investigate failures before modifying expectations and distinguish automation defects from application, data, environment, authentication, and configuration failures.
-- Use `ai-teacher` before generating new Java implementation code and `ai-compass` when exact ROA framework usage is unclear.
+- Always invoke `ai-teacher` before generating new Java implementation code and `ai-compass` before using any `io.cyborgcode.roa.*` type — even when the repository already contains a similar example.
 
 <!-- END ROA AI CONFIG: roa-ui/ui-testing -->

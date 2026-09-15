@@ -69,7 +69,7 @@ Design the ROA UI automation solution for:
     - Pandora → exact ROA framework usage;
     - AI Teacher → project-approved Java implementation patterns.
 
-7. If the design depends on uncertain `io.cyborgcode.roa.*` behavior, use `ai-compass`. Do not infer methods, annotations, options, or extension contracts from names.
+7. For every `io.cyborgcode.roa.*` type the design relies on, invoke `ai-compass` and read its metadata — always, even when the repository already shows a similar usage. Do not infer methods, annotations, options, or extension contracts from names.
 
 8. Ensure supporting setup does not perform the UI behavior under test. Other Rings, authentication, Journeys, insertion, or interception may prepare or support the scenario only when appropriate.
 

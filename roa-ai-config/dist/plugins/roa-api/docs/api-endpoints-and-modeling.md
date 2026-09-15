@@ -249,7 +249,7 @@ Prefer the repository's established organization when it correctly represents th
 
 AI Teacher should be used before generating new Java code so that new models and related classes follow curated project-approved patterns.
 
-Pandora should be used separately when exact ROA framework types or methods must be verified.
+Pandora is used separately, and always, for the exact ROA framework types and methods a model relies on.
 
 ## Contract Changes
 

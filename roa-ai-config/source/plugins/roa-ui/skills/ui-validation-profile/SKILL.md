@@ -66,7 +66,7 @@ Apply this profile when validating implemented ROA UI automation.
     - no uncontrolled shared data;
     - parallel execution remains safe where expected.
 
-12. When exact ROA framework usage affects validation and cannot be verified from the repository, use `ai-compass`.
+12. Before planning, writing, changing, or reviewing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. Do not infer framework contracts from names or from other repository code.
 
 13. Compile changed Java code using the project's Maven wrapper when available, otherwise Maven, with the narrowest sufficient compile command.
 

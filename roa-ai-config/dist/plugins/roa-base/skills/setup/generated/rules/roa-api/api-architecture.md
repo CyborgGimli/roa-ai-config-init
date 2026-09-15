@@ -9,6 +9,6 @@
 - Keep API interaction, reusable domain behavior, lifecycle setup, test data, and cleanup in their appropriate architectural responsibilities.
 - Introduce reusable API services only when they represent meaningful domain behavior or orchestration; avoid trivial wrappers around individual framework calls.
 - Supporting API operations may prepare prerequisites or perform independent verification, but must not replace the behavior the test is intended to prove.
-- Use Swagger/OpenAPI for application contract truth and the `ai-compass` skill for exact ROA framework usage; do not guess either.
+- Use Swagger/OpenAPI for application contract truth, and always invoke the `ai-compass` skill for every ROA type a design touches — even when the repository already shows a similar usage; do not guess either.
 
 <!-- END ROA AI CONFIG: roa-api/api-architecture -->

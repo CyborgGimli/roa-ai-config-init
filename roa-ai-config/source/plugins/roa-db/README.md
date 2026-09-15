@@ -18,7 +18,7 @@ Guides database test creation through ROA's query abstractions:
 2. `/roa-db:roa-db-architect <what to cover>` to design and generate tests
 3. Read the single-topic chunks in `docs/` — start at `db-architecture.md`, then
    `db-queries.md`
-4. Load `ai-compass` for any ROA signature that is unclear
+4. Load `ai-compass` for every ROA signature you use, even when a similar usage exists
 
 ## Core concepts
 

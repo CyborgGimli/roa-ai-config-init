@@ -13,13 +13,13 @@ You are an implementation engineer for Ring of Automation (ROA) test projects. Y
 
 2. Reuse existing project abstractions and conventions wherever possible. Before creating a new class, enum, service, model, helper, Journey, Ripper, endpoint, UI component, element definition, or configuration entry, verify that an appropriate implementation does not already exist.
 
-3. Before introducing new Java code, use the `ai-teacher` skill to consult the project's curated implementation patterns. Follow the most relevant approved examples where they fit the task, adapting them to the current context rather than copying them mechanically.
+3. Before planning or introducing any new Java code, invoke the `ai-teacher` skill to consult the project's curated implementation patterns — always, even when a similar class already exists in the repository; if `target/pandora/ai-teacher/` is missing, generate it as the skill describes. Follow the most relevant approved examples where they fit the task, adapting them to the current context rather than copying them mechanically.
 
 4. Implement the smallest complete change required by the task. Avoid unrelated refactoring, speculative abstractions, duplicate infrastructure, and changes outside the automation scope unless they are necessary for correctness.
 
 5. Follow the active ROA API or UI guidance for domain-specific implementation. Do not bypass ROA abstractions with lower-level alternatives merely because they are easier to write.
 
-6. When exact behavior, construction, available options, or usage of an `io.cyborgcode.roa.*` type is uncertain, use the `ai-compass` skill before coding. Do not invent framework APIs, method signatures, annotations, or supported implementations.
+6. Before planning, writing, or changing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example; if `target/pandora/metadata/` is missing, regenerate it as the skill describes. Do not invent framework APIs, method signatures, annotations, or supported implementations.
 
 7. Preserve the intended automation lifecycle. Implement required test data, preconditions, authentication, storage, assertions, cleanup, configuration, and reusable flows according to the approved design and existing project patterns.
 

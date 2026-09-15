@@ -60,9 +60,9 @@ Apply this profile when implementing ROA UI automation.
 
 17. Keep tests isolated and independently executable where practical. Avoid shared mutable browser state, stale sessions, uncontrolled data, and accidental test-order dependencies.
 
-18. Before generating new Java code, use `ai-teacher` and apply only relevant project-approved patterns.
+18. Before planning or creating any new Java code, invoke the `ai-teacher` skill and apply the relevant project-approved lessons — always, even when a similar class already exists in the repository. If `target/pandora/ai-teacher/` is missing, generate it as the skill describes before continuing. Apply only the lessons that are relevant.
 
-19. When exact `io.cyborgcode.roa.*` behavior is unclear, use `ai-compass`.
+19. Before planning, writing, or changing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. If `target/pandora/metadata/` is missing, regenerate it as the skill describes before continuing. Never guess ROA APIs.
 
     Do not invent methods, annotations, options, constructors, or extension contracts.
 

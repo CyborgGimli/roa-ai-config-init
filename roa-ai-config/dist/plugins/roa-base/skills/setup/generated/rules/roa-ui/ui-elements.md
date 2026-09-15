@@ -9,6 +9,6 @@
 - Reuse an existing element definition when it represents the same application control and still matches the current application.
 - Associate each element with the component type that matches its verified behavior; do not choose component types from appearance alone.
 - Keep application-specific locator information in element definitions and reusable interaction behavior in component implementations.
-- Use `ai-compass` rather than guessing exact element, component, or configuration contracts.
+- Always invoke `ai-compass` and read the metadata for the element, component, and configuration contracts involved before adding or changing an element, component type, or implementation — even when a sibling definition already exists.
 
 <!-- END ROA AI CONFIG: roa-ui/ui-elements -->

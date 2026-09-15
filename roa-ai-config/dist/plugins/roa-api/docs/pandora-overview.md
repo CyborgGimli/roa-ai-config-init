@@ -4,7 +4,7 @@ Pandora is ROA's machine-readable metadata layer.
 
 It gives Claude exact information about the ROA framework types available in the current project without requiring the complete framework API to be permanently documented or loaded into context.
 
-Use ROA documentation to understand framework concepts. Use Pandora when exact ROA framework usage matters.
+Use ROA documentation to understand framework concepts. Always use Pandora for the exact contract of every ROA type you write or change.
 
 ## Mental Model
 
@@ -120,7 +120,7 @@ Claude sees what this project actually provides
 
 This is important for ROA extension points such as project-defined elements, component types, endpoints, queries, and other supported implementations.
 
-Do not generalize one extension mechanism to another. Inspect the relevant metadata when exact behavior matters.
+Do not generalize one extension mechanism to another. Always inspect the relevant metadata for the mechanism you are using.
 
 ## Methods and Parameters
 
@@ -178,7 +178,7 @@ Existing repository
 
 ## When to Use Pandora
 
-Use Pandora when exact ROA framework information materially affects the task, especially when:
+Always use Pandora for every ROA type a task writes or changes; it is especially important when:
 
 * using an unfamiliar `io.cyborgcode.roa.*` type;
 * determining how a ROA type should be created;
@@ -189,7 +189,7 @@ Use Pandora when exact ROA framework information materially affects the task, es
 * diagnosing compilation errors involving ROA framework usage;
 * verifying remembered framework behavior against the installed ROA version.
 
-Do not load Pandora metadata unnecessarily when the repository already demonstrates the exact required pattern and there is no ambiguity.
+Load the metadata for every ROA type you are about to use even when the repository already demonstrates a similar pattern — repository examples show one usage, not the contract. Keep the load targeted: only the files for the types actually involved.
 
 ## Token-Efficient Use
 

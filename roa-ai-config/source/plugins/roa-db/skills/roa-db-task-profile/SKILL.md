@@ -20,8 +20,11 @@ workflow skills so those workflows are not duplicated per stack.
 3. Create rows uniquely per run and register their cleanup.
 4. Compile, then run the single test before running the suite.
 
-- **Framework contract**: when a ROA signature is unclear or code does not compile,
-  load `ai-compass` and read `target/pandora/metadata/` before guessing.
-- **Project patterns**: before generating a new class, load `ai-teacher` and take the
-  closest `EXCELLENT` lesson from `target/pandora/ai-teacher/` as the reference shape.
+- **Framework contract**: before using any `io.cyborgcode.roa.*` type, load
+  `ai-compass` and read `target/pandora/metadata/` for it — always, even when a
+  similar usage exists in the repository; regenerate the directory if it is missing.
+- **Project patterns**: before generating any new Java code, load `ai-teacher` and take
+  the closest `EXCELLENT` lesson from `target/pandora/ai-teacher/` as the reference
+  shape — always, even when a similar class already exists; generate the catalog if
+  it is missing.
 - **Done** means `roa-db-definition-of-done` is met, not merely that it compiles.

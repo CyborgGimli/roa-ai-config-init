@@ -20,7 +20,7 @@ $ARGUMENTS
 
 4. For API- or UI-specific work, use the appropriate architecture findings and plugin task profile. Do not invent domain architecture that should be established by the relevant specialist.
 
-5. When exact `io.cyborgcode.roa.*` behavior materially affects the plan and is not established by the repository, use the `ai-compass` skill rather than guessing.
+5. For every `io.cyborgcode.roa.*` type the plan will use, invoke the `ai-compass` skill and read its metadata — always, even when the repository already contains a similar usage. If `target/pandora/metadata/` is missing, regenerate it as the skill describes before continuing.
 
 6. Define the smallest complete implementation in dependency order. For each step, identify the files or symbols to create, modify, or reuse and the purpose of the change.
 

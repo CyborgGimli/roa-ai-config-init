@@ -38,7 +38,7 @@ $ARGUMENTS
 
 6. Verify that supporting setup, mocks, generated data, or alternate Rings do not accidentally replace the behavior the test is intended to prove.
 
-7. When exact `io.cyborgcode.roa.*` behavior is relevant to a concern and cannot be established from the repository, use the `ai-compass` skill rather than guessing.
+7. Before planning, writing, changing, or reviewing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. Do not infer framework contracts from names or from other repository code.
 
 8. Delegate an independent adversarial pass to `adversarial-test-reviewer` when useful for the scope or risk of the change.
 

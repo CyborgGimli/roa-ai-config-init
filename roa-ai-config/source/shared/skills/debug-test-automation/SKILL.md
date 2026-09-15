@@ -40,7 +40,7 @@ $ARGUMENTS
     * stale or incorrect ROA framework usage;
     * genuine product defect.
 
-6. When exact `io.cyborgcode.roa.*` behavior is relevant and cannot be verified from the repository, use the `ai-compass` skill rather than guessing.
+6. For every `io.cyborgcode.roa.*` type involved in the failure, invoke the `ai-compass` skill and read its metadata — always, rather than inferring behavior from other repository code.
 
 7. Do not treat symptoms as root causes. Trace the failure far enough to justify the conclusion.
 

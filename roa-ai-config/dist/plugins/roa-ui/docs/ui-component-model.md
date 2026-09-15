@@ -249,7 +249,7 @@ Component implementations are an important ROA extension point.
 
 Pandora may expose project-discovered component options through the options field (`aiCompassOptions`; `availableOptions` on older Pandora releases).
 
-Use Pandora when exact information is required about:
+Always read the Pandora metadata for the types involved; it is the source of truth for:
 
 * supported component interfaces;
 * implementation annotations;

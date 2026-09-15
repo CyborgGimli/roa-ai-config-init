@@ -46,7 +46,7 @@ Apply this profile when validating API automation changes.
 
 11. Check runtime storage usage where relevant. API or Quest storage should be used only when data genuinely needs to cross request, lifecycle, cleanup, or Ring boundaries.
 
-12. When exact `io.cyborgcode.roa.*` behavior affects validation and cannot be established from the repository, use the `ai-compass` skill rather than assuming the implementation is correct.
+12. Before planning, writing, changing, or reviewing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. Do not infer framework contracts from names or from other repository code.
 
 13. Confirm that relevant Java code compiles and that the appropriate API test scope was actually executed.
 

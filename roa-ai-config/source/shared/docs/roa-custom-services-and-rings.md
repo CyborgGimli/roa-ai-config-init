@@ -331,7 +331,7 @@ AI Teacher
 
 Repository conventions should be reused where appropriate.
 
-Pandora should be consulted when exact ROA extension behavior is uncertain.
+Pandora must always be consulted for the exact ROA extension contract, even when the repository already contains a similar extension.
 
 AI Teacher should be used when new Java implementation code is being created.
 

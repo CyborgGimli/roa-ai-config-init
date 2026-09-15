@@ -11,6 +11,6 @@
 - Treat synchronization and assertion separately: readiness allows execution to continue; assertions prove required behavior.
 - Ground synchronization conditions in actual runtime behavior observed through the application/DevTools.
 - Investigate intermittent failures before changing waits; do not increase timing merely to obtain a passing test.
-- Use `ai-compass` when exact ROA synchronization behavior or configuration is unclear.
+- Always invoke `ai-compass` and read the metadata for the ROA synchronization types and options involved before writing or changing synchronization code.
 
 <!-- END ROA AI CONFIG: roa-ui/ui-synchronization -->

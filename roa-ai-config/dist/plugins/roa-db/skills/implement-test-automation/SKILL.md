@@ -22,9 +22,9 @@ $ARGUMENTS
 
 5. Implement the smallest complete change through `implementation-engineer`.
 
-6. Before creating new Java code, use the `ai-teacher` skill to inspect relevant project-approved implementation patterns.
+6. Before planning or creating any new Java code, invoke the `ai-teacher` skill and apply the relevant project-approved lessons — always, even when a similar class already exists in the repository. If `target/pandora/ai-teacher/` is missing, generate it as the skill describes before continuing.
 
-7. When exact `io.cyborgcode.roa.*` behavior, construction, methods, annotations, or available options matter, use the `ai-compass` skill rather than guessing.
+7. Before planning, writing, or changing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. If `target/pandora/metadata/` is missing, regenerate it as the skill describes before continuing. Never guess ROA APIs.
 
 8. Preserve the complete task-relevant automation lifecycle where applicable:
 

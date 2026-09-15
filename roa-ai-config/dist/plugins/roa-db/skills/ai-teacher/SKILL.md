@@ -1,6 +1,6 @@
 ---
 name: ai-teacher
-description: Find curated project-approved Java implementation patterns before creating new Java code. Use when writing or implementing tests, services, models, DTOs, configuration, utilities, or other Java classes.
+description: Find curated project-approved Java implementation patterns before creating new Java code. ALWAYS use before planning, writing, or implementing any tests, services, models, DTOs, configuration, utilities, or other Java classes - even when a similar class already exists in the repository.
 user-invocable: false
 allowed-tools: Read, Glob, Grep, Bash
 ---
@@ -77,7 +77,7 @@ Ground new Java code in the project's curated AI Teacher lessons before implemen
 
 9. Use AI Teacher only for project implementation patterns.
 
-   Use the `ai-compass` skill separately when exact `io.cyborgcode.roa.*` framework methods, annotations, creation strategies, available options, or usages need verification.
+   Always use the `ai-compass` skill separately for the exact `io.cyborgcode.roa.*` framework methods, annotations, creation strategies, available options, and usages involved; lessons show style, not the contract.
 
 10. Never add `@AiLesson` to generated code. Lesson curation is human-owned.
 

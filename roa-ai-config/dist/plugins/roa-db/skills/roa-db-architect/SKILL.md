@@ -32,8 +32,8 @@ Invoked as `/roa-db:roa-db-architect <what to cover>`, for example:
 5. Load `ai-compass` and read `target/pandora/metadata/` for any ROA signature
    you are about to use — especially `DbQuery` and the assertion targets. Never
    guess a method name.
-6. Load `ai-teacher` before writing a new class and follow the closest
-   `EXCELLENT` lesson's shape.
+6. Load `ai-teacher` before writing any new Java code — always, even when a
+   similar class exists — and follow the closest `EXCELLENT` lesson's shape.
 7. Deep reference: `${CLAUDE_PLUGIN_ROOT}/docs/db-queries.md`, then
    `db-types.md` and `db-test-basics.md`.
 

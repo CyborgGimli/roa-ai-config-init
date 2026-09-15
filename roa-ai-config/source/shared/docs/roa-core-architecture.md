@@ -246,7 +246,7 @@ Existing repository
 
 Do not guess exact ROA methods, constructors, annotations, options, or extension contracts when they materially affect implementation.
 
-Use Pandora when exact framework usage must be established.
+Always use Pandora to establish the exact framework contract for the types you use.
 
 ## Core Principles
 
