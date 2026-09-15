@@ -59,6 +59,12 @@ Subdirectory `CLAUDE.md` files:
   expected best practice.
 - Do not invent commands, ports, services, credentials, owners, or architecture.
   If you cannot verify it, leave it out.
+- Name a Maven goal only when the build file binds or declares the plugin that
+  provides it. The ROA rules and docs mention every Pandora goal
+  (`pandora:navigation`, `pandora:open`, `pandora:teach`); that is not evidence
+  the repository has them. Check the `<plugins>` section of the `pom.xml`, name
+  only the goals that are actually available, and say nothing about the others —
+  the `ai-compass` and `ai-teacher` skills handle a missing generator themselves.
 - Do not add personal preferences.
 - Do not describe the current state of the tree. No "currently empty", "no `api/`
   package yet", "no tests exist yet", no lists of which enums or directories are
