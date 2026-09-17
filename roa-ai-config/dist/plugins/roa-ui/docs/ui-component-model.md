@@ -75,6 +75,13 @@ The exact interfaces, annotation attributes, methods, and registration behavior 
 
 Do not invent component implementation contracts.
 
+When a new implementation is needed (a `Checkbox` implementation beside an existing `Radio` one, for instance):
+
+* take the sibling implementation in the same package family as the template — its constant naming, constructor, member order, helper structure, and formatting — and change only what the new component's contract requires;
+* implement every method the ROA interface declares, with the parameter names Pandora shows for it;
+* give every `Strategy` value the meaning the component supports: a multi-select control such as a checkbox group acts on every option for `ALL`, while a single-select control rejects it;
+* keep private helpers to the few the sibling would have; do not introduce a second locating or state-reading strategy when the sibling's already fits the control.
+
 ## Element Definitions
 
 An element definition represents a concrete control in the application.

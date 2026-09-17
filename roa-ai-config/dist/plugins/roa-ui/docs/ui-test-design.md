@@ -50,6 +50,39 @@ The UI interaction is the mechanism.
 
 The requirement determines what must be proven.
 
+## Test Shape
+
+A new test method has a fixed shape. Keep it, even when a neighbouring method in the same class does not.
+
+```java
+@Test
+@Regression
+@Description("Validate forgotten password flow")
+void forgottenPassword_flow_validatesConfirmationMessage(Quest quest) {
+    String email = "test-demo@test.com";
+    String expectedMessage = "Your password will be sent to the following email: " + email;
+
+    quest.use(RING_OF_UI)
+        .browser().navigate(getUiConfig().baseUrl())
+        .button().click(ButtonFields.SIGN_IN_BUTTON)
+        .link().click(LinkFields.FORGOT_PASSWORD_LINK)
+        .input().insert(InputFields.EMAIL_FIELD, email)
+        .button().click(ButtonFields.SEND_PASSWORD_BUTTON)
+        .validate().validateTextInField(HTML.Tag.DIV, expectedMessage)
+        .complete();
+}
+```
+
+**Name.** `<subject>_<action>_<expectedOutcome>` in lowerCamel segments joined by underscores: `forgottenPassword_flow_validatesConfirmationMessage`, `keepMeSignedIn_loginTest`, `readEntireTable_validateWithAssertionTypes`. The name states what the test proves. Never use numbered names (`testScenario_4`, `test1`); a numbered sibling is not a convention to extend.
+
+**Annotations.** `@Test`, the project's suite marker that matches the scenario's role (`@Regression`; `@Smoke` only for a genuine smoke check, not both by default), and `@Description` with a short phrase that names the behavior. The description is not a narrative of the steps.
+
+**Data.** A value that only this scenario uses — the email typed in, the message it produces — is a local variable in the method, and the expectation is derived from the input rather than duplicated. The shared test-data class holds only values several tests need or stable application constants (menu labels, account names, success messages reused across scenarios). Do not create a constants holder for one test.
+
+**Assertion.** Assert the outcome the requirement names, using the most direct evidence. For text, validate it in the element that renders it as seen in the DOM — `validate().validateTextInField(HTML.Tag.DIV, message)` for a message in a `div` — not `BODY` or another page-wide container. Do not introduce a new typed element only to assert a one-off message; typed elements are for controls the tests interact with.
+
+**Scope.** The change contains the steps and assertion the requirement asks for and nothing more: no extra assertions "while we are here", no additional annotations, no helper classes.
+
 ## Ground Tests in the Actual Application
 
 Before implementing UI behavior that depends on selectors, component structure, synchronization, table behavior, session state, or network activity, verify the actual application through browser/DevTools inspection.
@@ -236,6 +269,8 @@ Avoid:
 * unexplained hardcoded values;
 * accidental dependence on pre-existing state;
 * shared mutable entities across unrelated tests.
+
+Place data where its reuse warrants: a single-use literal stays local to the test method (see *Test Shape*); values shared by several tests belong in the project's test-data class; generated or runtime-dependent data comes from `DataCreator`, `@Craft`, or `Late<T>`.
 
 For shared data guidance, see:
 
@@ -443,6 +478,7 @@ Use each source only for the questions it can actually answer.
 ## Core Principles
 
 * Design UI tests around user behavior, not framework calls.
+* Keep the test shape: descriptive `subject_action_outcome` name, one suite marker, one-phrase description, single-use data local, one direct assertion per required outcome.
 * Ground interactions in the actual application.
 * Use typed elements, components, and project UI abstractions.
 * Validate meaningful visible or business outcomes.

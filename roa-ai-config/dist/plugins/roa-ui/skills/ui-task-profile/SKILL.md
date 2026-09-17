@@ -58,15 +58,19 @@ Apply this profile when implementing ROA UI automation.
 
     Successful interaction, element presence, or absence of exceptions is not sufficient when stronger evidence is required.
 
-17. Keep tests isolated and independently executable where practical. Avoid shared mutable browser state, stale sessions, uncontrolled data, and accidental test-order dependencies.
+    Assert the outcome the requirement names and no more. Validate text in the element that renders it (`validate().validateTextInField(<tag>, text)`), not in `body`; do not add a typed element only to assert a one-off message.
 
-18. Before planning or creating any new Java code, invoke the `ai-teacher` skill and apply the relevant project-approved lessons — always, even when a similar class already exists in the repository. If `target/pandora/ai-teacher/` is missing, generate it as the skill describes before continuing. Apply only the lessons that are relevant.
+17. Keep the test shape: name the method `<subject>_<action>_<expectedOutcome>` (never `testScenario_N`, even beside numbered siblings); annotate with `@Test`, one matching suite marker, and a one-phrase `@Description`; keep single-use literals as local variables and derive expectations from inputs; promote to the shared test-data class only what several tests use.
 
-19. Before planning, writing, or changing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. If `target/pandora/metadata/` is missing, regenerate it as the skill describes before continuing. Never guess ROA APIs.
+18. Keep tests isolated and independently executable where practical. Avoid shared mutable browser state, stale sessions, uncontrolled data, and accidental test-order dependencies.
+
+19. Before planning or creating any new Java code, invoke the `ai-teacher` skill and apply the relevant project-approved lessons — always, even when a similar class already exists in the repository. If `target/pandora/ai-teacher/` is missing, generate it as the skill describes before continuing. Apply only the lessons that are relevant.
+
+20. Before planning, writing, or changing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. If `target/pandora/metadata/` is missing, regenerate it as the skill describes before continuing. Never guess ROA APIs.
 
     Do not invent methods, annotations, options, constructors, or extension contracts.
 
-20. If required repository, application, or framework evidence is insufficient, report the uncertainty or blocker instead of fabricating a solution.
+21. If required repository, application, or framework evidence is insufficient, report the uncertainty or blocker instead of fabricating a solution.
 
 ## Implementation Standard
 

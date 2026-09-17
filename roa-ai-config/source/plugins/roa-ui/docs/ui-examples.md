@@ -219,6 +219,31 @@ UI insertion
 
 Use `Late<T>` only where the value genuinely depends on runtime state.
 
+## Test Method Shape
+
+A new test method, whatever the scenario:
+
+```text
+name
+→ subject_action_expectedOutcome   (never testScenario_N)
+
+annotations
+→ @Test, one suite marker (@Regression | @Smoke), one-phrase @Description
+
+data
+→ single-use values are local variables; expectation derived from input
+→ shared values come from the project's test-data class
+
+assertion
+→ the outcome the requirement names, in the element that renders it
+→ validate().validateTextInField(HTML.Tag.DIV, message), not BODY
+
+scope
+→ nothing the requirement did not ask for
+```
+
+The full Java form is in `ui-test-design.md`, *Test Shape*.
+
 ## Positive UI Scenario
 
 A meaningful positive test might follow:

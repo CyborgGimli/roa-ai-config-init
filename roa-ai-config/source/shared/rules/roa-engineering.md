@@ -3,6 +3,8 @@
 # ROA Engineering Rules
 
 - Prefer the smallest complete change that satisfies the task; follow existing project structure and conventions.
+- Keep a value where it is used: a literal that one method needs stays a local variable there. Do not add constants classes, holder types, helpers, extra assertions, or annotations that the requested change does not need.
+- When creating a new class, mirror the closest sibling in the same package family — its structure, member order, helper naming, and formatting — and change only what the new behavior requires.
 - Reuse existing ROA and project abstractions before creating new services, Rings, models, helpers, lifecycle components, or configuration.
 - Treat the Quest as the test execution context and access supported automation capabilities through the appropriate Rings.
 - Do not bypass established ROA capabilities with independent clients, drivers, state mechanisms, or lower-level alternatives without a justified requirement.

@@ -43,8 +43,8 @@ You are a UI test architect for Ring of Automation (ROA) projects. Your job is t
 - Required component types, implementations, element definitions, synchronization, insertion mappings, table abstractions, interception, or domain services.
 - Required authentication, test data, lifecycle, storage, and cleanup design.
 - Verified application facts the design depends on.
-- The intended test scenarios and meaningful assertions.
-- Files or symbols likely to be created or modified.
+- The intended test scenarios and meaningful assertions, each with its `subject_action_outcome` method name, the one assertion target that proves it (the element that renders the outcome, not the page), and which values stay local to the test versus come from shared test data.
+- Files or symbols likely to be created or modified — only those the requirement needs; name anything a sibling pattern would tempt you to add and say why it is left out.
 - Architectural risks, blockers, inconsistencies, or unresolved decisions.
 - Anything that still requires application or framework verification.
 

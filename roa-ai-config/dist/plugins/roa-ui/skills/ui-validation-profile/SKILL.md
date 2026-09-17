@@ -59,22 +59,29 @@ Apply this profile when validating implemented ROA UI automation.
     - no exception occurred;
     - a weak generic state when a stronger requirement exists.
 
-11. Verify isolation and determinism:
+11. Verify test shape and scope:
+    - test method names are descriptive `subject_action_outcome`, not numbered;
+    - each test carries `@Test`, one matching suite marker, and a one-phrase `@Description`;
+    - single-use literals are local to the test; only shared values were added to the test-data class;
+    - text is validated in the element that renders it, not in `body`;
+    - no assertion, element, constants holder, helper, or annotation exists that the requirement did not call for.
+
+12. Verify isolation and determinism:
     - no accidental test-order dependency;
     - no inappropriate shared mutable browser state;
     - no stale session dependency;
     - no uncontrolled shared data;
     - parallel execution remains safe where expected.
 
-12. Before planning, writing, changing, or reviewing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. Do not infer framework contracts from names or from other repository code.
+13. Before planning, writing, changing, or reviewing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. Do not infer framework contracts from names or from other repository code.
 
-13. Compile changed Java code using the project's Maven wrapper when available, otherwise Maven, with the narrowest sufficient compile command.
+14. Compile changed Java code using the project's Maven wrapper when available, otherwise Maven, with the narrowest sufficient compile command.
 
-14. Run the smallest relevant test scope needed to demonstrate the changed behavior.
+15. Run the smallest relevant test scope needed to demonstrate the changed behavior.
 
-15. Never skip, disable, weaken, or rewrite valid assertions merely to obtain a green result.
+16. Never skip, disable, weaken, or rewrite valid assertions merely to obtain a green result.
 
-16. Classify failures accurately:
+17. Classify failures accurately:
     - automation defect;
     - application defect;
     - expectation/requirement mismatch;

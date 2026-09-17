@@ -26,7 +26,15 @@ Ground new Java code in the project's curated AI Teacher lessons before implemen
 
    The consuming project must configure the `ai-teacher-plugin` packages to scan.
 
-   If generation fails because the required configuration is missing, report the missing configuration and continue using the repository, ROA documentation, and Pandora rather than inventing a project pattern.
+   If generation fails because the required configuration is missing, report the missing configuration and continue with the baseline below, the repository, ROA documentation, and Pandora rather than inventing a project pattern.
+
+   **Baseline when no lesson applies.** These are the patterns to apply whenever the catalog is missing or holds nothing relevant:
+
+   * Take the closest sibling in the same package family as the template — same annotations, member order, helper structure and naming, formatting — and change only what the new behavior requires. For a component implementation, implement every method the ROA interface declares with the parameter names Pandora shows, and keep private helpers to the few the sibling would have.
+   * Name a new test method after its behavior, `<subject>_<action>_<expectedOutcome>`; never a numbered name, even beside numbered siblings. Annotate with `@Test`, one matching suite marker, and a one-phrase `@Description`.
+   * Keep a single-use literal local to the method that uses it and derive expectations from inputs; add to the shared test-data class only what several tests share.
+   * Name a new element constant the way the sibling constants for the same page or id prefix are named, and add the nested `Data` string mirror only when the enum already has one and the constant will be referenced from an annotation.
+   * Do not introduce helper classes, constants holders, extra assertions, or annotations the task does not require.
 
 4. Select the closest semantic category when available:
 
