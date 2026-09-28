@@ -18,7 +18,7 @@ $ARGUMENTS
 
 3. Reuse existing project structures before proposing new ones. Identify relevant tests, services, Rings, lifecycle mechanisms, data models, authentication, storage, cleanup, configuration, and domain abstractions only where they affect the task.
 
-4. For API- or UI-specific work, use the appropriate architecture findings and plugin task profile. Do not invent domain architecture that should be established by the relevant specialist.
+4. For domain-specific work (API, UI, database, or another installed specialty), delegate architecture decisions to the active plugin's dedicated architecture skill (for example `architect-ui-tests`, `architect-api-tests`, or `roa-db-architect`) and apply its task-profile skill (for example `ui-task-profile`, `api-task-profile`, or `roa-db-task-profile`) before planning further. Check the plugin's own skill listing for the exact name — plugins name these differently. Do not invent domain architecture that should be established by the relevant specialist.
 
 5. For every `io.cyborgcode.roa.*` type the plan will use, invoke the `ai-compass` skill and read its metadata — always, even when the repository already contains a similar usage. If `target/pandora/metadata/` is missing, regenerate it as the skill describes before continuing.
 

@@ -16,7 +16,7 @@ $ARGUMENTS
 
 2. Inspect the relevant repository context. Use `codebase-investigator` when existing structure, conventions, reusable abstractions, or implementation details are not already clear.
 
-3. Determine the required API or UI architecture before implementation. Use the active plugin guidance and specialist architect where the task requires architectural decisions.
+3. Determine the required domain architecture before implementation. Delegate to the active plugin's dedicated architecture skill (for example `architect-ui-tests`, `architect-api-tests`, or `roa-db-architect`) and apply its task-profile skill (for example `ui-task-profile`, `api-task-profile`, or `roa-db-task-profile`) whenever the task requires architectural or application-specific decisions. Check the plugin's own skill listing for the exact name — plugins name these differently.
 
 4. Produce or confirm a concrete implementation plan before making substantial changes. Keep the plan proportional to the task and reuse existing project abstractions wherever possible.
 
