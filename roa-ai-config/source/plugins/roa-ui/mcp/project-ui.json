@@ -1,5 +1,5 @@
 {
-  "description": "ROA UI MCP defaults. Target repositories customize these through ai-config.yaml.",
+  "description": "ROA UI MCP defaults. Target repositories customize these through ai-config.yaml. Package versions are pinned; bump them deliberately. @modelcontextprotocol/server-puppeteer is deprecated upstream; chrome-devtools covers the same investigation needs.",
   "servers": {
     "selenium": {
       "enabledByDefault": true,
@@ -8,7 +8,7 @@
         "command": "npx",
         "args": [
           "-y",
-          "@angiejones/mcp-selenium"
+          "@angiejones/mcp-selenium@0.2.3"
         ]
       }
     },
@@ -19,11 +19,11 @@
         "command": "npx",
         "args": [
           "-y",
-          "@modelcontextprotocol/server-puppeteer"
+          "@modelcontextprotocol/server-puppeteer@2025.5.12"
         ],
         "env": {
           "PUPPETEER_HEADLESS": "true",
-          "PUPPETEER_IGNORE_HTTPS_ERRORS": "true",
+          "PUPPETEER_IGNORE_HTTPS_ERRORS": "false",
           "PUPPETEER_TIMEOUT": "30000",
           "PUPPETEER_VIEWPORT_HEIGHT": "1080",
           "PUPPETEER_VIEWPORT_WIDTH": "1920"
@@ -37,8 +37,9 @@
         "command": "npx",
         "args": [
           "-y",
-          "chrome-devtools-mcp@latest",
-          "--headless=true"
+          "chrome-devtools-mcp@1.10.1",
+          "--headless=true",
+          "--isolated=true"
         ]
       }
     }

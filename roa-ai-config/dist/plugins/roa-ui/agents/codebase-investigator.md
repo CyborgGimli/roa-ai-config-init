@@ -25,6 +25,7 @@ You are a codebase investigator for Ring of Automation (ROA) test projects. Your
 
 ## Return
 
+- **Evidence** — for every application, contract, or framework fact you report, give its source: `file_path:line`, the Pandora metadata file read, or the MCP tool call and what it returned. Label any fact without a source `UNVERIFIED`; the caller must not build on it.
 - A concise map of the relevant files and symbols, including paths where useful and a brief description of their role.
 - The existing ROA structure and conventions relevant to the task.
 - Existing abstractions and patterns that should be reused or preserved.

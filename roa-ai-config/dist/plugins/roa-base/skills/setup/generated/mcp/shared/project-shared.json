@@ -1,8 +1,8 @@
 {
-  "description": "Shared MCP defaults for every ROA repository. Target repositories customize these through ai-config.yaml.",
+  "description": "Shared MCP defaults for every ROA repository. Target repositories customize these through ai-config.yaml. Package versions are pinned; bump them deliberately. The github server is off by default because its tools can publish repository content; @modelcontextprotocol/server-github is deprecated upstream, so prefer GitHub’s official github-mcp-server when enabling it.",
   "servers": {
     "github": {
-      "enabledByDefault": true,
+      "enabledByDefault": false,
       "required": [
         "tokenEnv"
       ],
@@ -11,7 +11,7 @@
         "command": "npx",
         "args": [
           "-y",
-          "@modelcontextprotocol/server-github"
+          "@modelcontextprotocol/server-github@2025.4.8"
         ]
       },
       "envFromConfig": {

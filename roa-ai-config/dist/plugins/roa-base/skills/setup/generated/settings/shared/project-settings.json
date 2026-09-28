@@ -7,6 +7,8 @@
     "deny": [
       "Read(.env)",
       "Read(.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
       "Read(secrets/**)",
       "Read(**/*.pem)",
       "Read(**/*.key)",
@@ -15,9 +17,16 @@
       "Read(**/*.jks)",
       "Read(**/*.keystore)",
       "Read(**/id_rsa*)",
+      "Read(**/id_ed25519*)",
       "Read(~/.ssh/**)",
       "Read(~/.aws/**)",
+      "Read(~/.azure/**)",
+      "Read(~/.config/gcloud/**)",
       "Read(~/.config/gh/**)",
+      "Read(~/.docker/config.json)",
+      "Read(~/.npmrc)",
+      "Read(~/.git-credentials)",
+      "Read(~/.gradle/gradle.properties)",
       "Read(~/.m2/settings.xml)",
       "Read(~/.m2/settings-security.xml)",
       "Read(~/.m2/settings-security4.xml)",
@@ -32,6 +41,8 @@
       "Bash(npm publish *)",
       "Bash(docker push *)",
       "Bash(gh release *)",
+      "Bash(gh gist *)",
+      "Bash(printenv*)",
 
       "PowerShell(git push --force*)",
       "PowerShell(git push * --force*)",
@@ -41,7 +52,24 @@
       "PowerShell(git reset --hard*)",
       "PowerShell(npm publish *)",
       "PowerShell(docker push *)",
-      "PowerShell(gh release *)"
+      "PowerShell(gh release *)",
+      "PowerShell(gh gist *)",
+
+      "mcp__github__push_files",
+      "mcp__github__create_or_update_file",
+      "mcp__github__create_repository",
+      "mcp__github__fork_repository",
+      "mcp__github__create_branch",
+      "mcp__github__merge_pull_request"
+    ],
+    "ask": [
+      "WebFetch",
+      "mcp__github__create_issue",
+      "mcp__github__update_issue",
+      "mcp__github__add_issue_comment",
+      "mcp__github__create_pull_request",
+      "mcp__github__create_pull_request_review",
+      "mcp__github__update_pull_request_branch"
     ]
   }
 }

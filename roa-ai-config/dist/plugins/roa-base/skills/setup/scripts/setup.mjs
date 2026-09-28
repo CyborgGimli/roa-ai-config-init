@@ -991,6 +991,9 @@ function mergeArrayValues(existing, incoming) {
   return merged;
 }
 
+// Scalars in a fragment (model, effortLevel, outputStyle, ...) are defaults for a
+// repository that has not chosen yet. Once the repository has its own value, an
+// update must not silently revert it.
 function mergeSettingsValue(existing, incoming) {
   if (Array.isArray(incoming)) {
     return mergeArrayValues(existing, incoming);
@@ -1004,7 +1007,60 @@ function mergeSettingsValue(existing, incoming) {
     return target;
   }
 
-  return incoming;
+  return existing === undefined || existing === null ? incoming : existing;
+}
+
+// Permission lists only ever grew: a rule dropped from a newer fragment stayed in
+// every repository forever. Ownership is recorded per plugin (the same pattern as
+// .mcp.json) so an update removes exactly the rules this plugin added earlier and
+// no longer ships — never a rule the repository or a sibling plugin owns.
+const PERMISSION_LISTS = ["allow", "deny", "ask"];
+
+function fragmentPermissions(spec) {
+  const owned = Object.fromEntries(PERMISSION_LISTS.map((list) => [list, new Set()]));
+  for (const fragmentPath of spec.settingsFragments ?? []) {
+    const permissions = loadSettingsFragment(fragmentPath).permissions ?? {};
+    for (const list of PERMISSION_LISTS) {
+      for (const rule of Array.isArray(permissions[list]) ? permissions[list] : []) {
+        owned[list].add(rule);
+      }
+    }
+  }
+  return Object.fromEntries(PERMISSION_LISTS.map((list) => [list, [...owned[list]].sort()]));
+}
+
+function readOwnedPermissions(ownedPath) {
+  if (!fs.existsSync(ownedPath)) {
+    return {};
+  }
+  try {
+    const parsed = JSON.parse(readText(ownedPath));
+    return isPlainObject(parsed.plugins) ? parsed.plugins : {};
+  } catch {
+    return {}; // cannot prove ownership, so remove nothing
+  }
+}
+
+function pruneStalePermissions(data, pluginName, current, previousByPlugin) {
+  const previous = previousByPlugin[pluginName] ?? {};
+  const removed = [];
+
+  for (const list of PERMISSION_LISTS) {
+    const stillOwned = new Set(current[list]);
+    for (const [otherPlugin, rules] of Object.entries(previousByPlugin)) {
+      if (otherPlugin !== pluginName) {
+        for (const rule of rules?.[list] ?? []) stillOwned.add(rule);
+      }
+    }
+
+    const stale = (previous[list] ?? []).filter((rule) => !stillOwned.has(rule));
+    if (stale.length > 0 && Array.isArray(data.permissions?.[list])) {
+      data.permissions[list] = data.permissions[list].filter((rule) => !stale.includes(rule));
+      removed.push(...stale.map((rule) => `${list}: ${rule}`));
+    }
+  }
+
+  return removed;
 }
 
 function mergeSettingsFragment(target, fragment) {
@@ -1103,10 +1159,23 @@ function slugifyServerName(value) {
     .replace(/^-+|-+$/g, "") || "default";
 }
 
+// The starter ai-config.yaml ships example.com placeholders. Pointing an MCP
+// server at them would make the agent investigate a stranger's host, so they
+// count as unset.
+function isPlaceholderValue(value) {
+  return typeof value === "string" && /(^|[./@])example\.(com|org|net)\b/i.test(value);
+}
+
 function missingRequiredFields(required, values) {
   return required.filter((field) => {
     const value = pathValue(values, field);
-    return value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
+    return (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      (Array.isArray(value) && value.length === 0) ||
+      isPlaceholderValue(value)
+    );
   });
 }
 
@@ -1226,6 +1295,42 @@ function loadOrCreateAiConfig(targetRoot, spec) {
   return [parsed, null, false];
 }
 
+// The roa-base hooks read .claude/roa-security.json to decide where browser MCP
+// tools may navigate and where shell commands may send data. It is derived from
+// ai-config.yaml so the human-edited file stays the single source of truth.
+function writeSecurityPolicy(targetRoot, aiConfig, warnings) {
+  const security = isPlainObject(aiConfig.security) ? aiConfig.security : {};
+  const declared = Array.isArray(security.allowedOrigins) ? security.allowedOrigins : [];
+  const allowedOrigins = [];
+
+  for (const entry of declared) {
+    let origin = null;
+    try {
+      origin = new URL(String(entry)).origin;
+    } catch {
+      // reported below
+    }
+    if (!origin || origin === "null" || isPlaceholderValue(String(entry))) {
+      warnings.push(`security.allowedOrigins entry ${JSON.stringify(entry)} is not a usable origin; ignored.`);
+      continue;
+    }
+    if (!allowedOrigins.includes(origin)) {
+      allowedOrigins.push(origin);
+    }
+  }
+
+  if (allowedOrigins.length === 0) {
+    warnings.push(
+      "security.allowedOrigins is empty: browser MCP navigation will ask for confirmation each time. " +
+        "Add the application under test to ai-config.yaml and rerun setup."
+    );
+  }
+
+  const policyPath = resolveTargetPath(targetRoot, ".claude/roa-security.json");
+  const status = writeIfChanged(policyPath, JSON.stringify({ allowedOrigins }, null, 2) + "\n");
+  return status === "unchanged" ? null : [status, policyPath];
+}
+
 function updateProjectMcp(targetRoot, spec, pluginName) {
   const catalogs = loadMcpCatalogs(spec);
   if (Object.keys(catalogs).length === 0) {
@@ -1249,6 +1354,11 @@ function updateProjectMcp(targetRoot, spec, pluginName) {
   const changed = [];
   if (aiConfigChange) {
     changed.push(aiConfigChange);
+  }
+
+  const policyChange = writeSecurityPolicy(targetRoot, aiConfig, warnings);
+  if (policyChange) {
+    changed.push(policyChange);
   }
 
   if (createdStarterConfig) {
@@ -1362,11 +1472,26 @@ function writeProjectMcp(targetRoot, mcpServers, pluginName) {
   return changed;
 }
 
-function updateSettings(filePath, spec, notes = []) {
+function updateSettings(filePath, spec, notes = [], pluginName = "", targetRoot = process.cwd()) {
   const data = loadSettings(filePath);
+  const ownedPath = resolveTargetPath(targetRoot, ".claude/roa-settings-owned.json");
+  const previousOwned = readOwnedPermissions(ownedPath);
+  const currentOwned = fragmentPermissions(spec);
+
+  const removed = pruneStalePermissions(data, pluginName, currentOwned, previousOwned);
+  if (removed.length > 0) {
+    notes.push(`removed permission rules no longer shipped by ${pluginName}: ${removed.join("; ")}`);
+  }
+
   for (const fragmentPath of spec.settingsFragments ?? []) {
     mergeSettingsFragment(data, loadSettingsFragment(fragmentPath));
   }
+
+  const ownedPlugins = { ...previousOwned, [pluginName]: currentOwned };
+  writeIfChanged(
+    ownedPath,
+    JSON.stringify({ plugins: Object.fromEntries(Object.entries(ownedPlugins).sort()) }, null, 2) + "\n"
+  );
 
   const marketplaceName = spec.marketplaceName;
   const enabledPlugin = spec.enabledPlugin;
@@ -1466,6 +1591,27 @@ function run(options) {
       "missing version/ref. Use: /roa-base:update <plugin-name> <version> or ref=<plugin-ref>"
     );
   }
+  // The templates this script writes come from the roa-base that is running it,
+  // not from the requested ref. Writing v0.1.9 content under a v0.1.11 label is
+  // worse than failing, so a version ref must match the running build.
+  if (requestedRef && !process.env.ROA_SETUP_ALLOW_REF_MISMATCH) {
+    const requestedVersion = requestedRef.match(/(?:^|--)v(\d+\.\d+\.\d+(?:[-+][\w.]+)?)$/)?.[1];
+    if (requestedVersion && spec.pluginVersion && requestedVersion !== spec.pluginVersion) {
+      throw new SetupError(
+        `requested ${requestedRef}, but the running roa-base is ${spec.pluginVersion} and would write ${spec.pluginVersion} templates. ` +
+          "Update the plugins first: `claude plugin marketplace update roa-ai`, then " +
+          "`claude plugin update roa-base@roa-ai --scope project` (and the module plugin), run /reload-plugins, " +
+          "and rerun this command. Nothing was written."
+      );
+    }
+    if (!requestedVersion) {
+      throw new SetupError(
+        `ref ${JSON.stringify(requestedRef)} is not a release version, so it cannot be checked against the running roa-base ` +
+          `(${spec.pluginVersion}). Use a version such as ${spec.pluginVersion}, or set ROA_SETUP_ALLOW_REF_MISMATCH=1 ` +
+          "if you deliberately want this label on the current templates. Nothing was written."
+      );
+    }
+  }
   if (requestedRef) {
     spec.marketplaceRef = requestedRef;
     if (spec.templateValues && typeof spec.templateValues === "object") {
@@ -1519,7 +1665,7 @@ function run(options) {
   }
 
   const settingsNotes = [];
-  changed.push([updateSettings(settingsPath, spec, settingsNotes), settingsPath]);
+  changed.push([updateSettings(settingsPath, spec, settingsNotes, pluginName, targetRoot), settingsPath]);
   const mcpResult = updateProjectMcp(targetRoot, spec, pluginName);
   changed.push(...mcpResult.changed);
 

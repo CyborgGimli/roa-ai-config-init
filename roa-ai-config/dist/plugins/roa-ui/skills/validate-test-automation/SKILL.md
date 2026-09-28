@@ -1,7 +1,7 @@
 ---
 name: validate-test-automation
 description: Independently verify that an ROA automation change is complete, correct, executable, aligned with the task, and supported by sufficient validation evidence.
-allowed-tools: Read, Glob, Grep, Bash, Skill, Task
+allowed-tools: Read, Glob, Grep, Bash, Skill, Agent
 ---
 
 Validate the completed automation work for:
@@ -10,64 +10,28 @@ Validate the completed automation work for:
 $ARGUMENTS
 ```
 
+The implementer does not validate its own work. Delegate the independent check with the `Agent` tool using the exact `subagent_type` given.
+
 ## Procedure
 
-1. Start from the task requirements, implemented changes, available investigation or architecture findings, and prior execution evidence.
+1. Collect the task requirements, the changed files (`git diff` against the base), the investigation and architecture findings with their evidence, and prior execution evidence.
 
-2. Apply the `validation-policy` skill's evidence requirements throughout this check, and apply the active plugin's validation-profile skill (for example `ui-validation-profile`, `api-validation-profile`, or `roa-db-validation-profile`) for domain-specific verification. Check the plugin's own skill listing for the exact name — plugins name these differently.
+2. Confirm the relevant Java changes compile and that the targeted tests were actually executed — the Surefire summary must show `Tests run:` greater than zero for that scope. If either is missing, produce it with the project's Maven build and the `roa-ui:run-tests` skill.
 
-3. Inspect the relevant implementation and verify that it follows existing project structure, ROA conventions, and established abstractions.
+3. Launch `subagent_type: roa-ui:validator` with everything from steps 1 and 2. The validator applies the `roa-ui:validation-policy` and `roa-ui:ui-validation-profile` skills, reads `ai-compass` metadata for every ROA type involved, and checks application or contract facts against the running application, inspected through the `chrome-devtools`, `browser`, or `selenium` MCP tools.
 
-4. Confirm that the automation proves the intended behavior with meaningful assertions rather than superficial success indicators.
+4. Do not accept a `PASS` that rests on an `UNVERIFIED` application, contract, or framework fact, on skipped or zero executed tests, on weakened assertions, or on bypassed ROA or project conventions.
 
-5. Verify the complete task-relevant lifecycle where applicable:
-
-    * test data;
-    * preconditions;
-    * authentication;
-    * storage;
-    * execution;
-    * assertions;
-    * cleanup;
-    * configuration.
-
-6. Before planning, writing, changing, or reviewing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. Do not infer framework contracts from names or from other repository code.
-
-7. Confirm that relevant Java changes compile.
-
-8. Confirm that the appropriate test scope was actually executed. Run targeted tests when additional execution evidence is required.
-
-9. Investigate failing validation evidence rather than assuming every failure is an automation defect. Distinguish:
-
-    * automation defects;
-    * application defects;
-    * environment failures;
-    * data or precondition problems;
-    * contract changes;
-    * configuration problems;
-    * framework issues.
-
-10. Do not approve work that achieves green results by:
-
-    * skipping tests;
-    * weakening assertions;
-    * deleting meaningful coverage;
-    * masking failures;
-    * introducing brittle workarounds;
-    * bypassing established ROA or project conventions.
-
-11. Delegate independent verification to `validator` when a separate validation pass is useful for the scope or risk of the change.
-
-12. Before returning a result, apply the `definition-of-done` skill to confirm the completion state is justified rather than assumed.
+5. Apply the `roa-ui:definition-of-done` skill to the validator's result before returning it.
 
 ## Return
 
 Provide:
 
-* PASS, FAIL, or BLOCKED;
+* `PASS`, `FAIL`, or `BLOCKED`;
 * requirements and behaviors verified;
 * compilation evidence;
-* tests executed and results;
+* tests executed, the executed-test count, and results;
 * missing, weak, or incorrect validation;
 * ROA or project-convention violations;
 * relevant state, cleanup, determinism, or maintainability concerns;

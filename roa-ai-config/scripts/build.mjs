@@ -298,6 +298,29 @@ function renderFile(src, dst, placeholders) {
   fs.writeFileSync(dst, renderText(fs.readFileSync(src, "utf8"), placeholders), "utf8");
 }
 
+// A copy rule with `"render": true` copies a file or directory tree and renders
+// the placeholders in every Markdown file on the way, so shared skills and agents
+// can name plugin-specific skills and agents exactly (e.g. `${plugin_name}:validator`).
+function renderTree(src, dst, placeholders) {
+  if (!fs.existsSync(src)) {
+    fail(`configured source path does not exist: ${src}`);
+  }
+  ensureInsideRepo(src);
+  ensureInsideRepo(dst);
+  if (fs.statSync(src).isDirectory()) {
+    fs.mkdirSync(dst, { recursive: true });
+    for (const entry of fs.readdirSync(src)) {
+      renderTree(path.join(src, entry), path.join(dst, entry), placeholders);
+    }
+    return;
+  }
+  if (src.endsWith(".md")) {
+    renderFile(src, dst, placeholders);
+  } else {
+    copyPath(src, dst);
+  }
+}
+
 function loadRenderedJson(src, placeholders, label) {
   if (!fs.existsSync(src)) {
     fail(`configured JSON source does not exist: ${src}`);
@@ -663,7 +686,11 @@ function buildPlugin(marketplace, plugin, distRoot, extraPlaceholders = {}) {
     const rule = requireObject(item, `${name}.copy[${index}]`);
     const src = repoPath(renderText(String(rule.from ?? ""), placeholders));
     const dst = path.resolve(outDir, renderText(String(rule.to ?? ""), placeholders));
-    copyPath(src, dst);
+    if (rule.render === true) {
+      renderTree(src, dst, placeholders);
+    } else {
+      copyPath(src, dst);
+    }
   });
 
   requireArray(plugin.render ?? [], `${name}.render`).forEach((item, index) => {

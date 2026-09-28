@@ -33,8 +33,17 @@ from the plugin's hidden profile skills and its own architect agent, not from fo
 
 ## Conventions
 
-- Review and investigation agents never edit; they declare `disallowedTools: Write,
-  Edit, NotebookEdit` or a read-only `tools` list.
-- Every finding cites `file_path:line`; an unlocated finding is not a finding.
+- Review and investigation agents never edit through the file tools: they declare
+  either a read-only `tools` list or `disallowedTools: Write, Edit, NotebookEdit`.
+  The second form is used by agents that need the project MCP servers (browser,
+  DevTools, Swagger), because a subagent only receives MCP tools when it inherits
+  the tool set. Both forms keep `Bash`, which can still write; the agent prompt
+  restricts it to read-only commands, and the roa-base hooks guard the dangerous
+  ones. This is an instruction, not a sandbox.
+- Delegation is explicit: workflow skills launch agents with the `Agent` tool and
+  a fully qualified `subagent_type` (`<plugin>:<agent>`), rendered at build time
+  from the plugin `placeholders`.
+- Every agent returns an **Evidence** entry and labels unsourced facts `UNVERIFIED`.
+- Every review finding cites `file_path:line`; the review skill drops unlocated findings.
 - Framework signatures are verified through the `ai-compass` skill, never inferred
   from a method name.

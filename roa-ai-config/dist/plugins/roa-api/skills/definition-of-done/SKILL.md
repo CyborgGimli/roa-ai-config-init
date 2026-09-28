@@ -2,7 +2,7 @@
 name: definition-of-done
 description: Determine whether an ROA automation task has sufficient implementation and validation evidence to be considered complete.
 user-invocable: false
-allowed-tools: Read, Glob, Grep, Bash, Skill, Task
+allowed-tools: Read, Glob, Grep, Bash
 ---
 
 Evaluate whether the current automation task is genuinely complete.
@@ -29,29 +29,29 @@ A task is done only when all applicable conditions are satisfied:
 
 5. Relevant Java changes compile successfully.
 
-6. The appropriate test scope has been executed successfully when runtime execution is required to prove the change.
+6. The appropriate test scope has been executed successfully when runtime execution is required to prove the change, and the run executed more than zero tests.
 
 7. Failures have not been hidden through skipped tests, weakened assertions, deleted coverage, suppressed errors, or brittle workarounds.
 
 8. Any remaining application, environment, data, contract, configuration, or framework issue is explicitly identified and does not invalidate the claimed automation result.
 
-9. No known blocker, unresolved correctness issue, or required validation remains.
+9. No known blocker, unresolved correctness issue, required validation, or `UNVERIFIED` application, contract, or framework fact remains.
 
 ## Result
 
-Return exactly one completion state:
+Return exactly one completion state, using the same vocabulary as every other ROA workflow:
 
 ```text
-DONE
+PASS
 → all applicable completion criteria are satisfied
 
-NOT_DONE
+FAIL
 → implementation or required validation is incomplete or incorrect
 
 BLOCKED
 → completion cannot currently be established because of a verified external blocker
 ```
 
-Include the smallest set of missing actions or evidence when the result is `NOT_DONE` or `BLOCKED`.
+Include the smallest set of missing actions or evidence when the result is `FAIL` or `BLOCKED`.
 
-Do not declare `DONE` based only on code inspection when compilation or test execution is required to prove the task.
+Do not declare `PASS` based only on code inspection when compilation or test execution is required to prove the task.

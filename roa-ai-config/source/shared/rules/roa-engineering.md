@@ -9,7 +9,7 @@
 - Treat the Quest as the test execution context and access supported automation capabilities through the appropriate Rings.
 - Do not bypass established ROA capabilities with independent clients, drivers, state mechanisms, or lower-level alternatives without a justified requirement.
 - Before planning, writing, or changing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. If `target/pandora/metadata/` is missing, regenerate it as the skill describes before continuing. Never guess ROA APIs.
-- Before planning or creating any new Java code, invoke the `ai-teacher` skill and apply the relevant project-approved lessons — always, even when a similar class already exists in the repository. If `target/pandora/ai-teacher/` is missing, generate it as the skill describes before continuing.
+- Before planning or creating any new Java code, invoke the `ai-teacher` skill and apply the relevant project-approved lessons — always, even when a similar class already exists in the repository. If `target/pandora/ai-teacher/` is missing, follow the skill’s generation-and-fallback steps.
 - Preserve established lifecycle, storage, data, authentication, cleanup, and Ring boundaries when modifying automation.
 - Keep code cohesive and readable; avoid speculative abstractions, duplicate infrastructure, and unrelated refactoring.
 - If repository evidence, Pandora metadata, or required external information is insufficient to implement something correctly, report the missing information instead of inventing it.

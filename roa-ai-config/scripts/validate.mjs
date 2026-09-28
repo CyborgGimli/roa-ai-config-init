@@ -260,12 +260,118 @@ function checkPlaceholderLeaks(problems) {
   if (fs.existsSync(distPlugins)) walk(distPlugins);
 }
 
+function markdownFiles(dir, files = []) {
+  if (!fs.existsSync(dir)) return files;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) markdownFiles(fullPath, files);
+    else if (entry.name.endsWith(".md")) files.push(fullPath);
+  }
+  return files;
+}
+
+function pluginAgentNames(pluginDir) {
+  const agentsDir = path.join(pluginDir, "agents");
+  if (!fs.existsSync(agentsDir)) return new Set();
+  return new Set(
+    fs.readdirSync(agentsDir).filter((entry) => entry.endsWith(".md")).map((entry) => entry.slice(0, -3))
+  );
+}
+
+// Workflow text names agents and skills by `<plugin>:<name>` and points at plugin
+// docs. A typo there does not fail anything at runtime — the model just improvises
+// — so every reference is resolved here instead.
+function checkCrossReferences(distPlugins, problems) {
+  const plugins = listDirs(distPlugins);
+  const index = Object.fromEntries(
+    plugins.map((name) => {
+      const dir = path.join(distPlugins, name);
+      return [name, { skills: pluginSkillNames(dir), agents: pluginAgentNames(dir), dir }];
+    })
+  );
+
+  for (const plugin of plugins) {
+    const { dir } = index[plugin];
+    const docsDir = path.join(dir, "docs");
+
+    for (const file of [...markdownFiles(path.join(dir, "skills")), ...markdownFiles(path.join(dir, "agents"))]) {
+      if (file.includes(`${path.sep}generated${path.sep}`)) continue; // rendered in the target repo
+      const rel = `${plugin}/${path.relative(dir, file).split(path.sep).join("/")}`;
+      const text = readText(file);
+
+      for (const match of text.matchAll(/subagent_type:\s*([a-z0-9-]+):([a-z0-9-]+)/g)) {
+        const [, owner, agent] = match;
+        if (!index[owner]?.agents.has(agent)) {
+          problems.push(`${rel}: subagent_type ${owner}:${agent} does not exist`);
+        }
+      }
+
+      for (const match of text.matchAll(/`([a-z0-9-]+):([a-z0-9-]+)`/g)) {
+        const [, owner, name] = match;
+        if (!index[owner]) continue; // not a plugin reference (e.g. a Maven goal)
+        if (!index[owner].skills.has(name) && !index[owner].agents.has(name)) {
+          problems.push(`${rel}: ${owner}:${name} is neither a skill nor an agent of ${owner}`);
+        }
+      }
+
+      for (const line of text.split("\n").filter((l) => l.includes("${CLAUDE_PLUGIN_ROOT}/docs/"))) {
+        for (const match of line.matchAll(/`(?:\$\{CLAUDE_PLUGIN_ROOT\}\/docs\/)?([a-z0-9-]+\.md)`/g)) {
+          if (!fs.existsSync(path.join(docsDir, match[1]))) {
+            problems.push(`${rel}: referenced doc docs/${match[1]} is not shipped by ${plugin}`);
+          }
+        }
+      }
+
+      const fm = parseFrontmatter(text) ?? {};
+      if (/\bTask\b/.test(String(fm["allowed-tools"] ?? ""))) {
+        problems.push(`${rel}: allowed-tools lists Task; the tool is called Agent`);
+      }
+
+      // An agent told to use MCP servers must receive them: a fixed `tools` list
+      // without mcp__ entries silently strips every MCP tool from the subagent.
+      if (rel.includes("/agents/") && typeof fm.tools === "string" && !fm.tools.includes("mcp__")) {
+        const body = text.slice(text.indexOf("\n---", 3) + 4);
+        if (/\b(MCP tools|MCP server|`swagger` MCP|`chrome-devtools`)/.test(body)) {
+          problems.push(`${rel}: instructs MCP use but its tools list grants no mcp__ tools (use disallowedTools instead)`);
+        }
+      }
+    }
+  }
+}
+
+// Optional: ROA_EVAL_DATASET=<path to generated-dataset.json> fails the build when
+// shipped guidance quotes the dataset's reference answers (test method names),
+// which would inflate evaluation scores without improving real behavior.
+function checkEvaluationLeakage(distPlugins, problems) {
+  const datasetPath = process.env.ROA_EVAL_DATASET;
+  if (!datasetPath) return;
+  if (!fs.existsSync(datasetPath)) {
+    problems.push(`ROA_EVAL_DATASET points at a missing file: ${datasetPath}`);
+    return;
+  }
+  const answers = new Set(
+    [...readText(datasetPath).matchAll(/\b[a-z][A-Za-z0-9]*_[a-z][A-Za-z0-9_]*\b/g)]
+      .map((match) => match[0])
+      .filter((name) => name.length >= 12)
+  );
+  for (const file of markdownFiles(distPlugins)) {
+    const text = readText(file);
+    for (const answer of answers) {
+      if (text.includes(answer)) {
+        problems.push(`evaluation answer ${answer} appears in ${path.relative(ROOT, file)}`);
+      }
+    }
+  }
+}
+
 function runStructuralChecks() {
   const problems = [];
   const distPlugins = path.join(ROOT, "dist", "plugins");
   for (const pluginName of listDirs(distPlugins)) {
     checkPluginStructure(path.join(distPlugins, pluginName), pluginName, problems);
   }
+  checkCrossReferences(distPlugins, problems);
+  checkEvaluationLeakage(distPlugins, problems);
   checkSetupRegistry(problems);
   checkPlaceholderLeaks(problems);
 

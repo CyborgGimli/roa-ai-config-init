@@ -1,5 +1,5 @@
 {
-  "description": "ROA API MCP defaults. Target repositories customize these through ai-config.yaml.",
+  "description": "ROA API MCP defaults. Target repositories customize these through ai-config.yaml. Package versions are pinned; bump them deliberately.",
   "servers": {
     "swagger": {
       "enabledByDefault": true,
@@ -12,7 +12,7 @@
         "command": "npx",
         "args": [
           "-y",
-          "swagger-mcp@latest"
+          "swagger-mcp@1.0.8"
         ]
       },
       "envFromConfig": {

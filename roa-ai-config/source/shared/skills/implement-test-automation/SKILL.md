@@ -1,7 +1,7 @@
 ---
 name: implement-test-automation
 description: Implement an ROA test-automation task end to end using the existing project architecture, verified ROA framework guidance, project-approved Java patterns, and appropriate validation.
-allowed-tools: Read, Glob, Grep, Edit, Write, Bash, Skill, Task
+allowed-tools: Read, Glob, Grep, Edit, Write, Bash, Skill, Agent
 ---
 
 Implement the requested automation work:
@@ -10,42 +10,27 @@ Implement the requested automation work:
 $ARGUMENTS
 ```
 
+You orchestrate; the named agents and skills do the specialist work. Delegate with the `Agent` tool using the exact `subagent_type` given, and pass each agent the task plus every finding gathered so far together with its evidence. Subagents cannot delegate further.
+
 ## Procedure
 
 1. Establish the requested behavior, scope, acceptance criteria, and constraints.
 
-2. Inspect the relevant repository context. Use `codebase-investigator` when existing structure, conventions, reusable abstractions, or implementation details are not already clear.
+2. Unless an approved plan already exists in this conversation, produce one with the `${plugin_name}:plan-test-automation` skill. It runs codebase investigation, the `${plugin_name}:${domain_architect_skill}` architecture skill (which gathers evidence from ${domain_evidence_source}), and the planner. Keep the plan proportional: a one-method change needs a short plan, not a skipped one.
 
-3. Determine the required domain architecture before implementation. Delegate to the active plugin's dedicated architecture skill (for example `architect-ui-tests`, `architect-api-tests`, or `roa-db-architect`) and apply its task-profile skill (for example `ui-task-profile`, `api-task-profile`, or `roa-db-task-profile`) whenever the task requires architectural or application-specific decisions. Check the plugin's own skill listing for the exact name — plugins name these differently.
+3. Do not start implementing while any fact the plan depends on is `UNVERIFIED` or `BLOCKED`. Report it instead.
 
-4. Produce or confirm a concrete implementation plan before making substantial changes. Keep the plan proportional to the task and reuse existing project abstractions wherever possible.
+4. Launch `subagent_type: ${plugin_name}:implementation-engineer` with the approved plan and its evidence. It applies `ai-teacher`, `ai-compass`, and the `${plugin_name}:${domain_task_profile}` skill, implements the smallest complete change, and compiles.
 
-5. Implement the smallest complete change through `implementation-engineer`.
+5. Any Java change you make yourself follows the same rules: invoke the `ai-teacher` skill before creating new Java code, and invoke the `ai-compass` skill and read the metadata for every `io.cyborgcode.roa.*` type involved — always, even when the repository already contains a similar example. If `target/pandora/metadata/` is missing, regenerate it as the skill describes before continuing. Never guess ROA APIs.
 
-6. Before planning or creating any new Java code, invoke the `ai-teacher` skill and apply the relevant project-approved lessons — always, even when a similar class already exists in the repository. If `target/pandora/ai-teacher/` is missing, generate it as the skill describes before continuing.
+6. Run the relevant tests with the `${plugin_name}:run-tests` skill. A run in which zero tests executed is not evidence.
 
-7. Before planning, writing, or changing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. If `target/pandora/metadata/` is missing, regenerate it as the skill describes before continuing. Never guess ROA APIs.
+7. If relevant tests fail, use the `${plugin_name}:fix-tests` skill. Do not weaken expectations or mask application, environment, data, or contract failures.
 
-8. Preserve the complete task-relevant automation lifecycle where applicable:
+8. Validate the completed change with the `${plugin_name}:validate-test-automation` skill. Do not claim completion without its `PASS`.
 
-    * test data;
-    * preconditions;
-    * authentication;
-    * storage;
-    * execution;
-    * assertions;
-    * cleanup;
-    * configuration.
-
-9. After meaningful Java implementation changes, compile the affected project. Prefer the Maven wrapper when available and fix compilation failures caused by the change before proceeding.
-
-10. Run the relevant tests required to prove the implemented behavior using the `run-tests` skill.
-
-11. If relevant tests fail, establish the root cause. Use `fix-tests` when the failure is an automation defect. Do not weaken expectations or mask application, environment, data, or contract failures.
-
-12. Validate the completed change using `validate-test-automation`. Do not claim completion without sufficient implementation and execution evidence.
-
-13. For substantial or risk-sensitive changes, use `review-test-automation` before final acceptance.
+9. For substantial or risk-sensitive changes, run the `${plugin_name}:review-test-automation` skill before final acceptance.
 
 ## Return
 
@@ -56,9 +41,9 @@ Provide:
 * existing abstractions and project patterns reused;
 * any justified deviation from the plan;
 * compilation performed and result;
-* tests executed and result;
-* validation outcome;
-* remaining blockers or uncertainties;
+* tests executed, the executed-test count, and result;
+* validation verdict: `PASS`, `FAIL`, or `BLOCKED`;
+* remaining blockers, uncertainties, or `UNVERIFIED` facts;
 * external application, environment, data, contract, or framework issues discovered.
 
 Do not claim completion until the requested automation is implemented and the required validation evidence is available, or an explicit blocker has been reported.

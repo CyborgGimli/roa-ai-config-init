@@ -1,7 +1,7 @@
 ---
 name: review-test-automation
 description: Perform an independent adversarial review of completed ROA automation to identify weak assertions, brittle design, hidden dependencies, architectural misuse, and false-positive risk.
-allowed-tools: Read, Glob, Grep, Bash, Skill, Task
+allowed-tools: Read, Glob, Grep, Bash, Skill, Agent
 ---
 
 Review the completed automation work for:
@@ -10,51 +10,30 @@ Review the completed automation work for:
 $ARGUMENTS
 ```
 
+You orchestrate two independent reviews and merge them. Delegate with the `Agent` tool using the exact `subagent_type` given; launch both reviewers in the same turn so neither sees the other's conclusions.
+
 ## Procedure
 
-1. Start from the task requirements, implementation, changed files, and available validation evidence.
+1. Collect the task requirements, the changed files (`git diff` against the base), and the available validation evidence. Pass all of it to both reviewers.
 
-2. Review the automation independently rather than assuming the implementation is correct.
+2. Launch `subagent_type: ${plugin_name}:adversarial-test-reviewer` for false positives, weak assertions, hidden coupling, cleanup, determinism, parallel safety, and setup that replaces the behavior under test.
 
-3. Look for false positives:
+3. Launch `subagent_type: ${plugin_name}:${domain_reviewer_agent}` for ${domain_label}-specific correctness: architecture, reuse of project abstractions, and fidelity to ${domain_evidence_source}.
 
-    * assertions that do not prove the intended behavior;
-    * superficial success checks;
-    * missing important outcomes;
-    * tests that could pass while the requirement is actually broken.
+4. Merge the findings. Drop any finding that has no `file_path:line` or no supporting evidence; deduplicate findings both reviewers raised; keep the more severe classification when they disagree.
 
-4. Look for hidden coupling and instability:
-
-    * test-order dependencies;
-    * shared mutable state;
-    * unsafe parallel execution;
-    * incomplete cleanup;
-    * brittle test data;
-    * environment assumptions;
-    * timing-sensitive behavior;
-    * duplicated or inconsistent setup.
-
-5. Challenge the architecture. Verify that existing ROA and project abstractions are used appropriately and that the implementation does not introduce unnecessary wrappers, duplicate infrastructure, or lower-level workarounds.
-
-6. Verify that supporting setup, mocks, generated data, or alternate Rings do not accidentally replace the behavior the test is intended to prove.
-
-7. Before planning, writing, changing, or reviewing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. Do not infer framework contracts from names or from other repository code.
-
-8. Delegate an independent adversarial pass to `adversarial-test-reviewer` when useful for the scope or risk of the change.
-
-9. Keep the review proportional to the task. Raise only concerns supported by implementation, repository context, or runtime evidence.
+5. Keep the review proportional to the task. Raise only concerns supported by the implementation, repository context, or runtime evidence.
 
 ## Return
 
 Provide:
 
-* overall review assessment;
+* overall verdict: `PASS`, `FAIL`, or `BLOCKED`;
+* blocking findings, each with `file_path:line`, the evidence, and the concrete correction;
+* non-blocking recommendations, kept separate;
 * false-positive or weak-assertion risks;
 * hidden state, cleanup, determinism, parallelism, or data risks;
-* brittle or unnecessarily complex implementation choices;
 * ROA or project-architecture misuse;
-* important missing scenarios or validations;
-* blocking issues versus recommendations;
-* prioritized corrections, if any.
+* anything neither reviewer could verify.
 
-Do not invent problems merely to be critical.
+Do not invent problems merely to be critical. Do not modify code.

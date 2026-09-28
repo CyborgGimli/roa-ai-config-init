@@ -1,7 +1,7 @@
 ---
 name: setup
 description: Configure the current target repository to use an ROA Claude Code plugin. Use when the user runs /roa-base:setup with a plugin name, or asks to wire an ROA plugin into this repository.
-allowed-tools: Bash(node *), Read, Glob, Grep, Edit, Write, Task
+allowed-tools: Bash(node *skills/setup/scripts/setup.mjs*), Bash(node *skills/setup/scripts/install-prereqs.mjs*), Read, Glob, Grep, Edit, Write, Agent
 ---
 
 Configure the requested ROA plugin, then create concise Claude Code project memory
@@ -18,19 +18,21 @@ $ARGUMENTS
 1. Determine the requested plugin name from `$ARGUMENTS`. Accept `roa-ui`,
    `roa-api`, `roa-db`, or `type=<plugin-name>`.
 
-2. Ensure toolchain prerequisites. **The install logic is a deterministic script -
-   run it; do not hand-install unless the script fails.**
+2. Check toolchain prerequisites. The check is a deterministic script and changes
+   nothing on the machine:
 
    ```bash
    node "${CLAUDE_PLUGIN_ROOT}/skills/setup/scripts/install-prereqs.mjs"
    ```
 
-   Act on its exit code (the install ladder):
+   Act on its exit code:
 
    - **Exit 0** - all prerequisites present. Continue.
-   - **Exit 2** - the script installed what it could, but one or more tools are
-     still missing. Try an adaptive install, then relay the printed
-     MANUAL INSTALLATION block.
+   - **Exit 2** - one or more tools are missing. Installing a JDK or Maven is a
+     machine-wide change, so ask the user first (list exactly what is missing).
+     Only if they agree, rerun the script with `--install` (winget on Windows,
+     Homebrew on macOS). Otherwise, or if that still fails, relay the printed
+     MANUAL INSTALLATION block and stop. Never improvise another install method.
    - **Exit 1** - Node.js is missing or too old. Relay the fix and stop; setup
      itself needs Node.js.
 
@@ -78,7 +80,7 @@ $ARGUMENTS
 6. For a **new** repository, stop after the generated template files. Do not invent
    architecture, commands, or module layout.
 
-7. For an **existing** repository, use the `repo-memory-architect` agent to update
+7. For an **existing** repository, use the `roa-base:repo-memory-architect` agent (launch it with the `Agent` tool, `subagent_type: roa-base:repo-memory-architect`) to update
    the root `CLAUDE.md` and create subdirectory `CLAUDE.md` files where they help.
    - The agent must read the generated plugin settings and rules first.
    - It must write best-practice guidance, not copy bad habits from the repo.
@@ -101,8 +103,12 @@ $ARGUMENTS
   the Claude CLI (used by CI and by this repository's own tests).
 - Expected problems exit with code `2` and a readable `setup failed: ...` message;
   unexpected programming errors are rethrown rather than swallowed.
-- This skill writes project-level files only. It never installs managed settings
-  or changes machine-wide Claude Code policy.
+- Setup writes project-level files. The only machine-level effects are the ones
+  named above: registering the `roa-ai` marketplace at user scope when it is
+  missing, and installing a JDK or Maven when the user explicitly agreed. It never
+  installs managed settings or changes machine-wide Claude Code policy.
+- Fill `security.allowedOrigins` in `ai-config.yaml` with the application under
+  test; the browser MCP tools ask before navigating anywhere else.
 
 ---
 

@@ -8,8 +8,8 @@
 //   - JDK >= 17       compiles and runs ROA tests
 //   - Maven >= 3.8    builds the project and runs `mvn pandora:navigation -U`
 //
-// Auto-install (unless --check-only): on Windows the JDK and Maven are installed
-// through winget, on macOS through Homebrew. Node.js and git are never
+// Check-only by default. With --install (passed only after the user agreed), the
+// JDK and Maven are installed through winget on Windows and Homebrew on macOS. Node.js and git are never
 // auto-installed (this script runs on Node, and system package installs vary too
 // much to do safely). If anything cannot be installed automatically, a MANUAL
 // INSTALLATION block is printed listing every requirement with commands for this
@@ -21,7 +21,10 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const CHECK_ONLY = process.argv.includes("--check-only");
+// Installing system software is a machine-wide change, so it never happens
+// unless the caller explicitly passes --install. --check-only is kept for
+// compatibility and wins over --install.
+const CHECK_ONLY = process.argv.includes("--check-only") || !process.argv.includes("--install");
 const MIN_NODE_MAJOR = 20;
 const MIN_JAVA_MAJOR = 17;
 const isWin = process.platform === "win32";

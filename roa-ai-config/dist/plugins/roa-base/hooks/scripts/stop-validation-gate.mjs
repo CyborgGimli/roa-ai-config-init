@@ -149,13 +149,14 @@ function relativeTrackedPath(
     );
 }
 
-function recordChanges(payload) {
+function recordChanges(payload, explicitPaths) {
     const cwd =
         currentWorkingDirectory(
             payload,
         );
 
     const touched =
+        explicitPaths ??
         relevantTouchedPaths(
             payload,
             cwd,
@@ -580,6 +581,92 @@ function handleStop(payload) {
     }
 }
 
+/*
+ * Shell commands (sed -i, Set-Content, heredocs, generators) change Java files
+ * without going through Write/Edit. PreToolUse notes when the command started;
+ * PostToolUse asks git which .java / pom.xml files are modified or untracked and
+ * keeps those whose mtime is not older than that start. Outside a git work tree
+ * this records nothing, which is the pre-existing behaviour.
+ */
+const SHELL_TOOLS = new Set([
+    "Bash",
+    "PowerShell",
+]);
+
+function shellMarkerName(payload) {
+    return `${stateName(payload)}-shell`;
+}
+
+function markShellStart(payload) {
+    writeWorkspaceState(
+        currentWorkingDirectory(payload),
+        shellMarkerName(payload),
+        { startedAt: Date.now() },
+    );
+}
+
+function gitChangedFiles(cwd) {
+    const result = runCommand(
+        "git",
+        ["status", "--porcelain", "-z", "-uall"],
+        { cwd, timeoutMs: 15000, shell: false },
+    );
+
+    if (result.status !== 0 || result.error) {
+        return [];
+    }
+
+    const entries = result.stdout.split("\0");
+    const files = [];
+
+    for (let index = 0; index < entries.length; index += 1) {
+        const entry = entries[index];
+
+        if (entry.length < 4) {
+            continue;
+        }
+
+        const status = entry.slice(0, 2);
+        files.push(entry.slice(3));
+
+        // Renames and copies carry the original path as the next entry.
+        if (/[RC]/.test(status)) {
+            index += 1;
+        }
+    }
+
+    return files;
+}
+
+function recordShellChanges(payload) {
+    const cwd = currentWorkingDirectory(payload);
+    const marker = readWorkspaceState(cwd, shellMarkerName(payload), {});
+    removeWorkspaceState(cwd, shellMarkerName(payload));
+
+    if (!Number.isFinite(marker.startedAt)) {
+        return;
+    }
+
+    // Filesystem mtime granularity can round down; allow a small margin.
+    const since = marker.startedAt - 2000;
+
+    const changed = gitChangedFiles(cwd)
+        .map((file) => resolveToolPath(cwd, file))
+        .filter((filePath) => isPathWithin(cwd, filePath))
+        .filter((filePath) => isJavaPath(filePath) || isPomPath(filePath))
+        .filter((filePath) => {
+            try {
+                return fs.statSync(filePath).mtimeMs >= since;
+            } catch {
+                return false; // deleted by the command
+            }
+        });
+
+    if (changed.length > 0) {
+        recordChanges(payload, changed);
+    }
+}
+
 function main() {
     const payload =
         readPayload();
@@ -590,21 +677,34 @@ function main() {
             "",
         );
 
+    const toolName =
+        String(
+            payload.tool_name ??
+            "",
+        );
+
+    if (
+        eventName === "PreToolUse" &&
+        SHELL_TOOLS.has(toolName)
+    ) {
+        markShellStart(payload);
+        return;
+    }
+
     if (
         eventName ===
         "PostToolUse"
     ) {
         if (
-            WRITE_TOOLS.has(
-                String(
-                    payload.tool_name ??
-                    "",
-                ),
-            )
+            WRITE_TOOLS.has(toolName)
         ) {
             recordChanges(
                 payload,
             );
+        } else if (
+            SHELL_TOOLS.has(toolName)
+        ) {
+            recordShellChanges(payload);
         }
 
         return;

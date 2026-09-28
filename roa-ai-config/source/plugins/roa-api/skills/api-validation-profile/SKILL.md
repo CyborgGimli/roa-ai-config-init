@@ -2,7 +2,7 @@
 name: api-validation-profile
 description: Apply API-specific validation requirements when shared ROA validation workflows verify completed API automation.
 user-invocable: false
-allowed-tools: Read, Glob, Grep, Bash, Skill, Task
+allowed-tools: Read, Glob, Grep, Bash, Skill
 ---
 
 Apply this profile when validating API automation changes.
@@ -11,7 +11,7 @@ Apply this profile when validating API automation changes.
 
 1. Verify that the implemented behavior matches the requested API scenario and acceptance criteria.
 
-2. Confirm that affected endpoint paths, HTTP methods, parameters, schemas, status codes, authentication requirements, and response expectations are grounded in the authoritative Swagger/OpenAPI contract or another explicit requirement source.
+2. Confirm that affected endpoint paths, HTTP methods, parameters, schemas, status codes, authentication requirements, and response expectations are grounded in the authoritative Swagger/OpenAPI contract (via the `swagger` MCP server) or another explicit requirement source. A contract fact without evidence makes the result `BLOCKED`, not `PASS`.
 
 3. Verify that the implementation reuses appropriate existing project abstractions, including where relevant:
    - typed endpoints;

@@ -20,12 +20,17 @@ $ARGUMENTS
 
 4. Run the targeted test or test set using the project's established Maven configuration, profiles, and required parameters.
 
-5. Do not skip tests or use options such as:
+5. Do not skip tests or use options that skip, ignore, or tolerate missing tests, such as:
 
    ```text
    -DskipTests
    -Dmaven.test.skip=true
+   -Dmaven.test.failure.ignore=true
+   -Dsurefire.failIfNoSpecifiedTests=false
+   -DfailIfNoTests=false
    ```
+
+   Confirm the Surefire summary shows `Tests run:` greater than zero for the targeted scope. A run where no test executed is `BLOCKED` (the selection matched nothing), never `PASS`.
 
 6. Capture the actual execution result, including:
 

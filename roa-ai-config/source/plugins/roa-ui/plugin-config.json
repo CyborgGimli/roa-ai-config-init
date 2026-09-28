@@ -1,7 +1,7 @@
 {
   "name": "roa-ui",
   "displayName": "ROA UI",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "ROA UI test automation plugin with application investigation, UI architecture, component and element modeling, synchronization, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
   "category": "test-automation",
   "tags": [
@@ -16,6 +16,15 @@
   "dependencies": [
     "roa-base"
   ],
+  "placeholders": {
+    "domain_label": "UI",
+    "domain_architect_skill": "architect-ui-tests",
+    "domain_task_profile": "ui-task-profile",
+    "domain_validation_profile": "ui-validation-profile",
+    "domain_reviewer_agent": "ui-architecture-reviewer",
+    "domain_investigator_agent": "ui-application-investigator",
+    "domain_evidence_source": "the running application, inspected through the `chrome-devtools`, `browser`, or `selenium` MCP tools"
+  },
   "copy": [
     {
       "from": "${plugin_dir}/README.md",
@@ -23,19 +32,23 @@
     },
     {
       "from": "${shared_dir}/skills",
-      "to": "skills"
+      "to": "skills",
+      "render": true
     },
     {
       "from": "${plugin_dir}/skills",
-      "to": "skills"
+      "to": "skills",
+      "render": true
     },
     {
       "from": "${shared_dir}/agents",
-      "to": "agents"
+      "to": "agents",
+      "render": true
     },
     {
       "from": "${plugin_dir}/agents",
-      "to": "agents"
+      "to": "agents",
+      "render": true
     },
     {
       "from": "${shared_dir}/docs",

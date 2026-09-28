@@ -12,9 +12,9 @@ Metadata for every `io.cyborgcode.roa.*` class is generated into
 target/pandora/metadata/io.cyborgcode.roa.ui.components.input.Input.json
 ```
 
-**If `target/pandora/metadata/` does not exist, this skill does not apply** — see
-"When metadata is unavailable" below rather than inventing an answer from the
-structure described here.
+**If `target/pandora/metadata/` does not exist, go straight to "When metadata is
+unavailable" below.** Never answer a framework question from the structure
+described here, from memory, or from other repository code instead.
 
 For token efficiency, open only the files for the classes you are actually using.
 When you do open one, **read the whole file** — the method you need is often below
@@ -139,13 +139,19 @@ goal before reporting a problem.
 
 ## When to regenerate
 
+Check the `<plugins>` section of the `pom.xml` first and use only what it declares.
+When the Pandora plugin is bound to a phase (normally `process-classes`), an
+ordinary compile regenerates the metadata:
+
+```bash
+mvn compile
+```
+
+Run the goal explicitly only when you need the `-U` dependency refresh:
+
 ```bash
 mvn pandora:navigation -U      # older Pandora: mvn pandora:open -U
 ```
-
-The plugin is normally also bound to `process-classes`, so an ordinary `mvn compile`
-refreshes metadata too; run the goal explicitly when you want the `-U` dependency
-refresh or the build has not been re-run.
 
 Run it after changing any class that implements:
 
@@ -165,7 +171,7 @@ Run it after changing any class that implements:
 
 If `target/pandora/metadata/` is empty or missing:
 
-1. Run the regeneration goal — it can take several minutes.
+1. Regenerate as described above — it can take several minutes.
 2. If it times out, retry once with a longer timeout.
 3. If it still fails, **stop and ask the user** to check that Maven dependencies
    resolve (`mvn dependency:tree`), that `mvn compile` succeeds, and that GitHub
@@ -189,8 +195,8 @@ Do not proceed by guessing at signatures.
 
 Metadata is technical reference, not architecture. A module instruction file that
 forbids a pattern outranks the fact that the metadata shows it exists — for
-example `Assertion.builder()` exists and is still wrong for ordinary UI components,
-which use the direct `validate*` methods instead.
+example (UI) `Assertion.builder()` exists and is still wrong for ordinary UI
+components, which use the direct `validate*` methods instead.
 
 Against `ai-teacher`: metadata wins on **signatures**, because it is generated from
 the framework on the classpath; the lesson catalog wins on **shape and style**,

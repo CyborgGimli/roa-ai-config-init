@@ -1,7 +1,7 @@
 {
   "name": "roa-db",
   "displayName": "ROA Database Testing",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Database testing with query abstractions and managed test data lifecycle",
   "category": "testing",
   "tags": [
@@ -14,22 +14,35 @@
   "dependencies": [
     "roa-base"
   ],
+  "placeholders": {
+    "domain_label": "DB",
+    "domain_architect_skill": "roa-db-architect",
+    "domain_task_profile": "roa-db-task-profile",
+    "domain_validation_profile": "roa-db-validation-profile",
+    "domain_reviewer_agent": "roa-db-data-reviewer",
+    "domain_investigator_agent": "codebase-investigator",
+    "domain_evidence_source": "the database schema and the project `DbQuery` definitions"
+  },
   "copy": [
     {
       "from": "${shared_dir}/agents",
-      "to": "agents"
+      "to": "agents",
+      "render": true
     },
     {
       "from": "${plugin_dir}/agents",
-      "to": "agents"
+      "to": "agents",
+      "render": true
     },
     {
       "from": "${shared_dir}/skills",
-      "to": "skills"
+      "to": "skills",
+      "render": true
     },
     {
       "from": "${plugin_dir}/skills",
-      "to": "skills"
+      "to": "skills",
+      "render": true
     },
     {
       "from": "${shared_dir}/output-styles",

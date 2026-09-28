@@ -1,8 +1,16 @@
 # ROA AI project configuration.
 # Commit this file after replacing examples with non-secret repository facts.
 # Keep secrets in environment variables, OAuth login, managed settings, or local secret stores.
+# Values that still contain "example.com" are treated as unset: setup skips the server that needs them.
 
 version: 1
+
+security:
+  # Origins (scheme://host[:port]) the browser/DevTools MCP tools may navigate to and
+  # WebFetch may read without asking. Put the application under test here, e.g.
+  #   allowedOrigins: [http://localhost:8080, https://app.test.internal]
+  # Empty means every navigation asks for confirmation.
+  allowedOrigins: []
 
 mcp:
   defaults:
@@ -11,8 +19,9 @@ mcp:
     alwaysLoad: false
 
   servers:
+    # Off by default: its tools can publish repository content to GitHub.
     github:
-      enabled: true
+      enabled: false
       tokenEnv: GITHUB_PERSONAL_ACCESS_TOKEN
 
     swagger:

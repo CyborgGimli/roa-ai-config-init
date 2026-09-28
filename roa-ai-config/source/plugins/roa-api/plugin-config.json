@@ -1,7 +1,7 @@
 {
   "name": "roa-api",
   "displayName": "ROA API",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "ROA API test automation plugin with API architecture, contract investigation, implementation, validation, review, Pandora, AI Teacher, and Java engineering workflows.",
   "category": "test-automation",
   "tags": [
@@ -15,6 +15,15 @@
   "dependencies": [
     "roa-base"
   ],
+  "placeholders": {
+    "domain_label": "API",
+    "domain_architect_skill": "architect-api-tests",
+    "domain_task_profile": "api-task-profile",
+    "domain_validation_profile": "api-validation-profile",
+    "domain_reviewer_agent": "api-contract-reviewer",
+    "domain_investigator_agent": "api-contract-investigator",
+    "domain_evidence_source": "the Swagger/OpenAPI contract, read through the `swagger` MCP server"
+  },
   "copy": [
     {
       "from": "${plugin_dir}/README.md",
@@ -22,19 +31,23 @@
     },
     {
       "from": "${shared_dir}/skills",
-      "to": "skills"
+      "to": "skills",
+      "render": true
     },
     {
       "from": "${plugin_dir}/skills",
-      "to": "skills"
+      "to": "skills",
+      "render": true
     },
     {
       "from": "${shared_dir}/agents",
-      "to": "agents"
+      "to": "agents",
+      "render": true
     },
     {
       "from": "${plugin_dir}/agents",
-      "to": "agents"
+      "to": "agents",
+      "render": true
     },
     {
       "from": "${shared_dir}/docs",

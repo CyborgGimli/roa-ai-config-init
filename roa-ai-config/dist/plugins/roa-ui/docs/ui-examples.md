@@ -236,7 +236,7 @@ data
 
 assertion
 → the outcome the requirement names, in the element that renders it
-→ validate().validateTextInField(HTML.Tag.DIV, message), not BODY
+→ validate().validateTextInField(HTML.Tag.<rendering element tag>, message), not BODY
 
 scope
 → nothing the requirement did not ask for

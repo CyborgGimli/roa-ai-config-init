@@ -2,7 +2,7 @@
 
 # API Contract Rules
 
-- Treat the configured Swagger/OpenAPI source as the authority for application API contract details.
+- Treat the configured Swagger/OpenAPI source as the authority for application API contract details, read through the `swagger` MCP server (see `.mcp.json`) — usually by delegating to the `roa-api:api-contract-investigator` agent. If it is unavailable, report the contract fact as unverified.
 - Never guess endpoint paths, HTTP methods, parameters, schemas, authentication requirements, status codes, headers, or response structures.
 - Preserve exact contract-defined parameter names, locations, types, required/optional semantics, and constrained values.
 - Base endpoint definitions and request/response models on the actual contract rather than repository naming or general REST conventions.

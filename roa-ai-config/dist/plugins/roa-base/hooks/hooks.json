@@ -20,6 +20,14 @@
               "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/maven-command-guard.mjs"
             ],
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/stop-validation-gate.mjs"
+            ],
+            "timeout": 10
           }
         ]
       },
@@ -33,13 +41,42 @@
               "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/generated-artifact-guard.mjs"
             ],
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/test-integrity-guard.mjs"
+            ],
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/skill-gate.mjs"
+            ],
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/mcp-origin-guard.mjs"
+            ],
+            "timeout": 10
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit|MultiEdit",
+        "matcher": "Write|Edit|MultiEdit|Bash|PowerShell",
         "hooks": [
           {
             "type": "command",
@@ -47,7 +84,7 @@
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/stop-validation-gate.mjs"
             ],
-            "timeout": 10
+            "timeout": 20
           }
         ]
       }

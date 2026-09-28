@@ -7,15 +7,29 @@ hook can be checked against them.
 
 | Event | Matcher | Hook | Purpose |
 | --- | --- | --- | --- |
-| `PreToolUse` | `Bash\|PowerShell` | `dangerous-command-guard.mjs` | Block high-confidence destructive shell commands |
-| `PreToolUse` | `Bash\|PowerShell` | `maven-command-guard.mjs` | Block Maven runs that skip tests |
+| `PreToolUse` | `Bash\|PowerShell` | `dangerous-command-guard.mjs` | Block destructive shell commands (broad deletes, force push by any spelling, history rewrites, hook bypass), shell reads of credential files, environment dumps and secret-variable references, and data sent to hosts outside `security.allowedOrigins` |
+| `PreToolUse` | `Bash\|PowerShell` | `maven-command-guard.mjs` | Block Maven runs that skip tests, ignore failures, or pass with zero selected tests (including via `MAVEN_OPTS`) |
+| `PreToolUse` | `Bash\|PowerShell` | `stop-validation-gate.mjs` | Note when a shell command starts, so its Java edits can be found afterwards |
 | `PreToolUse` | `Write\|Edit\|MultiEdit` | `generated-artifact-guard.mjs` | Refuse hand edits to generated Pandora output |
-| `PostToolUse` | `Write\|Edit\|MultiEdit` | `stop-validation-gate.mjs` | Record touched `.java` / `pom.xml` files in session state |
+| `PreToolUse` | `Write\|Edit\|MultiEdit` | `test-integrity-guard.mjs` | Refuse edits that add `@Disabled`/`@Ignore`/assumptions to tests or skip switches to `pom.xml` / `.mvn/maven.config` |
+| `PreToolUse` | `Write\|Edit\|MultiEdit` | `skill-gate.mjs` | Require an `ai-compass` Skill call before editing Java that uses `io.cyborgcode.roa` types, and an `ai-teacher` call before creating a Java file (reads the session and subagent transcripts; fails open) |
+| `PreToolUse` | `mcp__.*\|WebFetch` | `mcp-origin-guard.mjs` | Keep browser MCP navigation and in-page scripts on the application under test; no `file:`/`data:`/`javascript:` URLs; WebFetch elsewhere asks |
+| `PostToolUse` | `Write\|Edit\|MultiEdit\|Bash\|PowerShell` | `stop-validation-gate.mjs` | Record touched `.java` / `pom.xml` files in session state — for shell commands, the git-modified files newer than the command start |
 | `Stop` | — | `stop-validation-gate.mjs` | `test-compile` the recorded changes before the session ends; block with the compiler output on failure |
 
-Both shell guards must match `PowerShell` as well as `Bash`. Matching only
+All shell guards must match `PowerShell` as well as `Bash`. Matching only
 `Bash` leaves every PowerShell call ungated on Windows, which is where most of
-this team works.
+this team works. The command lexer follows the calling shell: backslash escapes
+for Bash, backtick escapes (and literal `\` path separators) for PowerShell.
+
+The allowlist the outbound checks use is `.claude/roa-security.json`, written by
+setup from `security.allowedOrigins` in `ai-config.yaml`. Loopback hosts are
+always allowed.
+
+These guards reduce risk; they are not a sandbox. A determined command can still
+get around a lexer, which is why credentials belong in environment variables the
+agent never needs, and why sensitive repositories should also enable Claude Code's
+sandbox or managed settings.
 
 ## Exit-code contract
 

@@ -57,29 +57,29 @@ A new test method has a fixed shape. Keep it, even when a neighbouring method in
 ```java
 @Test
 @Regression
-@Description("Validate forgotten password flow")
-void forgottenPassword_flow_validatesConfirmationMessage(Quest quest) {
-    String email = "test-demo@test.com";
-    String expectedMessage = "Your password will be sent to the following email: " + email;
+@Description("Search shows the no-results message")
+void search_unknownTerm_showsNoResultsMessage(Quest quest) {
+    String term = "zz-no-such-item";
+    String expectedMessage = "No results found for: " + term;
 
     quest.use(RING_OF_UI)
         .browser().navigate(getUiConfig().baseUrl())
-        .button().click(ButtonFields.SIGN_IN_BUTTON)
-        .link().click(LinkFields.FORGOT_PASSWORD_LINK)
-        .input().insert(InputFields.EMAIL_FIELD, email)
-        .button().click(ButtonFields.SEND_PASSWORD_BUTTON)
-        .validate().validateTextInField(HTML.Tag.DIV, expectedMessage)
+        .input().insert(InputFields.SEARCH_FIELD, term)
+        .button().click(ButtonFields.SEARCH_BUTTON)
+        .validate().validateTextInField(HTML.Tag.SPAN, expectedMessage)
         .complete();
 }
 ```
 
-**Name.** `<subject>_<action>_<expectedOutcome>` in lowerCamel segments joined by underscores: `forgottenPassword_flow_validatesConfirmationMessage`, `keepMeSignedIn_loginTest`, `readEntireTable_validateWithAssertionTypes`. The name states what the test proves. Never use numbered names (`testScenario_4`, `test1`); a numbered sibling is not a convention to extend.
+The application, element names, and message above are illustrative. Take real element constants from the project and verify them with `ai-compass` and the running application; take the tag from the element that renders the message in the live DOM.
+
+**Name.** `<subject>_<action>_<expectedOutcome>` in lowerCamel segments joined by underscores: `search_unknownTerm_showsNoResultsMessage`, `transferFunds_validAmount_showsConfirmation`, `accountTable_readAllRows_matchesExpectedBalances`. The name states what the test proves. Never use numbered names (`testScenario_4`, `test1`); a numbered sibling is not a convention to extend.
 
 **Annotations.** `@Test`, the project's suite marker that matches the scenario's role (`@Regression`; `@Smoke` only for a genuine smoke check, not both by default), and `@Description` with a short phrase that names the behavior. The description is not a narrative of the steps.
 
-**Data.** A value that only this scenario uses — the email typed in, the message it produces — is a local variable in the method, and the expectation is derived from the input rather than duplicated. The shared test-data class holds only values several tests need or stable application constants (menu labels, account names, success messages reused across scenarios). Do not create a constants holder for one test.
+**Data.** A value that only this scenario uses — the term typed in, the message it produces — is a local variable in the method, and the expectation is derived from the input rather than duplicated. The shared test-data class holds only values several tests need or stable application constants (menu labels, account names, success messages reused across scenarios). Do not create a constants holder for one test.
 
-**Assertion.** Assert the outcome the requirement names, using the most direct evidence. For text, validate it in the element that renders it as seen in the DOM — `validate().validateTextInField(HTML.Tag.DIV, message)` for a message in a `div` — not `BODY` or another page-wide container. Do not introduce a new typed element only to assert a one-off message; typed elements are for controls the tests interact with.
+**Assertion.** Assert the outcome the requirement names, using the most direct evidence. For text, validate it in the element that renders it as seen in the DOM — `validate().validateTextInField(HTML.Tag.<tag>, message)` with the tag of the element that renders the message in the live DOM — not `BODY` or another page-wide container. Do not introduce a new typed element only to assert a one-off message; typed elements are for controls the tests interact with.
 
 **Scope.** The change contains the steps and assertion the requirement asks for and nothing more: no extra assertions "while we are here", no additional annotations, no helper classes.
 

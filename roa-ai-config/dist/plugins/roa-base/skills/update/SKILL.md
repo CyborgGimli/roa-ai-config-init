@@ -1,7 +1,7 @@
 ---
 name: update
 description: Update an already-configured repository to a specific ROA plugin version. Use when the user runs /roa-base:update with a plugin name and version, or asks to move this repository to a newer ROA plugin release.
-allowed-tools: Bash(node *), Read, Glob, Grep, Edit, Write, Task
+allowed-tools: Bash(node *skills/setup/scripts/setup.mjs*), Bash(node *skills/setup/scripts/install-prereqs.mjs*), Read, Glob, Grep, Edit, Write, Agent
 ---
 
 Update the requested ROA plugin in the current target repository and refresh the
@@ -20,6 +20,16 @@ $ARGUMENTS
    A bare version is normalized to the release convention (`v1.3.0`), which
    names a release of the whole marketplace. A version is **required** for
    update; without one the script exits 2.
+
+   The script writes the templates of the roa-base that runs it, so it refuses a
+   version that differs from that roa-base (exit 2, nothing written). When that
+   happens, relay its instructions: update the marketplace and the plugins, run
+   `/reload-plugins`, then rerun the update. Do not work around the check.
+
+   Existing `model`, `effortLevel`, and `outputStyle` values in
+   `.claude/settings.json` are kept; permission rules that an earlier ROA version
+   added and this one no longer ships are removed (tracked in
+   `.claude/roa-settings-owned.json`).
 
    The ref is recorded once per marketplace in `.claude/settings.json`, so
    updating it moves every ROA plugin enabled in this repository. When the
@@ -50,7 +60,7 @@ $ARGUMENTS
    - `.mcp.json` reflects `ai-config.yaml` and the plugin's MCP defaults
    - user-owned content outside generated blocks was preserved
 
-6. Use the `repo-memory-architect` agent to refresh root and subdirectory
+6. Use the `roa-base:repo-memory-architect` agent (launch it with the `Agent` tool, `subagent_type: roa-base:repo-memory-architect`) to refresh root and subdirectory
    `CLAUDE.md` files when the repository has meaningful source and build files.
    The agent must read `.claude/settings.json` and `.claude/rules/<plugin-name>.md`
    first, keep memory concise and best-practice based, and must not copy poor repo

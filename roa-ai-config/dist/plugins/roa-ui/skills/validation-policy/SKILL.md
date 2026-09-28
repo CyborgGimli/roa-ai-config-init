@@ -2,7 +2,7 @@
 name: validation-policy
 description: Define the minimum validation evidence required for ROA automation changes and prevent unsupported completion claims.
 user-invocable: false
-allowed-tools: Read, Glob, Grep, Bash, Skill, Task
+allowed-tools: Read, Glob, Grep, Bash
 ---
 
 Apply the appropriate validation level to the current automation change.
@@ -32,6 +32,9 @@ Apply the appropriate validation level to the current automation change.
    ```text
    -DskipTests
    -Dmaven.test.skip=true
+   -Dmaven.test.failure.ignore=true
+   -Dsurefire.failIfNoSpecifiedTests=false
+   -DfailIfNoTests=false
    ```
 
 9. Validation failures must be investigated and classified before changing automation.
@@ -49,7 +52,7 @@ Apply the appropriate validation level to the current automation change.
 
 10. Do not obtain a green result by weakening assertions, deleting coverage, disabling tests, masking failures, or introducing unsupported workarounds.
 
-11. Validation evidence must reflect what was actually executed.
+11. Validation evidence must reflect what was actually executed. A test run whose Surefire summary shows `Tests run: 0` for the targeted scope proves nothing.
 
 12. If required validation cannot be completed, report the task as incomplete or blocked rather than assuming success.
 

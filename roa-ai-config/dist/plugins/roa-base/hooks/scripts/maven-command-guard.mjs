@@ -32,11 +32,13 @@ function escapeRegExp(value) {
 
 /**
  * Match Maven -D properties that are enabled either explicitly with =true
- * or implicitly by providing the property without a value.
+ * or implicitly by providing the property without a value. The property may
+ * also arrive inside MAVEN_OPTS="..." or $env:MAVEN_OPTS='...'.
  *
  * Examples:
  *   -DskipTests
  *   -DskipTests=true
+ *   MAVEN_OPTS="-DskipTests" mvn test
  *
  * Does not match:
  *   -DskipTests=false
@@ -45,7 +47,20 @@ function hasEnabledProperty(command, property) {
     const escapedProperty = escapeRegExp(property);
 
     return new RegExp(
-        `(^|\\s)["']?-D${escapedProperty}(?:=true)?["']?(?=\\s|$)`,
+        `(^|[\\s"'=])-D${escapedProperty}(?:=true)?["']?(?=[\\s"';]|$)`,
+        "i",
+    ).test(command);
+}
+
+/**
+ * Match Maven -D properties explicitly set to false. Used for the
+ * "fail if no tests" switches, whose safe default is true.
+ */
+function hasDisabledProperty(command, property) {
+    const escapedProperty = escapeRegExp(property);
+
+    return new RegExp(
+        `(^|[\\s"'=])-D${escapedProperty}=false["']?(?=[\\s"';]|$)`,
         "i",
     ).test(command);
 }
@@ -53,13 +68,26 @@ function hasEnabledProperty(command, property) {
 function findViolation(command) {
     if (
         hasEnabledProperty(command, "skipTests") ||
-        hasEnabledProperty(command, "maven.test.skip")
+        hasEnabledProperty(command, "maven.test.skip") ||
+        hasEnabledProperty(command, "maven.test.skip.exec") ||
+        hasEnabledProperty(command, "surefire.skip")
     ) {
         return "Maven tests must not be skipped by default";
     }
 
-    if (hasEnabledProperty(command, "maven.test.failure.ignore")) {
+    if (
+        hasEnabledProperty(command, "maven.test.failure.ignore") ||
+        hasEnabledProperty(command, "testFailureIgnore")
+    ) {
         return "Maven test failures must not be ignored";
+    }
+
+    if (
+        hasDisabledProperty(command, "surefire.failIfNoSpecifiedTests") ||
+        hasDisabledProperty(command, "failIfNoSpecifiedTests") ||
+        hasDisabledProperty(command, "failIfNoTests")
+    ) {
+        return "a test selection that matches nothing must fail, not pass with zero tests";
     }
 
     if (

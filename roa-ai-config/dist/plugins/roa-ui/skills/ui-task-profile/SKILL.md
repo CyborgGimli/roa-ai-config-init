@@ -21,7 +21,7 @@ Apply this profile when implementing ROA UI automation.
 
 5. Never guess application-specific facts.
 
-   DOM structure, locators, component behavior, synchronization conditions, tables, network traffic, and browser/session behavior must come from actual application/DevTools evidence.
+   DOM structure, locators, component behavior, synchronization conditions, tables, network traffic, and browser/session behavior must come from actual application/DevTools evidence gathered through the project MCP tools (`chrome-devtools`, `browser`, `selenium`), normally by the `roa-ui:ui-application-investigator` agent. A fact without that evidence is `UNVERIFIED`; do not implement against it.
 
 6. Use typed element definitions rather than raw selectors in tests.
 
@@ -60,17 +60,21 @@ Apply this profile when implementing ROA UI automation.
 
     Assert the outcome the requirement names and no more. Validate text in the element that renders it (`validate().validateTextInField(<tag>, text)`), not in `body`; do not add a typed element only to assert a one-off message.
 
-17. Keep the test shape: name the method `<subject>_<action>_<expectedOutcome>` (never `testScenario_N`, even beside numbered siblings); annotate with `@Test`, one matching suite marker, and a one-phrase `@Description`; keep single-use literals as local variables and derive expectations from inputs; promote to the shared test-data class only what several tests use.
+17. Keep the test shape: name the method `<subject>_<action>_<expectedOutcome>` (never `testScenario_N`, even beside numbered siblings); annotate with `@Test`, one matching suite marker, and a one-phrase `@Description`; keep single-use literals as local variables and derive expectations from inputs; promote to the shared test-data class only what several tests use. Name a new element constant the way the sibling constants for the same page or id prefix are named, and add the nested `Data` string mirror only when the enum already has one and the constant will be referenced from an annotation.
 
 18. Keep tests isolated and independently executable where practical. Avoid shared mutable browser state, stale sessions, uncontrolled data, and accidental test-order dependencies.
 
-19. Before planning or creating any new Java code, invoke the `ai-teacher` skill and apply the relevant project-approved lessons — always, even when a similar class already exists in the repository. If `target/pandora/ai-teacher/` is missing, generate it as the skill describes before continuing. Apply only the lessons that are relevant.
+19. Before planning or creating any new Java code, invoke the `ai-teacher` skill and apply the relevant project-approved lessons — always, even when a similar class already exists in the repository. If `target/pandora/ai-teacher/` is missing, follow the skill’s generation-and-fallback steps. Apply only the lessons that are relevant.
 
 20. Before planning, writing, or changing any code that uses an `io.cyborgcode.roa.*` type, invoke the `ai-compass` skill and read the metadata for every ROA type involved — always, even when the repository already contains a similar example. If `target/pandora/metadata/` is missing, regenerate it as the skill describes before continuing. Never guess ROA APIs.
 
     Do not invent methods, annotations, options, constructors, or extension contracts.
 
 21. If required repository, application, or framework evidence is insufficient, report the uncertainty or blocker instead of fabricating a solution.
+
+## Reference
+
+For depth on one concern, read only the matching plugin doc: `${CLAUDE_PLUGIN_ROOT}/docs/ui-component-model.md` (component types and implementations), `ui-elements-and-synchronization.md`, `ui-data-insertion.md`, `ui-tables.md`, `ui-network-interception.md`, `ui-authentication-and-session.md`, `ui-test-design.md`, `ui-examples.md`. Framework-wide concepts: `roa-core-architecture.md`, `roa-test-lifecycle.md`, `roa-data-and-storage.md`, `roa-custom-services-and-rings.md`.
 
 ## Implementation Standard
 

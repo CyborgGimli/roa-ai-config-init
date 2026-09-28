@@ -153,14 +153,14 @@ The existing repository structure and project conventions remain the primary sou
 For an already configured repository, use:
 
 ```text
-/roa-base:update
+/roa-base:update roa-ui <version>
 ```
 
 The update workflow refreshes ROA-managed configuration from the installed marketplace version while preserving supported user-owned content.
 
 ## Scope
 
-ROA V1 supports one capability plugin per consumer repository.
+A repository may enable more than one ROA module plugin (for example `roa-ui` and `roa-api`); the shared hooks and the Java language server ship once, in `roa-base`. All ROA plugins in a repository share one marketplace ref, so update them together.
 
 Use `roa-ui` for UI-focused ROA automation projects and `roa-api` for API-focused ROA automation projects.
 

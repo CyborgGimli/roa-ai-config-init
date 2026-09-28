@@ -2,7 +2,7 @@
 name: ui-validation-profile
 description: Provides the mandatory validation profile for completed ROA UI automation changes.
 user-invocable: false
-allowed-tools: Read, Grep, Glob, Bash, Skill, Task
+allowed-tools: Read, Grep, Glob, Bash, Skill
 ---
 
 # UI Validation Profile
@@ -23,7 +23,7 @@ Apply this profile when validating implemented ROA UI automation.
     - network activity;
     - authentication/session behavior.
 
-   If required application facts were never verified, do not claim full validation.
+   If a required application fact arrives without evidence, verify it through the project MCP tools (`chrome-devtools`, `browser`, `selenium`). If that is not possible, the result is `BLOCKED`, not `PASS`.
 
 3. Confirm existing project abstractions were reused or extended appropriately.
 

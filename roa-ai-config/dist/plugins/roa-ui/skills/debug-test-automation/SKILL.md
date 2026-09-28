@@ -1,7 +1,7 @@
 ---
 name: debug-test-automation
 description: Diagnose failing ROA automation by identifying the actual root cause and separating automation defects from application, environment, data, contract, configuration, and framework issues.
-allowed-tools: Read, Glob, Grep, Bash, Skill, Task
+allowed-tools: Read, Glob, Grep, Bash, Skill, Agent
 ---
 
 Diagnose the failing automation for:
@@ -10,25 +10,15 @@ Diagnose the failing automation for:
 $ARGUMENTS
 ```
 
+You orchestrate the diagnosis; delegate with the `Agent` tool using the exact `subagent_type` given. Subagents cannot delegate further, so collect the evidence they need before launching them.
+
 ## Procedure
 
-1. Start from the failing test, compilation error, stack trace, assertion failure, or reported behavior.
+1. Capture the actual failure: the failing test, compilation error, stack trace, assertion message, or reported behavior. Reproduce it with the `roa-ui:run-tests` skill when safe. Use real Maven output, reports, and logs, not assumptions.
 
-2. Reproduce or inspect the failure when safe and appropriate. Use actual logs, Maven output, reports, stack traces, and runtime evidence rather than assumptions.
+2. When the failure could depend on current UI behavior — a locator, synchronization condition, rendered text, request or response shape, contract, or data shape — launch `subagent_type: roa-ui:ui-application-investigator` to collect current evidence from the running application, inspected through the `chrome-devtools`, `browser`, or `selenium` MCP tools. Never diagnose such a failure from repository code or memory alone.
 
-3. Trace the failure through the relevant:
-
-    * test;
-    * supporting automation code;
-    * configuration;
-    * test data and preconditions;
-    * authentication or session state;
-    * environment;
-    * application behavior.
-
-4. Compare the failing implementation with nearby passing tests and established project patterns.
-
-5. Classify the root cause before recommending a fix. Distinguish between:
+3. Launch `subagent_type: roa-ui:test-debugger` with the failure evidence and the investigator's findings. It traces the failure path, compares it with passing tests, reads `ai-compass` metadata for the ROA types involved, and classifies the root cause as one of:
 
     * automation implementation defect;
     * incorrect assertion or expectation;
@@ -40,20 +30,15 @@ $ARGUMENTS
     * stale or incorrect ROA framework usage;
     * genuine product defect.
 
-6. For every `io.cyborgcode.roa.*` type involved in the failure, invoke the `ai-compass` skill and read its metadata — always, rather than inferring behavior from other repository code.
+4. Reject a classification that rests on a symptom rather than a traced cause, or on an application fact without evidence. Send it back with what is missing.
 
-7. Do not treat symptoms as root causes. Trace the failure far enough to justify the conclusion.
-
-8. Do not make tests pass by weakening assertions, deleting coverage, skipping tests, increasing waits blindly, hardcoding unstable values, or masking genuine product failures.
-
-9. Stop when the root cause is sufficiently established or a concrete external blocker prevents further diagnosis.
+5. Do not make tests pass by weakening assertions, deleting coverage, skipping tests, increasing waits blindly, hardcoding unstable values, or masking genuine product failures.
 
 ## Return
 
 Provide:
 
-* observed failure;
-* evidence used;
+* observed failure and the evidence used (commands, logs, `file_path:line`, MCP observations);
 * classified root cause;
 * relevant files, symbols, configuration, data, or runtime behavior;
 * smallest justified correction when the issue is in automation;

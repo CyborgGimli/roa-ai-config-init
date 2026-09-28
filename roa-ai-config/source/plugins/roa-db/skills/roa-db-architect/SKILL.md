@@ -1,7 +1,7 @@
 ---
 name: roa-db-architect
 description: Design and generate ROA database tests - DbQuery enums with {name} placeholders, QueryResponse/JSONPath reads, and Assertion.builder() validation. Use when a task needs new database test coverage rather than a change to an existing test.
-allowed-tools: Read, Glob, Grep, Bash, Write, Edit, Task, Skill
+allowed-tools: Read, Glob, Grep, Bash, Write, Edit, Agent, Skill
 ---
 
 # ROA DB Architect

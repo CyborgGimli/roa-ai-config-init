@@ -33,8 +33,8 @@ rather than a change to an existing test.
   Never guess a ROA API.
 - **Project patterns.** Before writing any new Java code, load `ai-teacher` and
   follow the closest approved lesson — always, even when a similar class already
-  exists. If `target/pandora/ai-teacher/` is missing, generate it as the skill
-  describes.
+  exists. If `target/pandora/ai-teacher/` is missing, follow the skill’s
+  generation-and-fallback steps.
 - **Own your rows.** Create them uniquely per run so reruns and parallel
   execution do not collide, and register cleanup for every one.
 - **Destructive statements only in a cleaner.** `DELETE`, `TRUNCATE`, `DROP` and
