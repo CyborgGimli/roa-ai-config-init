@@ -28,7 +28,7 @@ Ground new Java code in the project's curated AI Teacher lessons before implemen
 
    **Baseline when no lesson applies.** These are the patterns to apply whenever the catalog is missing or holds nothing relevant:
 
-   * Take the closest sibling in the same package family as the template — same annotations, member order, helper structure and naming, formatting — and change only what the new behavior requires. When implementing an ROA interface, implement every method it declares with the parameter names `ai-compass` shows, and keep private helpers to the few the sibling would have.
+   * Take the closest sibling in the same package family as the template for form — same annotations, member order, helper structure and naming, formatting, and the way it declares and references constants — and change only what the new behavior requires. The sibling is not the source of framework behavior: when its logic (how it reads state, locates or drives a control) contradicts the `ai-compass` usages or the new control's verified DOM, follow those. When implementing an ROA interface, implement every method it declares with the parameter names `ai-compass` shows, and keep private helpers to the few the sibling would have.
    * Name a new test method after its behavior, `<subject>_<action>_<expectedOutcome>`; never a numbered name, even beside numbered siblings.
    * Keep a single-use literal local to the method that uses it and derive expectations from inputs; add to the shared test-data class only what several tests share.
    * Name a new enum constant the way its sibling constants are named.

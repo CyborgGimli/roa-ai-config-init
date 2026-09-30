@@ -202,3 +202,11 @@ Against `ai-teacher`: metadata wins on **signatures**, because it is generated f
 the framework on the classpath; the lesson catalog wins on **shape and style**,
 because a human curated it. They rarely conflict — when they do, a catalog example
 has usually gone stale against an API change.
+
+Against the repository's sibling classes: the sibling wins on **project conventions**
+— naming, structure, and how constants are declared and referenced — so a usage
+snippet's style (for example, a string literal where the project references a
+constant) does not override what the sibling does. Metadata wins on **behavior** —
+how a component contract is fulfilled, such as how a control's state is read — so
+sibling logic written for a different kind of control is not carried over when the
+usage tier shows otherwise.

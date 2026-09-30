@@ -4,7 +4,7 @@
 
 - Prefer the smallest complete change that satisfies the task; follow existing project structure and conventions.
 - Keep a value where it is used: a literal that one method needs stays a local variable there. Do not add constants classes, holder types, helpers, extra assertions, or annotations that the requested change does not need.
-- When creating a new class, mirror the closest sibling in the same package family — its structure, member order, helper naming, and formatting — and change only what the new behavior requires.
+- When creating a new class, mirror the closest sibling in the same package family for project form — its structure, member order, helper naming, formatting, and how it declares and references constants — and change only what the new behavior requires. Take framework behavior from `ai-compass` and verified application evidence, not from the sibling: when the sibling's logic (how it reads state, locates or drives a control) contradicts the metadata usages or the new control's verified DOM, follow those.
 - Reuse existing ROA and project abstractions before creating new services, Rings, models, helpers, lifecycle components, or configuration.
 - Treat the Quest as the test execution context and access supported automation capabilities through the appropriate Rings.
 - Do not bypass established ROA capabilities with independent clients, drivers, state mechanisms, or lower-level alternatives without a justified requirement.
