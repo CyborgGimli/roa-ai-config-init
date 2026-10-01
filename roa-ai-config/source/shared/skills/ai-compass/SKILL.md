@@ -203,10 +203,10 @@ the framework on the classpath; the lesson catalog wins on **shape and style**,
 because a human curated it. They rarely conflict — when they do, a catalog example
 has usually gone stale against an API change.
 
-Against the repository's sibling classes: the sibling wins on **project conventions**
-— naming, structure, and how constants are declared and referenced — so a usage
-snippet's style (for example, a string literal where the project references a
-constant) does not override what the sibling does. Metadata wins on **behavior** —
-how a component contract is fulfilled, such as how a control's state is read — so
-sibling logic written for a different kind of control is not carried over when the
-usage tier shows otherwise.
+Against the repository's code: project code of the same kind wins on **project
+conventions** — naming, structure, and how constants are declared and referenced —
+so a usage snippet's style (for example, a string literal where the project
+references a constant) does not override the project. Metadata and verified
+evidence win on **behavior** — how a contract is fulfilled, such as how a control's
+state is read — so logic copied from code for a different kind of control, endpoint,
+or query is never carried over.

@@ -2,15 +2,9 @@
 
 # UI Synchronization
 
-- Synchronize against observable application conditions, not elapsed time.
-- Use established ROA element/component synchronization mechanisms before introducing custom waiting logic.
-- Prefer the narrowest condition that proves the required element or application state is ready.
-- Do not use arbitrary sleeps to hide timing or application-readiness problems.
-- Do not solve local synchronization issues with unnecessarily broad global waits or inflated timeouts.
-- Keep element-specific readiness with the element, reusable component behavior with the component implementation, and scenario-specific transitions with the relevant flow.
-- Treat synchronization and assertion separately: readiness allows execution to continue; assertions prove required behavior.
-- Ground synchronization conditions in actual runtime behavior observed through the application/DevTools, using the project’s configured MCP browser/DevTools tools (`chrome-devtools`, `browser`, `selenium` — see `.mcp.json`).
-- Investigate intermittent failures before changing waits; do not increase timing merely to obtain a passing test.
-- Always invoke `ai-compass` and read the metadata for the ROA synchronization types and options involved before writing or changing synchronization code.
+- Wait on an observable condition through ROA's element and component synchronization — the element is visible or clickable, a text is present, a request completed. Never `Thread.sleep`, and never raise a timeout to get a pass.
+- Keep element readiness on the element definition, component-specific waits in the component implementation, and scenario transitions in the flow.
+- Take the condition from what the application actually does, observed through DevTools and network activity; investigate an intermittent wait before changing it.
+- Readiness only lets the test continue; assertions prove the behavior.
 
 <!-- END ROA AI CONFIG: roa-ui/ui-synchronization -->

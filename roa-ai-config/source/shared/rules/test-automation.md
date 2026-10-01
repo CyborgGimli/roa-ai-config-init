@@ -2,15 +2,12 @@
 
 # Test Automation Rules
 
-- Automate the behavior required by the task and assert outcomes that meaningfully prove that behavior.
-- Do not make a test pass by weakening assertions, deleting coverage, skipping tests, masking failures, or changing expected behavior without evidence.
-- Keep tests deterministic and independently executable unless sequential/shared-state behavior is an intentional part of the scenario.
-- Use controlled test data and explicit preconditions; avoid hidden dependencies on execution order, leftover state, or unrelated tests.
-- Design cleanup for state-changing scenarios and reuse established Journeys, Rippers, `DataCleaner` implementations, and other lifecycle abstractions where appropriate.
-- Preserve the behavior under test: supporting Rings or setup mechanisms may prepare prerequisites or perform independent verification, but must not replace the action the test exists to prove.
-- Reuse existing project abstractions and domain flows instead of duplicating setup, interactions, assertions, or cleanup across tests.
-- Avoid arbitrary sleeps, brittle hardcoded values, uncontrolled shared mutable state, and other workarounds that hide synchronization, data, or isolation problems.
-- Consider parallel execution when introducing shared data, storage, authentication state, or cleanup behavior.
-- Treat a failing test as evidence to investigate, not automatically as an automation defect or a reason to relax the test.
+- A test proves one named behavior and performs that action itself. Journeys, authentication, and other Rings only prepare prerequisites or verify independently; they never perform the action under test.
+- Assert the outcome the requirement names, where it is observable: the UI element that renders it, the response field or resulting state, the row values. A status code, element presence, row count, or absence of an exception is not proof when the requirement concerns content.
+- Expectations come from the requirement or the contract, never from what the code currently returns.
+- Use controlled data that is unique per run when it persists, and register cleanup (`DataCleaner`, Rippers) for everything the test creates, including when it fails partway.
+- Tests run in parallel: no shared mutable state, execution-order dependence, or reliance on leftover data.
+- Synchronize on observable conditions, never on elapsed time.
+- A failure is evidence. Classify it — automation, application, data, environment, or contract — before changing code, and never weaken, skip, or disable a test to get a green run.
 
 <!-- END ROA AI CONFIG: shared/test-automation -->

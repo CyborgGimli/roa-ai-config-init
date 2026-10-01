@@ -2,15 +2,9 @@
 
 # Validation Rules
 
-- "Done" means verified: perform the compilation, tests, and checks that are relevant to the change before claiming completion.
-- Prefer the narrowest validation that provides sufficient evidence; do not run expensive full-suite checks when targeted validation is enough.
-- When Java automation code changes, confirm that the affected code compiles before reporting success.
-- Run relevant tests when execution is required to prove the requested behavior; compilation alone does not prove test correctness.
-- Report validation evidence accurately, including commands executed, outcomes, and any remaining gaps or blockers.
-- Never report PASS or completion without evidence that supports it.
-- Do not make validation pass by skipping tests, weakening assertions, deleting coverage, suppressing failures, or disabling required checks.
-- Investigate failures and distinguish automation defects from application, environment, data, contract, configuration, or pre-existing issues.
-- Do not treat flaky or unrelated failures as proof that the implemented change is incorrect; report them separately when evidence supports that classification.
-- If required validation cannot be performed, report the work as BLOCKED or incomplete rather than assuming it is correct.
+- Done means the change compiles and the tests that prove it ran and passed. Compilation alone proves nothing about behavior, and a run that executed zero tests is not evidence.
+- Run the narrowest scope that proves the change; a full suite is not needed when a targeted run is enough.
+- Report the commands, the executed-test count, the results, and what remains unvalidated. When validation could not run, report the work as BLOCKED, not done.
+- Report unrelated or pre-existing failures separately, with the evidence for that classification.
 
 <!-- END ROA AI CONFIG: shared/validation -->

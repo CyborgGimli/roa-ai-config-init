@@ -2,13 +2,10 @@
 
 # API Contract Rules
 
-- Treat the configured Swagger/OpenAPI source as the authority for application API contract details, read through the `swagger` MCP server (see `.mcp.json`) — usually by delegating to the `roa-api:api-contract-investigator` agent. If it is unavailable, report the contract fact as unverified.
-- Never guess endpoint paths, HTTP methods, parameters, schemas, authentication requirements, status codes, headers, or response structures.
-- Preserve exact contract-defined parameter names, locations, types, required/optional semantics, and constrained values.
-- Base endpoint definitions and request/response models on the actual contract rather than repository naming or general REST conventions.
-- Reuse existing project representations only when they still match the current contract.
-- If the repository and Swagger/OpenAPI disagree, investigate and report the discrepancy instead of silently choosing one.
-- Negative-test expectations must come from the contract or another explicit requirement source; do not invent error codes or payloads.
-- Keep application-contract discovery separate from ROA framework discovery: use Swagger/OpenAPI for the application contract and Pandora for exact ROA framework usage.
+- The configured Swagger/OpenAPI source is the authority for paths, methods, parameters, schemas, authentication, status codes, and error payloads. Read it through the `swagger` MCP server, normally via the `roa-api:api-contract-investigator` agent; when it is unavailable, mark the fact UNVERIFIED.
+- Keep parameter names, locations (path, query, header, body), types, and required or optional status exactly as the contract defines them; general REST conventions and repository naming are not evidence.
+- Negative expectations — status codes and error bodies — come from the contract or an explicit requirement, never from guessing.
+- When the repository and the contract disagree, report the discrepancy instead of silently choosing one.
+- Use Swagger/OpenAPI for the application contract and `ai-compass` for the ROA API; one never substitutes for the other.
 
 <!-- END ROA AI CONFIG: roa-api/api-contracts -->

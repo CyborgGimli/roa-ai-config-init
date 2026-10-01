@@ -1,14 +1,13 @@
 <!-- BEGIN ROA AI CONFIG: roa-ui/ui-elements -->
 
-# UI Elements
+# UI Elements and Components
 
-- Represent application controls through the project's typed element abstractions; do not place raw selectors in tests.
-- Derive locators from the actual rendered application and verify them through browser/DevTools inspection, using the project’s configured MCP browser/DevTools tools (`chrome-devtools`, `browser`, `selenium` — see `.mcp.json`).
-- Prefer the simplest stable locator that uniquely identifies the intended control.
-- Avoid generated classes, fragile DOM chains, positional selectors, unstable identifiers, and guessed locators.
-- Reuse an existing element definition when it represents the same application control and still matches the current application.
-- Associate each element with the component type that matches its verified behavior; do not choose component types from appearance alone.
-- Keep application-specific locator information in element definitions and reusable interaction behavior in component implementations.
-- Always invoke `ai-compass` and read the metadata for the element, component, and configuration contracts involved before adding or changing an element, component type, or implementation — even when a sibling definition already exists.
+- Identify a control in the live DOM before modelling it: a native element (`input`, `select`, `option`, `input[type=checkbox|radio]`, `button`, `a`) or a custom widget whose state lives in a class, an `aria-*` attribute, or a wrapper. Record where it keeps its state.
+- The component type follows the control's technology and behavior, not its appearance or package neighbors. Two controls share a component type and implementation only when they behave the same way.
+- In a component implementation, read state where the DOM keeps it. Native controls: `isSelected()` for checkboxes, radios, and options, `isEnabled()`, and `getDomProperty("value")` for inputs — the HTML attributes `checked`, `selected`, and `value` keep the page's initial state, not the current one. Custom widgets: the class or `aria-*` state verified in the DOM. Never copy a state-reading helper from an implementation for a different kind of control.
+- Implement every method the ROA component interface declares, with the parameter names `ai-compass` shows; select and deselect act only when the state needs to change.
+- Choose the simplest stable locator that is unique: `id`, then `name` or another stable attribute, then the visible text for a link (`By.linkText`). Avoid generated classes, positions, and long DOM chains.
+- Name a new element constant with the page or feature prefix its neighbors use. When the enum has a nested `Data` class, add the constant's string mirror there for any constant an annotation references (`@InsertionElement`, `@ImplementationOfType`) and static-import it where it is used.
+- Reuse an existing element constant when it is the same control and its locator still matches the DOM.
 
 <!-- END ROA AI CONFIG: roa-ui/ui-elements -->

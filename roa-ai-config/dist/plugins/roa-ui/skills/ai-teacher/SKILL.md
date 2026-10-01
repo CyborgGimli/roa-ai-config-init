@@ -28,12 +28,9 @@ Ground new Java code in the project's curated AI Teacher lessons before implemen
 
    **Baseline when no lesson applies.** These are the patterns to apply whenever the catalog is missing or holds nothing relevant:
 
-   * Take the closest sibling in the same package family as the template for form — same annotations, member order, helper structure and naming, formatting, and the way it declares and references constants — and change only what the new behavior requires. The sibling is not the source of framework behavior: when its logic (how it reads state, locates or drives a control) contradicts the `ai-compass` usages or the new control's verified DOM, follow those. When implementing an ROA interface, implement every method it declares with the parameter names `ai-compass` shows, and keep private helpers to the few the sibling would have.
-   * Name a new test method after its behavior, `<subject>_<action>_<expectedOutcome>`; never a numbered name, even beside numbered siblings.
-   * Keep a single-use literal local to the method that uses it and derive expectations from inputs; add to the shared test-data class only what several tests share.
-   * Name a new enum constant the way its sibling constants are named.
-   * Module-specific shape rules (annotations, element constants, assertions) come from the active plugin task profile.
-   * Do not introduce helper classes, constants holders, extra assertions, or annotations the task does not require.
+   * Choose the template by what the new code handles, not by where it sits: existing code for the same kind of control, contract operation, or query. Take only its form from it — naming, location, constructor, annotations, formatting. Behavior — how state is read, how a control is located or driven, how a request or query is built — comes from `ai-compass` and the verified evidence. A class beside it that handles a different kind of thing is not a template.
+   * When implementing an ROA interface, implement every method it declares with the parameter names `ai-compass` shows.
+   * Naming, imports, constants, environment values, single-use literals, and scope follow `.claude/rules/roa-engineering.md` and the domain rules beside it.
 
 4. Select the closest semantic category when available:
 

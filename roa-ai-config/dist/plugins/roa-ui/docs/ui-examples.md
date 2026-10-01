@@ -1,8 +1,8 @@
 # UI Examples
 
-This document provides focused examples of how ROA UI automation should be structured.
+This document provides worked examples of how ROA UI automation is structured.
 
-The examples illustrate architecture and test intent. Exact `io.cyborgcode.roa.*` methods, annotations, options, and supported UI contracts must be verified from the current repository and Pandora metadata before implementation.
+Java blocks marked *from the ROA inspector example project* are copied from that project and compile against ROA; its element names and locators belong to its application under test (Zero Bank). Blocks marked *pattern* show one decision in isolation. In your project, take element constants and locators from your application and verify every `io.cyborgcode.roa.*` call with `ai-compass`.
 
 ## Basic UI Flow
 
@@ -39,52 +39,125 @@ Do not replace ROA UI abstractions with direct driver interaction merely to repr
 
 ## Typed Element
 
-Prefer a project element definition over a raw selector in the test.
+Tests reference element constants; the locator and component type live in the element enum. From the ROA inspector example project, `ui/elements/RadioFields.java`:
 
 ```java
-// Preferred concept
-BUTTONS.click(LOGIN_BUTTON);
+public enum RadioFields implements RadioUiElement {
 
-// Avoid
-driver.findElement(By.cssSelector("...")).click();
+   DOLLARS_RADIO_FIELD(By.id("pc_inDollars_true"), RadioFieldTypes.BOOTSTRAP_RADIO_TYPE);
+
+   public static final class Data {
+
+      public static final String DOLLARS_RADIO_FIELD = "DOLLARS_RADIO_FIELD";
+
+      private Data() {
+      }
+
+   }
+
+   private final By locator;
+   private final RadioComponentType componentType;
+
+
+   RadioFields(final By locator, final RadioComponentType componentType) {
+      this.locator = locator;
+      this.componentType = componentType;
+   }
+
+
+   @Override
+   public By locator() {
+      return locator;
+   }
+
+
+   @Override
+   public <T extends ComponentType> T componentType() {
+      return (T) componentType;
+   }
+
+
+   @Override
+   public Enum<?> enumImpl() {
+      return this;
+   }
+
+}
 ```
 
-The exact service method and element type must come from the repository and Pandora.
+The test uses the constant, never the locator: `.radio().select(RadioFields.DOLLARS_RADIO_FIELD)`.
 
-The locator must come from actual application inspection.
+The nested `Data` class mirrors a constant's name as a compile-time string, because annotations such as `@InsertionElement(elementEnum = …)` cannot take an enum value. Add a mirror only for a constant an annotation references, and only when the enum already has a `Data` class; annotations reference the mirror through a static import (see *Data Insertion*).
 
 ## Component Type
 
-A typed element should reference the component type that matches the actual application control.
+A component type names one interaction technology. From the ROA inspector example project, `ui/types/RadioFieldTypes.java`:
 
-Conceptually:
+```java
+public enum RadioFieldTypes implements RadioComponentType {
 
-```text
-LOGIN_BUTTON
-→ verified locator
-→ project button component type
-→ registered component implementation
+   BOOTSTRAP_RADIO_TYPE;
+
+
+   public static final class Data {
+
+      public static final String BOOTSTRAP_RADIO = "BOOTSTRAP_RADIO_TYPE";
+
+      private Data() {
+      }
+
+   }
+
+
+   @Override
+   public Enum getType() {
+      return this;
+   }
+}
 ```
 
-Do not choose a component type based only on visual appearance.
-
-Use DevTools to understand the real control and reuse existing project component types when appropriate.
+Choose the type from how the control behaves in the live DOM, not from how it looks or from which enum sits next to it.
 
 ## Component Implementation
 
-When the application uses a component requiring custom reusable behavior:
+An implementation registers for a component type through the type's `Data` string. Structure from the ROA inspector example project, `ui/components/radio/RadioBootstrapImpl.java`:
 
-```text
-component type
-        ↓
-project component implementation
-        ↓
-reused by multiple typed elements
+```java
+@ImplementationOfType(RadioFieldTypes.Data.BOOTSTRAP_RADIO)
+public class RadioBootstrapImpl extends BaseComponent implements Radio {
+
+   public RadioBootstrapImpl(SmartWebDriver driver) {
+      super(driver);
+   }
+
+   // every method the Radio interface declares, with the parameter names ai-compass shows
+}
 ```
 
-Do not duplicate the same low-level interaction behavior across several tests or elements.
+Take this structure — registration, constructor, member order, naming — from an existing implementation. Take state reading from the new control's verified DOM, never from an implementation written for a different kind of control. The two cases differ in one place.
 
-Use Pandora for the exact ROA extension contract and AI Teacher before generating new Java implementation code.
+Pattern — a native control (`<input type="checkbox">`, `<input type="radio">`, `<option>`) keeps its current state in a DOM property, which `SmartWebElement` exposes through the WebElement API:
+
+```java
+private boolean isElementSelected(SmartWebElement element) {
+   return element.isSelected();
+}
+
+private boolean isElementEnabled(SmartWebElement element) {
+   return element.isEnabled();
+}
+```
+
+Pattern — a custom widget whose markup marks state with a class, verified in the DOM:
+
+```java
+private boolean isElementSelected(SmartWebElement element) {
+   String classes = element.getDomAttribute("class");
+   return classes != null && classes.contains(CHECKED_CLASS_INDICATOR);
+}
+```
+
+`getDomAttribute("checked")`, `getDomAttribute("selected")`, and `getDomAttribute("value")` return the attribute as the page declared it; they do not change when the user clicks or types, so on a native control they report the initial state. Read an input's current value with `getDomProperty("value")`.
 
 ## Element Synchronization
 
@@ -120,83 +193,84 @@ when an observable application condition exists.
 
 ## Login as Supporting Infrastructure
 
-When login itself is not under test:
+When login is not under test, the lifecycle logs in before the test body runs. From the ROA inspector example project, `BasicToAdvancedFeatureTests.java`:
 
-```text
-@AuthenticateViaUi
-        ↓
-authenticated browser state
-        ↓
-test exercises target business behavior
+```java
+@Test
+@Regression
+@Description("Insertion service maps model fields to UI controls in one operation")
+@AuthenticateViaUi(credentials = AdminCredentials.class, type = AppUiLogin.class)
+void insertionService_populatesFormFromModel(Quest quest,
+      @Craft(model = DataCreator.Data.PURCHASE_CURRENCY) PurchaseForeignCurrency purchaseForeignCurrency) {
 ```
 
-Use the project's actual authentication configuration and Pandora metadata.
-
-Do not invent annotation attributes or session-caching behavior.
+`AdminCredentials` and `AppUiLogin` are project classes under `ui/authentication`. Add `cacheCredentials = true` only when the tests in the class are meant to share one session.
 
 ## Login as the Behavior Under Test
 
-When login is the requirement:
+When login is the requirement, the test drives the form itself, with credentials from the project's test-data class. From the ROA inspector example project, `BasicToAdvancedFeatureTests.java`:
 
-```text
-open login page
-        ↓
-enter credentials
-        ↓
-submit
-        ↓
-validate authenticated result
+```java
+quest
+      .use(RING_OF_UI)
+      .browser().navigate(getUiConfig().baseUrl())
+      .button().click(ButtonFields.SIGN_IN_BUTTON)
+      .input().insert(InputFields.USERNAME_FIELD, Data.testData().username())
+      .input().insert(InputFields.PASSWORD_FIELD, Data.testData().password())
+      .button().click(ButtonFields.SIGN_IN_FORM_BUTTON)
 ```
 
-Do not use pre-established authenticated session state when doing so would bypass the behavior being tested.
+`Data.testData()` reads the credentials from the project's test-data properties. Never type credentials as literals, even when an older test or a knowledge file does. Do not use `@AuthenticateViaUi` here: it would perform the action the test exists to prove. End the test with an assertion on what only an authenticated user sees.
 
 ## Generated Form Data
 
-A UI test may receive generated model data through `@Craft`.
-
-Conceptually:
-
-```text
-@Craft
-   ↓
-DataCreator
-   ↓
-form model
-   ↓
-UI scenario
-```
-
-Use the project's actual `DataCreator` configuration.
-
-Do not invent Craft values or data mappings.
+A test receives a generated model through `@Craft`, which resolves it through the project's `DataCreator`: `@Craft(model = DataCreator.Data.PURCHASE_CURRENCY) PurchaseForeignCurrency purchaseForeignCurrency` in the signature above. Use the data types the project's `DataCreator` already declares; do not invent Craft values or mappings.
 
 ## Data Insertion
 
-For a structured form:
-
-```text
-form model
-    ↓
-@InsertionElement mappings
-    ↓
-typed UI elements
-    ↓
-insertion service
-    ↓
-form populated
-```
-
-Conceptually:
+A form model maps each field to an element constant through `@InsertionElement`, referencing the constant's `Data` mirror by static import. From the ROA inspector example project, `ui/model/PurchaseForeignCurrency.java`:
 
 ```java
-// exact API must be verified
-ui.insertion()
-    .insertData(model);
+import static io.cyborgcode.inspector.ui.elements.InputFields.Data.AMOUNT_CURRENCY_FIELD;
+import static io.cyborgcode.inspector.ui.elements.RadioFields.Data.DOLLARS_RADIO_FIELD;
+import static io.cyborgcode.inspector.ui.elements.SelectFields.Data.PC_CURRENCY_DDL;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Getter
+@Setter
+public class PurchaseForeignCurrency {
+
+   @InsertionElement(locatorClass = SelectFields.class, elementEnum = PC_CURRENCY_DDL, order = 1)
+   private String currency;
+
+   @InsertionElement(locatorClass = InputFields.class, elementEnum = AMOUNT_CURRENCY_FIELD, order = 2)
+   private String amount;
+
+   @InsertionElement(locatorClass = RadioFields.class, elementEnum = DOLLARS_RADIO_FIELD, order = 3)
+   private boolean usDollar;
+}
 ```
 
-Insertion performs data entry.
+`elementEnum` takes the static-imported constant, never a string literal such as `"PC_CURRENCY_DDL"`. A new form element therefore needs both its enum constant and its `Data` mirror.
 
-It does not validate that the application accepted or processed the data correctly.
+The test fills the whole form in one call:
+
+```java
+quest
+      .use(RING_OF_UI)
+      .link().click(LinkFields.TRANSFER_FUNDS_LINK)
+      .list().select(ListFields.NAVIGATION_TABS, PAY_BILLS)
+      .list().select(ListFields.PAY_BILLS_TABS, PURCHASE_FOREIGN_CURRENCY)
+      .insertion().insertData(purchaseForeignCurrency)
+      .button().click(ButtonFields.CALCULATE_COST_BUTTON)
+      .button().click(ButtonFields.PURCHASE_BUTTON)
+      .alert().validateValue(AlertFields.FOREIGN_CURRENCY_CASH, SUCCESSFUL_PURCHASE_MESSAGE)
+      .complete();
+```
+
+Insertion only enters data; the assertion after it proves the application accepted it.
 
 ## Runtime-Dependent Form Data
 
@@ -243,6 +317,23 @@ scope
 ```
 
 The full Java form is in `ui-test-design.md`, *Test Shape*.
+
+The imports such a test needs — copied from the ROA inspector example project's tests; the `Rings` package is the project's own:
+
+```java
+import io.cyborgcode.roa.framework.annotation.Regression;
+import io.cyborgcode.roa.framework.base.BaseQuest;
+import io.cyborgcode.roa.framework.quest.Quest;
+import io.cyborgcode.roa.ui.annotations.UI;
+import io.qameta.allure.Description;
+import javax.swing.text.html.HTML.Tag;
+import org.junit.jupiter.api.Test;
+
+import static io.cyborgcode.roa.ui.config.UiConfigHolder.getUiConfig;
+import static io.cyborgcode.inspector.common.base.Rings.RING_OF_UI;
+```
+
+When a new method goes into an existing test class, add the imports it is missing to that class and write `getUiConfig()` and `Tag.SPAN` in the method — never `io.cyborgcode.roa.ui.config.UiConfigHolder.getUiConfig()` or `javax.swing.text.html.HTML.Tag.SPAN` inline.
 
 ## Positive UI Scenario
 
@@ -516,29 +607,9 @@ Pandora
 
 Do not invent a fluent method or annotation attribute because its name seems likely.
 
-## Project Pattern Example
-
-If a new component implementation, element enum, or UI service must be created:
-
-```text
-Need
-→ new Java implementation
-
-Existing repository
-→ inspect directly relevant code
-
-AI Teacher
-→ inspect relevant curated lessons
-
-Pandora
-→ verify exact ROA types and extension contracts
-```
-
-Use each source for its own responsibility.
-
 ## Example Principles
 
-* Treat examples as structural guidance, not substitutes for application inspection or Pandora.
+* Copy structure from the examples; take locators and application behavior from your application and ROA calls from Pandora.
 * Use the actual application/DevTools for DOM, locator, network, synchronization, and session truth.
 * Use the repository for existing project abstractions and conventions.
 * Use Pandora for exact ROA UI framework usage.

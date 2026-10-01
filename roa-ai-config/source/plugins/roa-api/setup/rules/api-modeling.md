@@ -2,15 +2,9 @@
 
 # API Modeling Rules
 
-- Represent structured API request data with typed project models where appropriate.
-- Reuse existing request, response, nested, enum, constant, and JSONPath abstractions before creating new ones.
-- Keep models aligned with the authoritative Swagger/OpenAPI schema, including required and optional fields, nested structures, collections, and constrained values.
-- Do not add fields, defaults, or model behavior merely to simplify a test when they are not supported by the contract or project conventions.
-- Do not create duplicate models for the same contract shape without a justified architectural reason.
-- Use typed constants or enums for reusable contract values when the project already follows that convention; avoid repeated magic strings.
-- Keep reusable JSONPath expressions centralized according to project conventions and distinguish extraction from actual assertion logic.
-- Create response models only when they provide real reuse or domain value; focused JSONPath-based validation may be sufficient for simple responses.
-- Before generating any new Java models or related classes, always invoke the `ai-teacher` skill for the relevant project-approved implementation patterns, even when a similar model already exists.
-- Always invoke the `ai-compass` skill and read the metadata for every ROA framework type, serialization behavior, or API abstraction a model relies on before writing it.
+- Model a request body as a typed request model that mirrors the contract schema: required and optional fields, nesting, collections, and constrained values. Add no field, default, or behavior the contract does not define.
+- Reuse an existing model when it matches the same schema; never create a second model for the same shape.
+- Add a response model only when several tests read the same structure; a focused check through a JSONPath definition is enough for one field.
+- A new endpoint constant follows the naming of its neighbors in the endpoint enum (method and resource); request configuration the project already centralizes, such as shared headers, is reused, not repeated per test.
 
 <!-- END ROA AI CONFIG: roa-api/api-modeling -->

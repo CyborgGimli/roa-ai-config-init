@@ -75,12 +75,15 @@ The exact interfaces, annotation attributes, methods, and registration behavior 
 
 Do not invent component implementation contracts.
 
-When a new implementation is needed (a `Checkbox` implementation beside an existing `Radio` one, for instance):
+When a new implementation is needed:
 
-* take the sibling implementation in the same package family as the template — its constant naming, constructor, member order, helper structure, and formatting — and change only what the new component's contract requires;
+* first establish from the live DOM what the control is — a native element (`input[type=checkbox]`, `select`, `input`) or a custom widget — and where it keeps its state: the element's property, a class, or an `aria-*` attribute;
+* take structure from an existing implementation in the project — constructor, `@ImplementationOfType` registration, constant naming, member order, formatting — but never its state-reading or locating logic unless it handles the same kind of control. A CSS-styled radio that marks selection with a `checked` class and a native checkbox that keeps it in the `checked` property sit side by side in the package and share no behavior;
+* read native state through the WebElement API (`isSelected()`, `isEnabled()`, `getDomProperty("value")`), because the HTML attributes keep the page's initial state; read custom-widget state from the class or attribute verified in the DOM;
 * implement every method the ROA interface declares, with the parameter names Pandora shows for it;
-* give every `Strategy` value the meaning the component supports: a multi-select control such as a checkbox group acts on every option for `ALL`, while a single-select control rejects it;
-* keep private helpers to the few the sibling would have; do not introduce a second locating or state-reading strategy when the sibling's already fits the control.
+* give every `Strategy` value the meaning the component supports: a multi-select control such as a checkbox group acts on every option for `ALL`, while a single-select control rejects it.
+
+`ui-examples.md`, *Component Implementation*, shows both cases side by side.
 
 ## Element Definitions
 

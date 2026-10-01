@@ -2,22 +2,10 @@
 
 # UI Testing
 
-- Design tests around meaningful user behavior and required outcomes, not individual UI framework calls.
-- Use verified application behavior, typed elements, established components, and project UI abstractions.
-- Keep setup separate from the behavior under test; authentication, Journeys, API/DB support, insertion, or interception must not perform the action the UI test exists to verify.
-- Use controlled test data and established ROA lifecycle, authentication, storage, and cleanup mechanisms.
-- Assert meaningful visible or business outcomes; successful clicks, element presence, or absence of exceptions are not sufficient when stronger evidence is required.
-- Keep positive and negative scenarios focused on the behavior being verified.
-- Use deterministic synchronization and never weaken assertions, skip behavior, or add arbitrary waits merely to make a test pass.
-- Keep tests independently executable where practical and avoid shared mutable browser state, stale sessions, test-order dependencies, and uncontrolled data.
-- Use network interception only when it materially supports the scenario; it must not replace required UI validation.
-- Reuse existing domain flows and abstractions when they improve clarity without hiding the behavior under test.
-- Investigate failures before modifying expectations and distinguish automation defects from application, data, environment, authentication, and configuration failures.
-- Name test methods after the behavior: `<subject>_<action>_<expectedOutcome>` in lowerCamel segments (for example `search_unknownTerm_showsNoResultsMessage`). Never use numbered names such as `testScenario_4` or `test1`, even when a sibling method in the same class already does.
-- Annotate a test with `@Test`, the project's suite marker that matches its role (`@Regression`, or `@Smoke` only for a genuine smoke check — not both by default), and a short `@Description` that names the behavior in one phrase; do not narrate the steps.
-- Keep a value that only one scenario uses (an input, the message derived from it) as a local variable inside that test method, and derive the expectation from the input (`"No results found for: " + term`). Promote a literal to the shared test-data class only when more than one test needs it or it is a stable application constant.
-- Assert exactly the outcome the requirement names, using the most direct evidence. Validate text in the element that renders it as seen in the DOM (`validate().validateTextInField(<tag of that element>, text)`), not `body` or another page-wide container, and do not add a new element definition only to assert a one-off message.
-- Do not add assertions, preconditions, constants classes, helpers, or annotations the requirement does not call for; the smallest complete change is the correct one.
-- Always invoke `ai-teacher` before generating new Java implementation code and `ai-compass` before using any `io.cyborgcode.roa.*` type — even when the repository already contains a similar example.
+- Test shape: the class is `@UI` and extends `BaseQuest`; the method is named `<subject>_<action>_<expectedOutcome>` in lowerCamel segments (never `testScenario_N`, even beside numbered neighbors) and carries `@Test`, one suite marker (`@Regression`, or `@Smoke` for a genuine smoke check), and a one-phrase `@Description`; the chain starts with `quest.use(RING_OF_UI)` and ends with `.complete()`.
+- Login as setup uses `@AuthenticateViaUi` with the project's credentials and login classes. Login as the behavior under test drives the form with credentials from the project's test-data class (`Data.testData()` in ROA archetype projects), never literals.
+- Assert the named outcome in the element that renders it: `validate().validateTextInField(Tag.<tag of that element>, expected)` with `javax.swing.text.html.HTML.Tag` imported — never `body` or another page-wide container. Do not add an element constant only to assert a one-off message.
+- Derive the expected text from the input (`"No results found for: " + term`), and keep single-use inputs and expectations as local variables.
+- Add nothing the requirement did not ask for: no extra validations, `@DisplayName`, helpers, or constants.
 
 <!-- END ROA AI CONFIG: roa-ui/ui-testing -->
